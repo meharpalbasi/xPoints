@@ -2,7 +2,7 @@ name: Daily xPoints Prediction
 
 on:
   schedule:
-    - cron: "0 0 * * *"  # Runs daily at midnight UTC
+    - cron: "30 16 * * *"  # Runs daily at midnight UTC
   workflow_dispatch:
 
 jobs:
