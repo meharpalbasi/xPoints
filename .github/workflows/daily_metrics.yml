@@ -1,0 +1,42 @@
+name: Daily FPL Metrics Generation
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # Runs daily at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  run-fpl-metrics:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      # Step 3: Install required dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas numpy tqdm scikit-learn
+
+      # Step 4: Run your metrics script
+      - name: Run FPL Metrics script
+        run: |
+          python script2.py
+        # Replace 'script2.py' with the filename of your Python script if different.
+
+      # Step 5: Commit the generated fpl_full_history_metrics.json back to the repository
+      - name: Commit fpl_full_history_metrics.json to repository
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: "fpl_full_history_metrics.json"
+          message: "Update fpl_full_history_metrics.json [skip ci]"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
