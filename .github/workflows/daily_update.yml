@@ -26,12 +26,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests pandas numpy tqdm scikit-learn
+          pip install requests==2.32.3 pandas==2.2.3 numpy==2.2.3 tqdm==4.67.1 scikit-learn==1.4.2 xgboost==1.7.5 python-dateutil==2.9.0.post0
+
+      - name: Check installed package versions
+        run: |
+          pip list | grep -E 'requests|pandas|numpy|tqdm|scikit-learn|xgboost|python-dateutil'
 
       - name: Run prediction script
         run: |
-          python script.py
-        # Replace 'your_script.py' with your script's filename.
+          python script.py  # Replace with your actual script filename, e.g., 'fpl_prediction.py'
 
       - name: Commit predictions.json to repository
         uses: EndBug/add-and-commit@v9
