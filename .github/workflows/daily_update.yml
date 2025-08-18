@@ -4,8 +4,8 @@ permissions:
   contents: write
 
 on:
- # schedule:
-  #  - cron: "30 16 * * *"  # Runs daily at 16:30 UTC
+  schedule:
+    - cron: "30 16 * * *"  # Runs daily at 16:30 UTC
   workflow_dispatch:
 
 jobs:
