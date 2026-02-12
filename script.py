@@ -27,7 +27,7 @@ fixtures_df = pd.DataFrame(fixtures_data)
 events_df["deadline_time"] = pd.to_datetime(events_df["deadline_time"], utc=True)
 
 # Detect "next" gameweek that hasn't started yet (deadline_time > now).
-now_utc = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+now_utc = datetime.datetime.now(datetime.timezone.utc)
 future_events = events_df[(events_df["finished"] == False) &
                           (events_df["deadline_time"] > now_utc)]
 
