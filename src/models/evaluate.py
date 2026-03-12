@@ -7,7 +7,6 @@ import pandas as pd
 from scipy.stats import spearmanr
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-from src.data.features import get_feature_columns
 from src.models.ensemble import ensemble_predict
 from src.models.train import ModelArtifacts
 from src.utils.config import (
@@ -92,26 +91,36 @@ def walk_forward_evaluate(
     target_col: str = "target_points",
     min_train_gws: int = 6,
 ) -> Dict[str, Any]:
-    """Run walk-forward evaluation across all positions.
+    """Post-hoc evaluation using pre-trained models on walk-forward folds.
 
-    For each fold, trains on GW1..N (using pre-trained models for speed,
-    we just evaluate the already-trained models on held-out GWs).
+    ⚠️ WARNING: This is NOT true walk-forward / out-of-sample validation.
+    The models in `artifacts` were trained on the FULL dataset (all gameweeks).
+    Each "test" fold was part of the training data, so these metrics will be
+    over-optimistic compared to genuine out-of-sample performance.
+
+    This function is useful for:
+    - Checking predictions are sensible across time
+    - Per-category (Zeros/Blanks/Tickers/Haulers) error breakdown
+    - Sanity-checking model fit
+
+    For true out-of-sample metrics, retrain models per fold (expensive).
 
     Parameters
     ----------
     df : pd.DataFrame
         Full feature-engineered dataframe.
     artifacts : ModelArtifacts
-        Trained models per position.
+        Pre-trained models per position (trained on full data).
     target_col : str
         Target column.
     min_train_gws : int
-        Minimum training gameweeks for walk-forward.
+        Minimum training gameweeks for walk-forward splits.
 
     Returns
     -------
     dict
         Evaluation results with overall and per-position breakdowns.
+        Includes an 'in_sample_warning' flag.
     """
     wfcv = WalkForwardCV(min_train_gws=min_train_gws)
 
@@ -149,6 +158,10 @@ def walk_forward_evaluate(
     y_p = np.array(all_y_pred)
 
     results: Dict[str, Any] = {
+        "in_sample_warning": (
+            "These metrics are in-sample: models were trained on all data "
+            "including the test folds. Do not treat as out-of-sample estimates."
+        ),
         "overall": evaluate_position(y_t, y_p, "ALL") if len(y_t) > 0 else {},
         "per_position": {},
     }

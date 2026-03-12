@@ -30,9 +30,9 @@ def _compute_sample_weights(
 ) -> np.ndarray:
     """Compute sample weights using KBinsDiscretizer + compute_sample_weight.
 
-    Bins the target into position-specific number of bins (entropy strategy),
-    then computes 'balanced' sample weights so under-represented return
-    categories get higher weight.
+    Bins the target into position-specific number of bins using uniform-width
+    strategy, then computes 'balanced' sample weights so under-represented
+    return categories (e.g. haulers) get higher weight.
 
     Parameters
     ----------
@@ -47,7 +47,7 @@ def _compute_sample_weights(
         Per-sample weights.
     """
     n_bins = SAMPLE_WEIGHT_BINS[position]
-    kbd = KBinsDiscretizer(n_bins=n_bins, encode="ordinal", strategy="quantile")
+    kbd = KBinsDiscretizer(n_bins=n_bins, encode="ordinal", strategy="uniform")
     bins = kbd.fit_transform(y.values.reshape(-1, 1)).ravel().astype(int)
     weights = compute_sample_weight("balanced", bins)
     return weights

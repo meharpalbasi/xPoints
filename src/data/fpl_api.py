@@ -34,11 +34,11 @@ def detect_next_gameweek(events_df: pd.DataFrame) -> int:
     now_utc = datetime.datetime.now(datetime.timezone.utc)
 
     future = events_df[
-        (events_df["finished"] == False) & (events_df["deadline_time"] > now_utc)
+        (~events_df["finished"]) & (events_df["deadline_time"] > now_utc)
     ]
     if not future.empty:
         return int(future["id"].min())
-    return int(events_df[events_df["finished"] == False]["id"].min())
+    return int(events_df[~events_df["finished"]]["id"].min())
 
 
 def fetch_fixtures() -> pd.DataFrame:
@@ -47,32 +47,6 @@ def fetch_fixtures() -> pd.DataFrame:
     resp.raise_for_status()
     df = pd.DataFrame(resp.json())
     df = df.rename(columns={"id": "fixture_id"})
-    return df
-
-
-def fetch_player_history(player_id: int) -> Optional[pd.DataFrame]:
-    """Fetch per-GW history for a single player."""
-    resp = requests.get(f"{BASE_URL}/element-summary/{player_id}/", timeout=30)
-    if resp.status_code != 200:
-        return None
-    history = resp.json().get("history", [])
-    if not history:
-        return None
-    df = pd.DataFrame(history)
-    df["player_id"] = player_id
-    return df
-
-
-def fetch_player_fixtures(player_id: int) -> Optional[pd.DataFrame]:
-    """Fetch upcoming fixtures for a single player."""
-    resp = requests.get(f"{BASE_URL}/element-summary/{player_id}/", timeout=30)
-    if resp.status_code != 200:
-        return None
-    fixtures = resp.json().get("fixtures", [])
-    if not fixtures:
-        return None
-    df = pd.DataFrame(fixtures)
-    df["player_id"] = player_id
     return df
 
 
@@ -134,16 +108,17 @@ def merge_player_metadata(
     history_df: pd.DataFrame, players_df: pd.DataFrame
 ) -> pd.DataFrame:
     """Merge player-level metadata into the history dataframe."""
+    # Note: influence, creativity, threat, ict_index are intentionally excluded
+    # here because history_df already has per-GW values for these columns from
+    # the element-summary endpoint. Merging bootstrap season-level aggregates
+    # would cause pandas column collisions (_x/_y suffixes) and silently break
+    # rolling feature computation.
     merge_cols = [
         "id",
         "element_type",
         "team",
         "web_name",
         "selected_by_percent",
-        "influence",
-        "creativity",
-        "threat",
-        "ict_index",
         "status_numeric",
         "chance_of_playing_next_round",
         "form",

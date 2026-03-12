@@ -55,8 +55,13 @@ def predict_next_gameweek(
         pred_df["xPoints"] = pred_df["xPoints_raw"]
 
     # Zero out BGW / unavailable players
+    fixture_count = (
+        pred_df["fixture_count"]
+        if "fixture_count" in pred_df.columns
+        else pd.Series(1, index=pred_df.index)
+    )
     mask_zero = (
-        (pred_df.get("fixture_count", pd.Series(1)) == 0)
+        (fixture_count == 0)
         | (pred_df["chance_of_playing_next_round"] == 0)
     )
     pred_df.loc[mask_zero, "xPoints"] = 0.0

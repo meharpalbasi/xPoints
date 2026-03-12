@@ -1,5 +1,6 @@
-"""Ensemble logic: median of XGB + RF predictions per position."""
+"""Ensemble logic: mean of XGB + RF predictions per position."""
 
+import logging
 from typing import Dict, List
 
 import numpy as np
@@ -7,13 +8,17 @@ import pandas as pd
 
 from src.models.train import ModelArtifacts
 
+logger = logging.getLogger(__name__)
+
 
 def ensemble_predict(
     X: pd.DataFrame,
     models: Dict[str, object],
     feature_cols: List[str],
 ) -> np.ndarray:
-    """Predict using the ensemble (median of XGB + RF).
+    """Predict using the ensemble (mean of XGB + RF).
+
+    With exactly 2 models, median == mean, so we call it what it is.
 
     Parameters
     ----------
@@ -27,17 +32,27 @@ def ensemble_predict(
     Returns
     -------
     np.ndarray
-        Median predictions.
+        Mean predictions.
+
+    Raises
+    ------
+    ValueError
+        If any expected feature columns are missing from X.
     """
-    available = [c for c in feature_cols if c in X.columns]
-    X_sub = X[available]
+    missing = [c for c in feature_cols if c not in X.columns]
+    if missing:
+        raise ValueError(
+            f"ensemble_predict: {len(missing)} feature columns missing from input: "
+            f"{missing[:10]}{'...' if len(missing) > 10 else ''}"
+        )
+
+    X_sub = X[feature_cols]
 
     preds_xgb = models["xgb"].predict(X_sub)
     preds_rf = models["rf"].predict(X_sub)
 
-    # Median of the two predictions per sample
-    stacked = np.vstack([preds_xgb, preds_rf])
-    return np.median(stacked, axis=0)
+    # Mean of the two predictions per sample
+    return (preds_xgb + preds_rf) / 2.0
 
 
 def ensemble_predict_all(

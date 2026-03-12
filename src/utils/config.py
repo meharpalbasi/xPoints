@@ -32,14 +32,13 @@ GK_RAW_STATS: List[str] = [
     "red_cards",
 ]
 
-OUTFIELD_RAW_STATS: List[str] = [
+# Base outfield stats shared across DEF/MID/FWD
+_OUTFIELD_BASE: List[str] = [
     "goals_scored",
     "assists",
-    "clean_sheets",
-    "goals_conceded",
     "expected_goals",
     "expected_assists",
-    "shots",  # mapped from 'attempted_passes' -> we use what FPL exposes
+    "expected_goal_involvements",
     "influence",
     "creativity",
     "threat",
@@ -50,11 +49,26 @@ OUTFIELD_RAW_STATS: List[str] = [
     "red_cards",
 ]
 
+# Position-specific feature sets — defenders emphasise defensive stats,
+# forwards emphasise attacking stats, midfielders get both.
+DEF_RAW_STATS: List[str] = _OUTFIELD_BASE + [
+    "clean_sheets",
+    "goals_conceded",
+    "expected_goals_conceded",
+]
+
+MID_RAW_STATS: List[str] = _OUTFIELD_BASE + [
+    "clean_sheets",
+    "goals_conceded",
+]
+
+FWD_RAW_STATS: List[str] = _OUTFIELD_BASE  # no defensive stats for forwards
+
 POSITION_RAW_STATS: Dict[str, List[str]] = {
     "GK": GK_RAW_STATS,
-    "DEF": OUTFIELD_RAW_STATS,
-    "MID": OUTFIELD_RAW_STATS,
-    "FWD": OUTFIELD_RAW_STATS,
+    "DEF": DEF_RAW_STATS,
+    "MID": MID_RAW_STATS,
+    "FWD": FWD_RAW_STATS,
 }
 
 # ---------------------------------------------------------------------------

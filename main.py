@@ -8,7 +8,6 @@ Usage:
 
 import argparse
 import json
-import sys
 
 import pandas as pd
 
@@ -75,8 +74,11 @@ def main() -> None:
     # ── 4. Evaluate (optional) ───────────────────────────────────────────
     if args.evaluate:
         print("\n" + "=" * 60)
-        print("STEP 4: Walk-forward evaluation")
+        print("STEP 4: Post-hoc evaluation (in-sample — see warning)")
         print("=" * 60)
+        print("⚠️  Models were trained on all data; these metrics are NOT")
+        print("   out-of-sample. Useful for sanity-checking, not for")
+        print("   reporting generalisation performance.")
 
         eval_results = walk_forward_evaluate(feature_df, artifacts)
 

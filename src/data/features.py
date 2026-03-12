@@ -135,10 +135,17 @@ def build_feature_matrix(
 
     df = create_rolling_features(history_df, sorted(all_stats))
 
-    # Fixture difficulty
-    df["fixture_difficulty"] = df.apply(
-        lambda row: _get_difficulty(row, fixtures_df), axis=1
+    # Fixture difficulty — vectorized merge instead of row-by-row apply
+    df = df.merge(
+        fixtures_df[["fixture_id", "team_h_difficulty", "team_a_difficulty"]],
+        left_on="fixture",
+        right_on="fixture_id",
+        how="left",
     )
+    df["fixture_difficulty"] = np.where(
+        df["was_home"], df["team_h_difficulty"], df["team_a_difficulty"]
+    )
+    df.drop(columns=["fixture_id", "team_h_difficulty", "team_a_difficulty"], inplace=True)
     df["home_dummy"] = df["was_home"].astype(int)
 
     # Ensure context features are numeric
@@ -156,18 +163,6 @@ def build_feature_matrix(
     df["position"] = df["element_type"].map(POSITION_MAP)
 
     return df
-
-
-def _get_difficulty(row: pd.Series, fixtures_df: pd.DataFrame) -> float:
-    """Look up fixture difficulty for a history row."""
-    fix_id = row.get("fixture")
-    was_home = row.get("was_home")
-    match_info = fixtures_df.loc[fixtures_df["fixture_id"] == fix_id]
-    if match_info.empty:
-        return np.nan
-    if was_home:
-        return float(match_info["team_h_difficulty"].values[0])
-    return float(match_info["team_a_difficulty"].values[0])
 
 
 def build_prediction_features(
@@ -215,8 +210,14 @@ def build_prediction_features(
         )
         latest = latest.merge(dgw, on="player_id", how="left")
         latest["fixture_count"] = latest["fixture_count"].fillna(0)
-        latest["fixture_difficulty"] = latest.get("avg_difficulty", pd.Series(3.0)).fillna(3.0)
-        latest["home_dummy"] = latest.get("home_proportion", pd.Series(0.5)).fillna(0.5)
+        latest["fixture_difficulty"] = (
+            latest["avg_difficulty"] if "avg_difficulty" in latest.columns
+            else pd.Series(3.0, index=latest.index)
+        ).fillna(3.0)
+        latest["home_dummy"] = (
+            latest["home_proportion"] if "home_proportion" in latest.columns
+            else pd.Series(0.5, index=latest.index)
+        ).fillna(0.5)
     else:
         latest["fixture_count"] = 1
         latest["fixture_difficulty"] = 3.0
