@@ -43,8 +43,8 @@ class GameweekTimeSeriesSplit:
         if n_rounds < self.n_splits + 1:
             raise ValueError(f"Need at least {self.n_splits + 1} rounds, got {n_rounds}")
         
-        # Each fold: train on rounds[:i+1], validate on rounds[i+1]
-        # We use the last n_splits rounds as validation sets
+        # Last n_splits rounds are used as successive validation sets.
+        # Training window expands up to each validation round.
         for i in range(self.n_splits):
             val_round_idx = n_rounds - self.n_splits + i
             train_rounds = unique_rounds[:val_round_idx]
@@ -157,16 +157,11 @@ status_map = {"a": 4.0, "d": 2.0, "i": 0.0, "s": 0.0, "u": 1.0}
 players_df["status_numeric"] = players_df["status"].map(status_map).fillna(1.0)
 players_df["form"] = pd.to_numeric(players_df["form"], errors="coerce").fillna(0.0)
 
-# Rename static ICT columns to avoid overwriting per-GW history values
-# (history already has influence, creativity, threat per gameweek)
+# Drop season-level ICT columns from the merge — we use per-GW rolling
+# versions (influence_rolling_*, creativity_rolling_*, threat_rolling_*)
+# which are more granular and already in feature_cols.
 players_merge_cols = players_df[["id", "element_type", "team", "web_name", "selected_by_percent",
-                "influence", "creativity", "threat", "ict_index", "status_numeric",
-                "chance_of_playing_next_round", "form"]].rename(columns={
-    "influence": "influence_season",
-    "creativity": "creativity_season",
-    "threat": "threat_season",
-    "ict_index": "ict_index_season",
-})
+                "status_numeric", "chance_of_playing_next_round", "form"]]
 
 full_history_df = full_history_df.merge(
     players_merge_cols,
@@ -360,11 +355,11 @@ y_train_reset = y_train.reset_index(drop=True)
 grid_search = GridSearchCV(
     estimator=xgb,
     param_grid=param_grid,
-    cv=gw_cv.split(X_train_reset, y_train_reset, groups=train_rounds_series),
+    cv=gw_cv,
     scoring="neg_mean_squared_error",
     n_jobs=-1
 )
-grid_search.fit(X_train_reset, y_train_reset)
+grid_search.fit(X_train_reset, y_train_reset, groups=train_rounds_series)
 
 print("Best params:", grid_search.best_params_)
 best_xgb = grid_search.best_estimator_
@@ -413,7 +408,10 @@ for pos_id, pos_name in position_map.items():
     pos_mse = mean_squared_error(pos_y, pos_pred)
     pos_mae = mean_absolute_error(pos_y, pos_pred)
     pos_r2 = r2_score(pos_y, pos_pred)
-    pos_sp, pos_sp_p = spearmanr(pos_y, pos_pred)
+    if pos_y.nunique() < 2 or pos_pred.nunique() < 2:
+        pos_sp, pos_sp_p = np.nan, np.nan
+    else:
+        pos_sp, pos_sp_p = spearmanr(pos_y, pos_pred)
     
     print(f"  {pos_name}: MAE={pos_mae:.3f}  R²={pos_r2:.4f}  Spearman={pos_sp:.3f}  (n={pos_mask.sum()})")
     eval_results["per_position"][pos_name] = {
