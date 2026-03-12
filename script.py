@@ -1,12 +1,66 @@
+###############################################################################
+# PHASE 1 CHANGES (feat/quick-wins):
+# - Removed StandardScaler (XGBoost doesn't need it)
+# - Added rolling features: saves, bonus, bps, yellow_cards, influence,
+#   creativity, threat
+# - Added feature importance logging (feature_importance.json + top 15 print)
+# - Added better evaluation: MAE, R², Spearman rank correlation, per-position
+#   breakdown. Saved to evaluation.json.
+# - Increased test set from 3 GWs to 6 GWs
+# - Fixed TimeSeriesSplit: custom CV splitter that splits by 'round' column
+###############################################################################
+
+import json
 import requests
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import datetime
 from xgboost import XGBRegressor
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.model_selection import GridSearchCV
+from scipy.stats import spearmanr
+
+###############################################################################
+# CUSTOM CV SPLITTER — splits by 'round' column, not row index
+###############################################################################
+class GameweekTimeSeriesSplit:
+    """Custom CV splitter that splits by the 'round' column.
+    
+    Ensures no data leakage: all rows from a given gameweek are entirely
+    in train or validation, never split across both.
+    """
+    def __init__(self, n_splits=3):
+        self.n_splits = n_splits
+    
+    def split(self, X, y=None, groups=None):
+        """groups must be the 'round' values aligned with X."""
+        if groups is None:
+            raise ValueError("GameweekTimeSeriesSplit requires groups (round values)")
+        unique_rounds = sorted(groups.unique())
+        n_rounds = len(unique_rounds)
+        # Need at least n_splits + 1 rounds
+        if n_rounds < self.n_splits + 1:
+            raise ValueError(f"Need at least {self.n_splits + 1} rounds, got {n_rounds}")
+        
+        # Each fold: train on rounds[:i+1], validate on rounds[i+1]
+        # We use the last n_splits rounds as validation sets
+        for i in range(self.n_splits):
+            val_round_idx = n_rounds - self.n_splits + i
+            train_rounds = unique_rounds[:val_round_idx]
+            val_rounds = [unique_rounds[val_round_idx]]
+            
+            train_mask = groups.isin(train_rounds)
+            val_mask = groups.isin(val_rounds)
+            
+            train_indices = np.where(train_mask)[0]
+            val_indices = np.where(val_mask)[0]
+            
+            yield train_indices, val_indices
+    
+    def get_n_splits(self, X=None, y=None, groups=None):
+        return self.n_splits
+
 
 ###############################################################################
 # 1) FETCH GLOBAL DATA (PLAYERS, TEAMS, FIXTURES)
@@ -103,18 +157,32 @@ status_map = {"a": 4.0, "d": 2.0, "i": 0.0, "s": 0.0, "u": 1.0}
 players_df["status_numeric"] = players_df["status"].map(status_map).fillna(1.0)
 players_df["form"] = pd.to_numeric(players_df["form"], errors="coerce").fillna(0.0)
 
-full_history_df = full_history_df.merge(
-    players_df[["id", "element_type", "team", "web_name", "selected_by_percent",
+# Rename static ICT columns to avoid overwriting per-GW history values
+# (history already has influence, creativity, threat per gameweek)
+players_merge_cols = players_df[["id", "element_type", "team", "web_name", "selected_by_percent",
                 "influence", "creativity", "threat", "ict_index", "status_numeric",
-                "chance_of_playing_next_round", "form"]],
+                "chance_of_playing_next_round", "form"]].rename(columns={
+    "influence": "influence_season",
+    "creativity": "creativity_season",
+    "threat": "threat_season",
+    "ict_index": "ict_index_season",
+})
+
+full_history_df = full_history_df.merge(
+    players_merge_cols,
     left_on="player_id", right_on="id", how="left"
 )
+
+# Ensure per-GW influence/creativity/threat are numeric (API returns strings)
+for col in ["influence", "creativity", "threat"]:
+    full_history_df[col] = pd.to_numeric(full_history_df[col], errors="coerce").fillna(0.0)
 full_history_df.sort_values(["player_id", "round"], inplace=True)
 
 ###############################################################################
 # 3) MULTI-ROLLING WINDOWS FOR PLAYER STATS
 ###############################################################################
 def create_multi_rolling_features(df, group_col="player_id", windows=[3, 5, 8]):
+    # Original lag features
     df["goals_scored_lag"] = df.groupby(group_col)["goals_scored"].shift(1)
     df["assists_lag"] = df.groupby(group_col)["assists"].shift(1)
     df["clean_sheets_lag"] = df.groupby(group_col)["clean_sheets"].shift(1)
@@ -122,7 +190,17 @@ def create_multi_rolling_features(df, group_col="player_id", windows=[3, 5, 8]):
     df["xA_lag"] = df.groupby(group_col)["expected_assists"].shift(1)
     df["minutes_lag"] = df.groupby(group_col)["minutes"].shift(1)
 
+    # New lag features (Phase 1)
+    df["saves_lag"] = df.groupby(group_col)["saves"].shift(1)
+    df["bonus_lag"] = df.groupby(group_col)["bonus"].shift(1)
+    df["bps_lag"] = df.groupby(group_col)["bps"].shift(1)
+    df["yellow_cards_lag"] = df.groupby(group_col)["yellow_cards"].shift(1)
+    df["influence_lag"] = df.groupby(group_col)["influence"].shift(1)
+    df["creativity_lag"] = df.groupby(group_col)["creativity"].shift(1)
+    df["threat_lag"] = df.groupby(group_col)["threat"].shift(1)
+
     for w in windows:
+        # Original rolling features
         df[f"goals_scored_rolling_{w}"] = (
             df.groupby(group_col)["goals_scored_lag"].rolling(w, min_periods=1).sum()
             .reset_index(level=0, drop=True)
@@ -145,6 +223,36 @@ def create_multi_rolling_features(df, group_col="player_id", windows=[3, 5, 8]):
         )
         df[f"minutes_rolling_{w}"] = (
             df.groupby(group_col)["minutes_lag"].rolling(w, min_periods=1).mean()
+            .reset_index(level=0, drop=True)
+        )
+
+        # New rolling features (Phase 1)
+        df[f"saves_rolling_{w}"] = (
+            df.groupby(group_col)["saves_lag"].rolling(w, min_periods=1).sum()
+            .reset_index(level=0, drop=True)
+        )
+        df[f"bonus_rolling_{w}"] = (
+            df.groupby(group_col)["bonus_lag"].rolling(w, min_periods=1).sum()
+            .reset_index(level=0, drop=True)
+        )
+        df[f"bps_rolling_{w}"] = (
+            df.groupby(group_col)["bps_lag"].rolling(w, min_periods=1).mean()
+            .reset_index(level=0, drop=True)
+        )
+        df[f"yellow_cards_rolling_{w}"] = (
+            df.groupby(group_col)["yellow_cards_lag"].rolling(w, min_periods=1).sum()
+            .reset_index(level=0, drop=True)
+        )
+        df[f"influence_rolling_{w}"] = (
+            df.groupby(group_col)["influence_lag"].rolling(w, min_periods=1).mean()
+            .reset_index(level=0, drop=True)
+        )
+        df[f"creativity_rolling_{w}"] = (
+            df.groupby(group_col)["creativity_lag"].rolling(w, min_periods=1).mean()
+            .reset_index(level=0, drop=True)
+        )
+        df[f"threat_rolling_{w}"] = (
+            df.groupby(group_col)["threat_lag"].rolling(w, min_periods=1).mean()
             .reset_index(level=0, drop=True)
         )
     return df
@@ -180,7 +288,14 @@ for w in [3, 5, 8]:
         f"cs_rolling_{w}",
         f"xG_rolling_{w}",
         f"xA_rolling_{w}",
-        f"minutes_rolling_{w}"
+        f"minutes_rolling_{w}",
+        f"saves_rolling_{w}",
+        f"bonus_rolling_{w}",
+        f"bps_rolling_{w}",
+        f"yellow_cards_rolling_{w}",
+        f"influence_rolling_{w}",
+        f"creativity_rolling_{w}",
+        f"threat_rolling_{w}",
     ]
 feature_cols += [
     "element_type",
@@ -205,11 +320,11 @@ y = model_df[target_col]
 # 5.1) TIME-BASED SPLIT
 ###############################################################################
 all_rounds = sorted(model_df["round"].unique())
-if len(all_rounds) < 4:
-    raise ValueError("Not enough rounds to do a time-based split in this example.")
+if len(all_rounds) < 7:
+    raise ValueError("Not enough rounds to do a time-based split (need at least 7).")
 
-test_rounds = all_rounds[-3:]
-train_rounds = all_rounds[:-3]
+test_rounds = all_rounds[-6:]
+train_rounds = all_rounds[:-6]
 
 train_df = model_df[model_df["round"].isin(train_rounds)]
 test_df = model_df[model_df["round"].isin(test_rounds)]
@@ -219,14 +334,15 @@ y_train = train_df[target_col]
 X_test = test_df[feature_cols]
 y_test = test_df[target_col]
 
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+# No scaler needed — XGBoost is tree-based, invariant to monotonic transforms
 
 ###############################################################################
 # 6) HYPERPARAMETER TUNING WITH GRIDSEARCH USING XGBOOST
 ###############################################################################
-tscv = TimeSeriesSplit(n_splits=3)
+# Custom CV splitter that respects gameweek boundaries
+gw_cv = GameweekTimeSeriesSplit(n_splits=3)
+train_rounds_series = train_df["round"].reset_index(drop=True)
+
 param_grid = {
     "n_estimators": [50, 100, 200],
     "max_depth": [3, 5, 7],
@@ -237,21 +353,98 @@ param_grid = {
 
 xgb = XGBRegressor(random_state=42, objective="reg:squarederror")
 
+# Reset index so cv indices align with the DataFrame
+X_train_reset = X_train.reset_index(drop=True)
+y_train_reset = y_train.reset_index(drop=True)
+
 grid_search = GridSearchCV(
     estimator=xgb,
     param_grid=param_grid,
-    cv=tscv,
+    cv=gw_cv.split(X_train_reset, y_train_reset, groups=train_rounds_series),
     scoring="neg_mean_squared_error",
     n_jobs=-1
 )
-grid_search.fit(X_train_scaled, y_train)
+grid_search.fit(X_train_reset, y_train_reset)
 
 print("Best params:", grid_search.best_params_)
 best_xgb = grid_search.best_estimator_
 
-y_pred_test = best_xgb.predict(X_test_scaled)
+y_pred_test = best_xgb.predict(X_test)
 test_mse = mean_squared_error(y_test, y_pred_test)
-print(f"Time-based split MSE on last 3 GWs: {test_mse:.4f}")
+test_mae = mean_absolute_error(y_test, y_pred_test)
+test_r2 = r2_score(y_test, y_pred_test)
+test_spearman, test_spearman_p = spearmanr(y_test, y_pred_test)
+
+print(f"\n=== Evaluation on last 6 GWs ===")
+print(f"MSE:  {test_mse:.4f}")
+print(f"RMSE: {np.sqrt(test_mse):.4f}")
+print(f"MAE:  {test_mae:.4f}")
+print(f"R²:   {test_r2:.4f}")
+print(f"Spearman ρ: {test_spearman:.4f} (p={test_spearman_p:.2e})")
+
+###############################################################################
+# 6.1) PER-POSITION EVALUATION
+###############################################################################
+position_map = {1: "GK", 2: "DEF", 3: "MID", 4: "FWD"}
+test_df_eval = test_df.copy()
+test_df_eval["y_pred"] = y_pred_test
+
+eval_results = {
+    "overall": {
+        "mse": round(test_mse, 4),
+        "rmse": round(np.sqrt(test_mse), 4),
+        "mae": round(test_mae, 4),
+        "r2": round(test_r2, 4),
+        "spearman_rho": round(test_spearman, 4),
+        "spearman_p": float(test_spearman_p),
+        "n_samples": len(y_test),
+        "test_gameweeks": [int(r) for r in test_rounds],
+    },
+    "per_position": {}
+}
+
+print(f"\n=== Per-Position Breakdown ===")
+for pos_id, pos_name in position_map.items():
+    pos_mask = test_df_eval["element_type"] == pos_id
+    if pos_mask.sum() == 0:
+        continue
+    pos_y = test_df_eval.loc[pos_mask, target_col]
+    pos_pred = test_df_eval.loc[pos_mask, "y_pred"]
+    pos_mse = mean_squared_error(pos_y, pos_pred)
+    pos_mae = mean_absolute_error(pos_y, pos_pred)
+    pos_r2 = r2_score(pos_y, pos_pred)
+    pos_sp, pos_sp_p = spearmanr(pos_y, pos_pred)
+    
+    print(f"  {pos_name}: MAE={pos_mae:.3f}  R²={pos_r2:.4f}  Spearman={pos_sp:.3f}  (n={pos_mask.sum()})")
+    eval_results["per_position"][pos_name] = {
+        "mse": round(pos_mse, 4),
+        "rmse": round(np.sqrt(pos_mse), 4),
+        "mae": round(pos_mae, 4),
+        "r2": round(pos_r2, 4),
+        "spearman_rho": round(pos_sp, 4),
+        "n_samples": int(pos_mask.sum()),
+    }
+
+with open("evaluation.json", "w") as f:
+    json.dump(eval_results, f, indent=2)
+print("\nEvaluation saved to evaluation.json")
+
+###############################################################################
+# 6.2) FEATURE IMPORTANCE LOGGING
+###############################################################################
+importances = best_xgb.feature_importances_
+feat_imp = dict(zip(feature_cols, [round(float(v), 6) for v in importances]))
+feat_imp_sorted = dict(sorted(feat_imp.items(), key=lambda x: x[1], reverse=True))
+
+with open("feature_importance.json", "w") as f:
+    json.dump(feat_imp_sorted, f, indent=2)
+
+print(f"\n=== Top 15 Features ===")
+for i, (feat, imp) in enumerate(feat_imp_sorted.items()):
+    if i >= 15:
+        break
+    print(f"  {i+1:2d}. {feat:35s} {imp:.4f}")
+print("Feature importances saved to feature_importance.json")
 
 ###############################################################################
 # 7) BUILD PREDICTION DATAFRAME FOR NEXT GW WITH DGW/BGW SUPPORT
@@ -277,6 +470,13 @@ for _, p_row in latest_per_player.iterrows():
         row_data[f"xG_rolling_{w}"] = p_row[f"xG_rolling_{w}"]
         row_data[f"xA_rolling_{w}"] = p_row[f"xA_rolling_{w}"]
         row_data[f"minutes_rolling_{w}"] = p_row[f"minutes_rolling_{w}"]
+        row_data[f"saves_rolling_{w}"] = p_row[f"saves_rolling_{w}"]
+        row_data[f"bonus_rolling_{w}"] = p_row[f"bonus_rolling_{w}"]
+        row_data[f"bps_rolling_{w}"] = p_row[f"bps_rolling_{w}"]
+        row_data[f"yellow_cards_rolling_{w}"] = p_row[f"yellow_cards_rolling_{w}"]
+        row_data[f"influence_rolling_{w}"] = p_row[f"influence_rolling_{w}"]
+        row_data[f"creativity_rolling_{w}"] = p_row[f"creativity_rolling_{w}"]
+        row_data[f"threat_rolling_{w}"] = p_row[f"threat_rolling_{w}"]
     
     row_data["element_type"] = p_row["element_type"]
     row_data["selected_by_percent"] = p_row["selected_by_percent"]
@@ -319,10 +519,9 @@ else:
 # Prepare data for prediction
 X_next = pred_df[feature_cols].copy()
 X_next["selected_by_percent"] = pd.to_numeric(X_next["selected_by_percent"], errors="coerce").fillna(0.0)
-X_next_scaled = scaler.transform(X_next)
 
 # Predict with XGBoost and adjust for fixture count (DGW scaling)
-pred_df["xPoints_raw"] = best_xgb.predict(X_next_scaled)
+pred_df["xPoints_raw"] = best_xgb.predict(X_next)
 pred_df["xPoints"] = pred_df["xPoints_raw"] * pred_df["fixture_count"]
 
 # Force xPoints = 0 for BGW players or 0% chance of playing
