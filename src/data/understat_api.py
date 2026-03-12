@@ -287,7 +287,7 @@ class UnderstatData:
                     "player_name": pname,
                     "team": pteam,
                     "date": m.get("date", ""),
-                    "round": m.get("roster_id", ""),
+                    "round": m.get("round", m.get("week", "")),
                     "h_team": m.get("h_team", ""),
                     "a_team": m.get("a_team", ""),
                     "xG": float(m.get("xG", 0)),

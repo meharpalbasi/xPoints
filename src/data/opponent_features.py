@@ -173,14 +173,30 @@ class OpponentFeatures:
             return all_rolling
 
         # If fixtures provided, merge opponent stats
-        # Assume fixtures has 'opponent_team' matching team_name
-        merged = fixtures.merge(
-            all_rolling,
-            left_on=["opponent_team"],
-            right_on=["team_name"],
-            how="left",
-            suffixes=("", "_opp"),
-        )
+        # Assume fixtures has 'opponent_team' and 'date' matching team_name/date
+        # Must join on BOTH team name AND date to avoid many-to-many row explosion
+        if "date" not in fixtures.columns or "date" not in all_rolling.columns:
+            # Fallback if date column missing — but warn about potential duplication
+            print("[opponent] WARNING: 'date' column missing, joining on team name only (may duplicate rows)")
+            merged = fixtures.merge(
+                all_rolling,
+                left_on=["opponent_team"],
+                right_on=["team_name"],
+                how="left",
+                suffixes=("", "_opp"),
+            )
+        else:
+            # Ensure both date columns are datetime for proper matching
+            fixtures = fixtures.copy()
+            fixtures["date"] = pd.to_datetime(fixtures["date"], errors="coerce")
+            all_rolling["date"] = pd.to_datetime(all_rolling["date"], errors="coerce")
+            merged = fixtures.merge(
+                all_rolling,
+                left_on=["opponent_team", "date"],
+                right_on=["team_name", "date"],
+                how="left",
+                suffixes=("", "_opp"),
+            )
         return merged
 
     def get_opponent_vector(

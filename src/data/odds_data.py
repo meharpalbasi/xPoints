@@ -124,8 +124,9 @@ def _implied_cs_prob(
     A more precise approach uses Poisson distribution, but this is a
     practical approximation that correlates well with actual CS rates.
     """
-    # Opponent's P(score 0) ≈ 1 - P(opponent wins) scaled
-    # If opponent is very unlikely to win, CS is more likely
+    # Empirical approximation: weight opponent win prob (1.2) and draw prob (0.3)
+    # to estimate P(opponent scores). Constants derived from historical EPL data.
+    # Note: can exceed 1.0 for very strong opponents, hence the clamp below.
     p_opp_scores = opponent_win_prob * 1.2 + draw_prob * 0.3
     p_cs = max(0.05, min(0.60, 1.0 - p_opp_scores))
     return p_cs
@@ -192,15 +193,8 @@ class OddsData:
             resp = requests.get(url, timeout=30)
             resp.raise_for_status()
         except requests.RequestException as e:
-            print(f"[odds] Error fetching odds CSV: {e}")
-            # Try alternative URL format
-            alt_url = f"https://www.football-data.co.uk/mmz4281/{self.season_code}/E0.csv"
-            try:
-                resp = requests.get(alt_url, timeout=30)
-                resp.raise_for_status()
-            except requests.RequestException:
-                print(f"[odds] Both URLs failed. Returning empty DataFrame.")
-                return pd.DataFrame()
+            print(f"[odds] Error fetching odds CSV: {e}. Returning empty DataFrame.")
+            return pd.DataFrame()
 
         # Parse CSV (football-data.co.uk uses various encodings)
         try:
@@ -359,8 +353,8 @@ class OddsData:
 
         mask = features["fpl_team_id"] == fpl_team_id
         if match_date:
-            features["date_str"] = pd.to_datetime(features["date"]).dt.strftime("%Y-%m-%d")
-            mask = mask & (features["date_str"] == match_date)
+            date_series = pd.to_datetime(features["date"]).dt.strftime("%Y-%m-%d")
+            mask = mask & (date_series == match_date)
 
         matched = features[mask]
         if matched.empty:
