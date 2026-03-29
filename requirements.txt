@@ -1,0 +1,10 @@
+# FPL xPoints Prediction Model Dependencies
+# Versions pinned to match GitHub Actions workflow
+
+requests==2.32.3
+pandas==2.2.3
+numpy>=1.26.0
+tqdm==4.67.1
+scikit-learn==1.4.2
+xgboost==1.7.5
+python-dateutil==2.9.0.post0
