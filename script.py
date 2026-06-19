@@ -292,6 +292,11 @@ pred_df = pd.DataFrame(pred_rows)
 # Handle DGWs and BGWs
 if upcoming_fixtures_df is None:
     print("No upcoming fixture data found. Skipping DGW/BGW adjustments.")
+    pred_df["fixture_count"] = 0
+    pred_df["avg_difficulty"] = 3.0
+    pred_df["home_proportion"] = 0.5
+    pred_df["fixture_difficulty"] = pred_df["avg_difficulty"]
+    pred_df["home_dummy"] = pred_df["home_proportion"]
 else:
     # Filter fixtures for next_gw and calculate fixture count and aggregated features
     player_next_fixtures = upcoming_fixtures_df[upcoming_fixtures_df["event"] == next_gw]
