@@ -44,22 +44,29 @@ print(f"Detected Next Gameweek: {next_gw}")
 ###############################################################################
 player_ids = players_df["id"].tolist()
 
-def fetch_player_history(player_id):
+def fetch_player_summary(player_id):
     url = f"https://fantasy.premierleague.com/api/element-summary/{player_id}/"
     resp = requests.get(url)
     if resp.status_code != 200:
         return None
-    j = resp.json()
-    history = j.get("history", [])
+    return resp.json()
+
+def summary_to_history(player_id, summary):
+    if summary is None:
+        return None
+    history = summary.get("history", [])
     if len(history) == 0:
         return None
     df = pd.DataFrame(history)
     df["player_id"] = player_id
     return df
 
+player_summaries = {}
 all_histories = []
-for pid in tqdm(player_ids, desc="Fetching player histories"):
-    hdf = fetch_player_history(pid)
+for pid in tqdm(player_ids, desc="Fetching player summaries"):
+    summary = fetch_player_summary(pid)
+    player_summaries[pid] = summary
+    hdf = summary_to_history(pid, summary)
     if hdf is not None:
         all_histories.append(hdf)
 
@@ -71,13 +78,10 @@ full_history_df = pd.concat(all_histories, ignore_index=True)
 ###############################################################################
 # 2.1) FETCH PER-PLAYER UPCOMING FIXTURES
 ###############################################################################
-def fetch_player_fixtures(player_id):
-    url = f"https://fantasy.premierleague.com/api/element-summary/{player_id}/"
-    resp = requests.get(url)
-    if resp.status_code != 200:
+def summary_to_fixtures(player_id, summary):
+    if summary is None:
         return None
-    data = resp.json()
-    fixtures = data.get("fixtures", [])
+    fixtures = summary.get("fixtures", [])
     if not fixtures:
         return None
     fixtures_df = pd.DataFrame(fixtures)
@@ -85,8 +89,8 @@ def fetch_player_fixtures(player_id):
     return fixtures_df
 
 all_upcoming_fixtures = []
-for pid in tqdm(player_ids, desc="Fetching player upcoming fixtures"):
-    fdf = fetch_player_fixtures(pid)
+for pid in tqdm(player_ids, desc="Preparing player upcoming fixtures"):
+    fdf = summary_to_fixtures(pid, player_summaries.get(pid))
     if fdf is not None:
         all_upcoming_fixtures.append(fdf)
 
