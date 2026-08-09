@@ -2,6 +2,7 @@ name: Daily xPoints Prediction
 
 permissions:
   contents: write
+  issues: write
 
 on:
   schedule:
@@ -14,32 +15,59 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: true
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.9"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests==2.32.3 pandas==2.2.3 numpy tqdm==4.67.1 scikit-learn==1.4.2 xgboost==1.7.5 python-dateutil==2.9.0.post0
+          pip install -r requirements.txt
 
-      - name: Check installed package versions
+      - name: Run prediction model (ep_next baseline on failure)
         run: |
-          pip list | grep -E 'requests|pandas|numpy|tqdm|scikit-learn|xgboost|python-dateutil'
+          # script.py trains on current-season history only, so it cannot run
+          # pre-season or in the first ~5 gameweeks. When it fails for ANY
+          # reason, fall back to baseline.py (FPL's own ep_next, stdlib-only)
+          # rather than leaving a stale file in place — a stale predictions.json
+          # keyed on last season's element IDs served the wrong player names
+          # for 11 weeks in 2026.
+          python script.py || {
+            echo "::warning::script.py failed — falling back to ep_next baseline"
+            python baseline.py
+          }
 
-      - name: Run prediction script
-        run: |
-          python script.py  # Replace with your actual script filename, e.g., 'fpl_prediction.py'
+      - name: Archive pre-deadline snapshot
+        # Copies predictions.json to predictions/gw{N}.json. The last run before
+        # each deadline freezes there, so predictions can later be scored
+        # against actual points. Before this file existed, every prediction the
+        # project ever made was destroyed by the next day's overwrite.
+        run: python baseline.py --archive-only
 
-      - name: Commit predictions.json to repository
+      - name: Commit predictions to repository
         uses: EndBug/add-and-commit@v9
         with:
-          add: "predictions.json"
+          add: "predictions.json predictions/"
           message: "Update predictions.json [skip ci]"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Alert on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="⚠️ Daily xPoints prediction workflow failed"
+          url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "Failed again: $url"
+          else
+            body=$(printf 'Run: %s\n\nThis workflow previously failed silently for 78 consecutive days. This issue is the alarm — it collects repeat failures until closed.' "$url")
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          fi
