@@ -44,7 +44,7 @@ Predictions update daily via GitHub Actions:
 
 ```bash
 # Install dependencies
-pip install requests pandas numpy tqdm scikit-learn xgboost
+pip install -r requirements.txt
 
 # Run predictions
 python script.py
