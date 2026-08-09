@@ -12,7 +12,8 @@ from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 # 1) FETCH GLOBAL DATA (PLAYERS, TEAMS, FIXTURES)
 ###############################################################################
 bootstrap_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
-response = requests.get(bootstrap_url)
+response = requests.get(bootstrap_url, timeout=30)
+response.raise_for_status()
 data = response.json()
 
 players_df = pd.DataFrame(data["elements"])
@@ -20,7 +21,9 @@ teams_df = pd.DataFrame(data["teams"])
 events_df = pd.DataFrame(data["events"])
 
 fixtures_url = "https://fantasy.premierleague.com/api/fixtures/"
-fixtures_data = requests.get(fixtures_url).json()
+fixtures_response = requests.get(fixtures_url, timeout=30)
+fixtures_response.raise_for_status()
+fixtures_data = fixtures_response.json()
 fixtures_df = pd.DataFrame(fixtures_data)
 
 # Convert 'deadline_time' to a proper datetime (UTC).
@@ -46,8 +49,10 @@ player_ids = players_df["id"].tolist()
 
 def fetch_player_history(player_id):
     url = f"https://fantasy.premierleague.com/api/element-summary/{player_id}/"
-    resp = requests.get(url)
-    if resp.status_code != 200:
+    try:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+    except requests.RequestException:
         return None
     j = resp.json()
     history = j.get("history", [])
@@ -73,8 +78,10 @@ full_history_df = pd.concat(all_histories, ignore_index=True)
 ###############################################################################
 def fetch_player_fixtures(player_id):
     url = f"https://fantasy.premierleague.com/api/element-summary/{player_id}/"
-    resp = requests.get(url)
-    if resp.status_code != 200:
+    try:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+    except requests.RequestException:
         return None
     data = resp.json()
     fixtures = data.get("fixtures", [])

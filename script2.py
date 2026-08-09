@@ -6,7 +6,8 @@ from tqdm import tqdm
 def get_bootstrap_data():
     """Fetch bootstrap-static data and return players_df, teams_df, events_df."""
     bootstrap_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
-    response = requests.get(bootstrap_url)
+    response = requests.get(bootstrap_url, timeout=30)
+    response.raise_for_status()
     data = response.json()
     
     players_df = pd.DataFrame(data["elements"])
@@ -18,7 +19,8 @@ def get_bootstrap_data():
 def get_fixtures_data():
     """Fetch the fixtures data."""
     fixtures_url = "https://fantasy.premierleague.com/api/fixtures/"
-    response = requests.get(fixtures_url)
+    response = requests.get(fixtures_url, timeout=30)
+    response.raise_for_status()
     fixtures_data = response.json()
     fixtures_df = pd.DataFrame(fixtures_data)
     return fixtures_df
@@ -29,8 +31,10 @@ def get_player_history(player_id):
     Returns a DataFrame with columns like 'round', 'minutes', 'goals_scored', 'total_points', etc.
     """
     url = f"https://fantasy.premierleague.com/api/element-summary/{player_id}/"
-    resp = requests.get(url)
-    if resp.status_code != 200:
+    try:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+    except requests.RequestException:
         return None
     
     j = resp.json()
