@@ -8,6 +8,15 @@ on:
   schedule:
     - cron: "30 16 * * *"  # Runs daily at 16:30 UTC
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Prediction source to attempt
+        required: true
+        default: baseline
+        type: choice
+        options:
+          - baseline
+          - model
 
 jobs:
   run-prediction:
@@ -29,18 +38,33 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run prediction model (ep_next baseline on failure)
+      - name: Generate validated prediction candidate
+        id: generate
+        env:
+          PREDICTION_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'baseline' }}
         run: |
-          # script.py trains on current-season history only, so it cannot run
-          # pre-season or in the first ~5 gameweeks. When it fails for ANY
-          # reason, fall back to baseline.py (FPL's own ep_next, stdlib-only)
-          # rather than leaving a stale file in place — a stale predictions.json
-          # keyed on last season's element IDs served the wrong player names
-          # for 11 weeks in 2026.
-          python script.py || {
-            echo "::warning::script.py failed — falling back to ep_next baseline"
+          if [ "$PREDICTION_MODE" = "model" ]; then
+            if python script.py; then
+              echo "source=model" >> "$GITHUB_OUTPUT"
+              echo "fallback_used=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "::warning::model candidate failed validation — publishing ep_next baseline"
+              python baseline.py
+              echo "source=fpl_ep_next" >> "$GITHUB_OUTPUT"
+              echo "fallback_used=true" >> "$GITHUB_OUTPUT"
+            fi
+          else
             python baseline.py
-          }
+            echo "source=fpl_ep_next" >> "$GITHUB_OUTPUT"
+            echo "fallback_used=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Record publication source
+        run: |
+          echo "### Prediction publication" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Requested mode: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'baseline' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Published source: ${{ steps.generate.outputs.source }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Fallback used: ${{ steps.generate.outputs.fallback_used }}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Archive pre-deadline snapshot
         # Copies predictions.json to predictions/gw{N}.json. The last run before

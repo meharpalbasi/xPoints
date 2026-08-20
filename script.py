@@ -1,12 +1,21 @@
 import requests
 import pandas as pd
 import numpy as np
+import json
 from tqdm import tqdm
 import datetime
 from xgboost import XGBRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
+from prediction_safety import (
+    POSITIONS,
+    build_player_fixture_rows,
+    season_from_events,
+    write_predictions,
+)
+
+MODEL_VERSION = "xgboost-current-season-1"
 
 ###############################################################################
 # 1) FETCH GLOBAL DATA (PLAYERS, TEAMS, FIXTURES)
@@ -74,32 +83,6 @@ if not all_histories:
 full_history_df = pd.concat(all_histories, ignore_index=True)
 
 ###############################################################################
-# 2.1) FETCH PER-PLAYER UPCOMING FIXTURES
-###############################################################################
-def fetch_player_fixtures(player_id):
-    url = f"https://fantasy.premierleague.com/api/element-summary/{player_id}/"
-    try:
-        resp = requests.get(url, timeout=30)
-        resp.raise_for_status()
-    except requests.RequestException:
-        return None
-    data = resp.json()
-    fixtures = data.get("fixtures", [])
-    if not fixtures:
-        return None
-    fixtures_df = pd.DataFrame(fixtures)
-    fixtures_df["player_id"] = player_id
-    return fixtures_df
-
-all_upcoming_fixtures = []
-for pid in tqdm(player_ids, desc="Fetching player upcoming fixtures"):
-    fdf = fetch_player_fixtures(pid)
-    if fdf is not None:
-        all_upcoming_fixtures.append(fdf)
-
-upcoming_fixtures_df = pd.concat(all_upcoming_fixtures, ignore_index=True) if all_upcoming_fixtures else None
-
-###############################################################################
 # 2.2) ADD MORE FEATURES FROM players_df
 ###############################################################################
 players_df["chance_of_playing_next_round"] = pd.to_numeric(
@@ -111,7 +94,7 @@ players_df["status_numeric"] = players_df["status"].map(status_map).fillna(1.0)
 players_df["form"] = pd.to_numeric(players_df["form"], errors="coerce").fillna(0.0)
 
 full_history_df = full_history_df.merge(
-    players_df[["id", "element_type", "team", "web_name", "selected_by_percent",
+    players_df[["id", "code", "element_type", "team", "web_name", "selected_by_percent",
                 "influence", "creativity", "threat", "ict_index", "status_numeric",
                 "chance_of_playing_next_round", "form"]],
     left_on="player_id", right_on="id", how="left"
@@ -274,6 +257,7 @@ pred_rows = []
 for _, p_row in latest_per_player.iterrows():
     row_data = {f: np.nan for f in feature_cols}
     row_data["player_id"] = p_row["player_id"]
+    row_data["player_code"] = p_row["code"]
     row_data["web_name"] = p_row["web_name"]
     row_data["team"] = p_row["team"]
     
@@ -296,37 +280,15 @@ for _, p_row in latest_per_player.iterrows():
 # Corrected line - removed .Scope
 pred_df = pd.DataFrame(pred_rows)
 
-# Handle DGWs and BGWs
-if upcoming_fixtures_df is None:
-    print("No upcoming fixture data found. Skipping DGW/BGW adjustments.")
-    pred_df["fixture_count"] = 0
-    pred_df["avg_difficulty"] = 3.0
-    pred_df["home_proportion"] = 0.5
-    pred_df["fixture_difficulty"] = pred_df["avg_difficulty"]
-    pred_df["home_dummy"] = pred_df["home_proportion"]
-else:
-    # Filter fixtures for next_gw and calculate fixture count and aggregated features
-    player_next_fixtures = upcoming_fixtures_df[upcoming_fixtures_df["event"] == next_gw]
-    
-    fixture_count = player_next_fixtures.groupby("player_id").size().reset_index(name="fixture_count")
-    avg_difficulty = player_next_fixtures.groupby("player_id")["difficulty"].mean().reset_index(name="avg_difficulty")
-    home_proportion = player_next_fixtures.groupby("player_id")["is_home"].mean().reset_index(name="home_proportion")
-    
-    # Merge the individual DataFrames into one with player_id as a column
-    dgw_bgw_df = fixture_count.merge(avg_difficulty, on="player_id", how="outer") \
-                              .merge(home_proportion, on="player_id", how="outer")
-    
-    # Merge DGW/BGW info into pred_df
-    pred_df = pred_df.merge(dgw_bgw_df, on="player_id", how="left")
-    
-    # Fill missing values: BGW players get 0 fixtures, default difficulty/home to neutral
-    pred_df["fixture_count"] = pred_df["fixture_count"].fillna(0)
-    pred_df["avg_difficulty"] = pred_df["avg_difficulty"].fillna(3.0)   # Neutral difficulty
-    pred_df["home_proportion"] = pred_df["home_proportion"].fillna(0.5) # Neutral home/away
-    
-    # Overwrite fixture_difficulty and home_dummy with DGW/BGW-adjusted values
-    pred_df["fixture_difficulty"] = pred_df["avg_difficulty"]
-    pred_df["home_dummy"] = pred_df["home_proportion"]
+# Derive DGW/BGW features from the already validated global fixture feed.
+# This removes hundreds of duplicate element-summary calls and, critically,
+# means an upstream failure cannot be mistaken for a confirmed blank gameweek.
+fixture_features_df = pd.DataFrame(build_player_fixture_rows(
+    players_df[["id", "team"]].to_dict(orient="records"),
+    fixtures_data,
+    next_gw,
+))
+pred_df = pred_df.merge(fixture_features_df, on="player_id", how="left")
 
 # Prepare data for prediction
 X_next = pred_df[feature_cols].copy()
@@ -336,6 +298,7 @@ X_next_scaled = scaler.transform(X_next)
 # Predict with XGBoost and adjust for fixture count (DGW scaling)
 pred_df["xPoints_raw"] = best_xgb.predict(X_next_scaled)
 pred_df["xPoints"] = pred_df["xPoints_raw"] * pred_df["fixture_count"]
+pred_df["xPoints"] = pred_df["xPoints"].clip(lower=0)
 
 # Force xPoints = 0 for BGW players or 0% chance of playing
 pred_df.loc[(pred_df["fixture_count"] == 0) | (pred_df["chance_of_playing_next_round"] == 0), "xPoints"] = 0
@@ -343,6 +306,14 @@ pred_df.loc[(pred_df["fixture_count"] == 0) | (pred_df["chance_of_playing_next_r
 # Map team ID -> name for display
 team_map = dict(zip(teams_df["id"], teams_df["name"]))
 pred_df["team_name"] = pred_df["team"].map(team_map)
+pred_df["position"] = pred_df["element_type"].map(POSITIONS)
+pred_df["generated_at"] = datetime.datetime.now(
+    datetime.timezone.utc
+).strftime("%Y-%m-%dT%H:%M:%SZ")
+pred_df["season"] = season_from_events(data["events"])
+pred_df["gameweek"] = int(next_gw)
+pred_df["source"] = "model"
+pred_df["model_version"] = MODEL_VERSION
 
 pred_df.sort_values("xPoints", ascending=False, inplace=True)
 
@@ -350,5 +321,8 @@ pred_df.sort_values("xPoints", ascending=False, inplace=True)
 print("\n=== Next Gameweek xPoints (DGW/BGW Adjusted) ===")
 print(pred_df[["web_name", "team_name", "fixture_count", "chance_of_playing_next_round", "xPoints"]].head(30))
 
-# If you want to save results to JSON
-pred_df.to_json("predictions.json", orient="records", indent=2)
+rows = json.loads(pred_df.to_json(orient="records"))
+official_player_ids = players_df[
+    players_df["element_type"].isin(POSITIONS)
+]["id"].tolist()
+write_predictions("predictions.json", rows, official_player_ids, int(next_gw))

@@ -1,6 +1,15 @@
 # xPoints
 
-Expected points predictor for Fantasy Premier League using XGBoost machine learning.
+Expected-points pipeline for Fantasy Premier League with a validated official
+FPL baseline and an experimental XGBoost candidate.
+
+## Production status
+
+The scheduled production feed currently runs in explicit **baseline mode** and
+publishes official FPL `ep_next` values with source/version provenance. The
+XGBoost path is not promoted automatically: it can be requested manually, but
+must pass player-parity, fixture, provenance, validity, and non-zero output
+gates or the workflow publishes the baseline instead.
 
 ## What It Does
 
@@ -23,14 +32,15 @@ xPoints predicts how many FPL points each player will score in the upcoming game
 
 1. **Data Collection** — Fetches player data, fixtures, and per-gameweek history from the official FPL API
 2. **Feature Engineering** — Creates rolling averages, form metrics, and fixture difficulty ratings
-3. **Model Training** — Trains an XGBoost regressor on historical data using time-series cross-validation
-4. **Prediction** — Generates expected points for the next gameweek
+3. **Candidate Training** — Trains an experimental XGBoost regressor on current-season history
+4. **Validation** — Blocks incomplete, stale-schema, invalid, or all-zero candidates
+5. **Publication** — Atomically publishes the requested source, falling back to `ep_next` when a model candidate fails
 
 ## Automation
 
 Predictions update daily via GitHub Actions:
 
-- **`daily_update.yml`** — Runs at 16:30 UTC, generates `predictions.json`
+- **`daily_update.yml`** — Runs at 16:30 UTC in baseline mode and generates a validated `predictions.json`
 - **`daily_metrics.yml`** — Generates extended metrics file
 
 ## Scripts
@@ -38,6 +48,8 @@ Predictions update daily via GitHub Actions:
 | Script | Purpose |
 |--------|---------|
 | `script.py` | Main prediction pipeline (fetch → train → predict → output) |
+| `baseline.py` | Production `ep_next` baseline and immutable GW snapshot writer |
+| `prediction_safety.py` | Shared fixture derivation, output validation, and atomic publication |
 | `script2.py` | Extended metrics generation with additional feature engineering |
 
 ## Usage
