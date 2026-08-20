@@ -38,6 +38,8 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
+from prediction_safety import write_predictions
+
 BOOTSTRAP_URL = "https://fantasy.premierleague.com/api/bootstrap-static/"
 FIXTURES_URL = "https://fantasy.premierleague.com/api/fixtures/"
 HEADERS = {
@@ -195,7 +197,11 @@ def main():
             print(f"❌ sanity check failed: {p}")
         sys.exit(1)
 
-    OUT_PATH.write_text(json.dumps(rows, indent=2))
+    expected_player_ids = [
+        player["id"] for player in bootstrap["elements"]
+        if player.get("element_type") in POSITIONS
+    ]
+    write_predictions(OUT_PATH, rows, expected_player_ids, gw)
     nonzero = sum(1 for r in rows if r["xPoints"] > 0)
     print(f"✅ wrote {len(rows)} predictions for GW{gw} "
           f"({nonzero} non-zero, top: {rows[0]['web_name']} {rows[0]['xPoints']:.2f})")
