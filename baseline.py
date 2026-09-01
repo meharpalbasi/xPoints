@@ -77,6 +77,54 @@ def next_gameweek(events):
     return min(unfinished) if unfinished else None
 
 
+def event_deadline(events, gw):
+    """ISO deadline of the target gameweek, or None if unknown."""
+    for ev in events:
+        if ev.get("id") == gw:
+            return ev.get("deadline_time")
+    return None
+
+
+def parse_utc(iso):
+    return dt.datetime.strptime(iso, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+
+
+def archive_allowed(now, deadline_iso):
+    """The per-gameweek snapshot may only be (re)written BEFORE its deadline.
+
+    The workflow runs hourly, so the last run before the deadline is the one
+    that freezes. After the deadline, FPL's is_next flips to N+1 — but that
+    flip can lag by minutes, and a run in that window must not overwrite the
+    frozen file with post-deadline data.
+    """
+    if deadline_iso is None:
+        return True
+    return now < parse_utc(deadline_iso)
+
+
+def content_signature(rows):
+    """Rows with the run timestamp stripped — 'did the data change?'"""
+    stripped = [{k: v for k, v in r.items() if k != "generated_at"} for r in rows]
+    return json.dumps(stripped, sort_keys=True)
+
+
+def existing_signature():
+    if not OUT_PATH.exists():
+        return None
+    try:
+        return content_signature(json.loads(OUT_PATH.read_text()))
+    except (ValueError, OSError):
+        return None
+
+
+def step_summary(lines):
+    """Append to the GitHub Actions job summary when running in CI."""
+    path = Path(__import__("os").environ.get("GITHUB_STEP_SUMMARY", ""))
+    if path.name:
+        with path.open("a") as f:
+            f.write("\n".join(lines) + "\n")
+
+
 def season_label(events):
     """e.g. '2026/27', derived from the GW1 deadline year."""
     first = min(events, key=lambda ev: ev["id"])
@@ -163,14 +211,18 @@ def sanity_check(rows):
     return problems
 
 
-def archive(gw):
+def archive(gw, deadline_iso=None):
     if gw is None:
         print("⚠️  no target gameweek resolvable — skipping archive")
+        return
+    now = dt.datetime.now(dt.timezone.utc)
+    if not archive_allowed(now, deadline_iso):
+        print(f"🔒 GW{gw} deadline {deadline_iso} has passed — gw{gw}.json stays frozen")
         return
     ARCHIVE_DIR.mkdir(exist_ok=True)
     dest = ARCHIVE_DIR / f"gw{gw}.json"
     shutil.copyfile(OUT_PATH, dest)
-    print(f"📁 archived {OUT_PATH} -> {dest}")
+    print(f"📁 archived {OUT_PATH} -> {dest} (deadline {deadline_iso})")
 
 
 def main():
@@ -181,11 +233,12 @@ def main():
 
     bootstrap = fetch_json(BOOTSTRAP_URL)
     gw = next_gameweek(bootstrap["events"])
+    deadline = event_deadline(bootstrap["events"], gw)
 
     if args.archive_only:
         if not OUT_PATH.exists():
             sys.exit("predictions.json does not exist — nothing to archive")
-        archive(gw)
+        archive(gw, deadline)
         return
 
     fixtures = fetch_json(FIXTURES_URL)
@@ -201,11 +254,27 @@ def main():
         player["id"] for player in bootstrap["elements"]
         if player.get("element_type") in POSITIONS
     ]
-    write_predictions(OUT_PATH, rows, expected_player_ids, gw)
+
+    # The workflow runs hourly. When FPL hasn't changed anything, leave the
+    # file alone so we don't commit a new timestamp every hour.
+    if content_signature(rows) == existing_signature():
+        print(f"⏸  predictions unchanged since last write — GW{gw}, no rewrite")
+        step_summary([f"- GW{gw}: unchanged, not rewritten"])
+        archive(gw, deadline)
+        return
+
+    warnings = write_predictions(OUT_PATH, rows, expected_player_ids, gw)
     nonzero = sum(1 for r in rows if r["xPoints"] > 0)
+    negatives = sum(1 for r in rows if r["xPoints"] < 0)
     print(f"✅ wrote {len(rows)} predictions for GW{gw} "
-          f"({nonzero} non-zero, top: {rows[0]['web_name']} {rows[0]['xPoints']:.2f})")
-    archive(gw)
+          f"({nonzero} non-zero, {negatives} negative, top: {rows[0]['web_name']} {rows[0]['xPoints']:.2f})")
+    for w in warnings:
+        print(f"⚠️  anomaly: {w}")
+    step_summary(
+        [f"- GW{gw}: wrote {len(rows)} rows, {nonzero} positive, {negatives} negative, deadline {deadline}"]
+        + [f"- ⚠️ {w}" for w in warnings]
+    )
+    archive(gw, deadline)
 
 
 if __name__ == "__main__":
