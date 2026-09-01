@@ -6,7 +6,12 @@ permissions:
 
 on:
   schedule:
-    - cron: "30 16 * * *"  # Runs daily at 16:30 UTC
+    # Hourly, off the :00 mark (GitHub's most-delayed slot). A single daily
+    # 16:30 run left the frozen pre-deadline snapshot a median of 20 hours
+    # stale across the 38 published deadlines, and was observed landing up to
+    # 8h32m late. Hourly keeps the last pre-deadline run within ~1h of the
+    # deadline; baseline.py only rewrites files when the data actually changed.
+    - cron: "7 * * * *"
   workflow_dispatch:
     inputs:
       mode:
@@ -17,6 +22,11 @@ on:
         options:
           - baseline
           - model
+
+# Never let two runs race on predictions.json / the per-GW archive.
+concurrency:
+  group: predictions-publication
+  cancel-in-progress: false
 
 jobs:
   run-prediction:
@@ -31,7 +41,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
@@ -66,11 +76,14 @@ jobs:
           echo "- Published source: ${{ steps.generate.outputs.source }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Fallback used: ${{ steps.generate.outputs.fallback_used }}" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Warn if the model fell back
+        if: steps.generate.outputs.fallback_used == 'true'
+        run: echo "::warning::Model mode was requested but the ep_next baseline was published instead"
+
       - name: Archive pre-deadline snapshot
-        # Copies predictions.json to predictions/gw{N}.json. The last run before
-        # each deadline freezes there, so predictions can later be scored
-        # against actual points. Before this file existed, every prediction the
-        # project ever made was destroyed by the next day's overwrite.
+        # Copies predictions.json to predictions/gw{N}.json while the target
+        # gameweek's deadline is still in the future; after it passes the file
+        # stays frozen so predictions can be scored against actual points.
         run: python baseline.py --archive-only
 
       - name: Commit predictions to repository
@@ -80,6 +93,18 @@ jobs:
           message: "Update predictions.json [skip ci]"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Close alert issue on recovery
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="⚠️ Daily xPoints prediction workflow failed"
+          url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue close "$existing" --repo "$GITHUB_REPOSITORY" --comment "Recovered: $url"
+          fi
 
       - name: Alert on failure
         if: failure()
@@ -92,6 +117,6 @@ jobs:
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "Failed again: $url"
           else
-            body=$(printf 'Run: %s\n\nThis workflow previously failed silently for 78 consecutive days. This issue is the alarm — it collects repeat failures until closed.' "$url")
+            body=$(printf 'Run: %s\n\nThis issue is the alarm — it collects repeat failures and closes itself on the next successful run.' "$url")
             gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
           fi
