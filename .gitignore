@@ -45,3 +45,6 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Training data is downloaded by fetch_data.py, never committed
+data/
