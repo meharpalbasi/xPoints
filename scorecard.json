@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-09-01T19:24:37Z",
+  "method": "Each archived pre-deadline snapshot is joined to official FPL results (event/{gw}/live) once the event is data_checked. Metrics are reported per named population; ties in rankings are broken at random and averaged. Files under scores/ are immutable once written.",
+  "populations": {
+    "all": "every player in the archive",
+    "played": "minutes > 0",
+    "starters": "minutes >= 60"
+  },
+  "summary": {
+    "scored_gameweeks": 2,
+    "mean_ep_next_spearman_starters": 0.1295,
+    "mean_ep_next_mae_all": 1.5328,
+    "mean_zero_mae_all": 1.5215,
+    "power": {
+      "effect_to_detect": 0.05,
+      "per_gameweek_sd_used": 0.091,
+      "sd_source": "prior from 2025/26 research (0.091); observed once >= 3 gameweeks scored",
+      "gameweeks_needed_power_80": 27,
+      "gameweeks_needed_power_90": 35,
+      "formula": "n = ((z_{1-alpha/2} + z_power) * sd / effect)^2, one-sample normal approximation, alpha 0.05"
+    }
+  },
+  "gameweeks": [
+    {
+      "gameweek": 1,
+      "deadline": "2026-08-21T17:30:00Z",
+      "generated_at": "2026-08-21T16:58:19Z",
+      "source": "fpl_ep_next",
+      "n_all": 600,
+      "n_played": 308,
+      "n_starters": 210,
+      "ep_next_mae_all": 1.5983,
+      "zero_mae_all": 1.5933,
+      "ep_next_spearman_all": 0.4813,
+      "ep_next_spearman_starters": 0.086,
+      "ep_next_spearman_starters_ci95": [
+        -0.0516,
+        0.2209
+      ],
+      "ep_next_precision_at_20_starters": 0.1058,
+      "ep_next_captain_regret": 13.4,
+      "price_spearman_starters": null,
+      "blend_spearman_starters": null,
+      "blend_precision_at_20_starters": null
+    },
+    {
+      "gameweek": 2,
+      "deadline": "2026-08-28T17:30:00Z",
+      "generated_at": "2026-08-28T01:01:20Z",
+      "source": "fpl_ep_next",
+      "n_all": 616,
+      "n_played": 308,
+      "n_starters": 209,
+      "ep_next_mae_all": 1.4672,
+      "zero_mae_all": 1.4497,
+      "ep_next_spearman_all": 0.5164,
+      "ep_next_spearman_starters": 0.1731,
+      "ep_next_spearman_starters_ci95": [
+        0.0366,
+        0.3223
+      ],
+      "ep_next_precision_at_20_starters": 0.315,
+      "ep_next_captain_regret": 9.84,
+      "price_spearman_starters": null,
+      "blend_spearman_starters": null,
+      "blend_precision_at_20_starters": null
+    }
+  ]
+}
