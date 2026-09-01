@@ -156,3 +156,29 @@ class DeadlineFreezeTests(unittest.TestCase):
         c = [prediction(1, xpoints=4.1) | {"generated_at": "2026-09-01T11:00:00Z"}]
         self.assertEqual(content_signature(a), content_signature(b))
         self.assertNotEqual(content_signature(a), content_signature(c))
+
+
+class PriceBlendOrderingTests(unittest.TestCase):
+    """XP-00: ep_next ties are broken by price; blend_rank is additive."""
+
+    def rows(self):
+        def r(pid, etype, xp, cost):
+            return {**prediction(pid, xpoints=xp), "element_type": etype,
+                    "position": {2: "DEF", 3: "MID"}[etype], "now_cost": cost}
+        return [r(1, 3, 4.0, 60), r(2, 3, 4.0, 130), r(3, 3, 5.0, 70),
+                r(4, 2, 4.0, 45), r(5, 2, 4.0, 55)]
+
+    def test_file_order_breaks_xpoints_ties_by_price(self):
+        from baseline import assign_blend_rank, order_rows
+        rows = order_rows(assign_blend_rank(self.rows()))
+        self.assertEqual([r["player_id"] for r in rows], [3, 2, 1, 5, 4])  # 5.0, then 4.0s by price 130/60/55/45
+        self.assertTrue(all(r["ordering"] == "ep_next_desc,price_desc" for r in rows))
+
+    def test_blend_rank_is_within_position_and_leaves_xpoints_untouched(self):
+        from baseline import assign_blend_rank
+        rows = {r["player_id"]: r for r in assign_blend_rank(self.rows())}
+        # MID: ep ranks 3.0 -> 1, 4.0 -> 2.5 tie; cost ranks 130 -> 1, 70 -> 2, 60 -> 3
+        self.assertLess(rows[2]["blend_score"], rows[1]["blend_score"])  # pricier tie wins
+        self.assertLess(rows[3]["blend_score"], rows[1]["blend_score"])
+        self.assertEqual({rows[i]["xPoints"] for i in (1, 2)}, {4.0})    # values untouched
+        self.assertEqual(sorted(r["blend_rank"] for r in rows.values()), [1, 2, 3, 4, 5])

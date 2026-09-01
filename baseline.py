@@ -179,6 +179,8 @@ def build_rows(bootstrap, fixtures, gw):
             "selected_by_percent": str(p.get("selected_by_percent") or "0.0"),
             "status_numeric": STATUS_MAP.get(p.get("status"), 1),
             "chance_of_playing_next_round": p.get("chance_of_playing_next_round"),
+            "now_cost": p.get("now_cost"),
+            "price_millions": round((p.get("now_cost") or 0) / 10, 1),
             "fixture_count": n,
             "avg_difficulty": round(sum(t["difficulty"]) / n, 2) if n else 0.0,
             "fixture_difficulty": round(sum(t["difficulty"]) / n, 2) if n else 0.0,
@@ -190,7 +192,59 @@ def build_rows(bootstrap, fixtures, gw):
             "model_version": MODEL_VERSION,
         })
 
-    rows.sort(key=lambda r: r["xPoints"], reverse=True)
+    assign_blend_rank(rows)
+    return order_rows(rows)
+
+
+def _average_ranks(values):
+    """1-based descending ranks with ties given their average rank."""
+    order = sorted(range(len(values)), key=lambda i: -values[i])
+    ranks = [0.0] * len(values)
+    i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and values[order[j + 1]] == values[order[i]]:
+            j += 1
+        avg = (i + j) / 2 + 1
+        for k in range(i, j + 1):
+            ranks[order[k]] = avg
+        i = j + 1
+    return ranks
+
+
+def assign_blend_rank(rows, ep_weight=0.5):
+    """Within-position blend of ep_next rank and price rank -> blend_rank.
+
+    ep_next is ~73% a price ranking already and carries only ~25-30
+    distinct values across 600+ players, so it ties constantly. Blending
+    its rank with now_cost rank within each position beat ep_next alone
+    among starters by +0.119 Spearman at GW1 2026/27 and +0.0875 across
+    37 gameweeks of 2025/26 (research report, 28 Aug 2026). This field
+    is ADDITIVE: xPoints is unchanged and stays the displayed value.
+    """
+    by_pos = {}
+    for r in rows:
+        by_pos.setdefault(r["element_type"], []).append(r)
+    for group in by_pos.values():
+        ep_ranks = _average_ranks([float(r["xPoints"]) for r in group])
+        cost_ranks = _average_ranks([float(r.get("now_cost") or 0) for r in group])
+        for r, ep_r, cost_r in zip(group, ep_ranks, cost_ranks):
+            r["blend_score"] = round(ep_weight * ep_r + (1 - ep_weight) * cost_r, 2)
+    # Global 1..N rank from the within-position score (lower is better).
+    for i, r in enumerate(sorted(rows, key=lambda r: (r["blend_score"], -float(r["xPoints"]), r["player_id"])), 1):
+        r["blend_rank"] = i
+    return rows
+
+
+def order_rows(rows):
+    """File order: xPoints desc, then price desc among ties, then id.
+
+    Clients sort by xPoints with a stable sort, so among equal xPoints
+    the file order is what users see — this is the measured tie-break.
+    """
+    rows.sort(key=lambda r: (-float(r["xPoints"]), -float(r.get("now_cost") or 0), r["player_id"]))
+    for r in rows:
+        r["ordering"] = "ep_next_desc,price_desc"
     return rows
 
 
