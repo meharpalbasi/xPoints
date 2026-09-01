@@ -1,8 +1,15 @@
+import importlib.util
 import unittest
 
-import pandas as pd
+HAS_ML_DEPS = all(importlib.util.find_spec(m) for m in ("pandas", "sklearn", "xgboost"))
+if HAS_ML_DEPS:
+    import pandas as pd
+    from backtest import build_features, load_player_gameweeks
 
-from backtest import build_features, load_player_gameweeks
+
+@unittest.skipUnless(HAS_ML_DEPS, "backtest harness deps (pandas/sklearn/xgboost) not installed")
+class _NeedsML(unittest.TestCase):
+    pass
 
 
 def frame(points_by_gw, minutes_by_gw=None):
@@ -18,7 +25,7 @@ def frame(points_by_gw, minutes_by_gw=None):
     return pd.DataFrame(rows)
 
 
-class AsOfFeatureTests(unittest.TestCase):
+class AsOfFeatureTests(_NeedsML):
     def test_features_at_gw_g_never_see_gw_g(self):
         """Changing ONLY the target gameweek's own row must leave its features unchanged."""
         base = frame([2, 6, 1, 9, 3])
