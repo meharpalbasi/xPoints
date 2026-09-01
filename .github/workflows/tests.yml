@@ -16,5 +16,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Run safety tests
+          cache: pip
+      - name: Install dependencies
+        # The publication path is stdlib-only, but the backtest harness
+        # (backtest.py) needs pandas/scikit-learn/xgboost and must be tested
+        # for real — it is the tool every model change is judged by.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run tests
         run: python -m unittest discover -s tests -v
