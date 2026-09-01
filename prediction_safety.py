@@ -8,6 +8,20 @@ from pathlib import Path
 
 
 POSITIONS = {1: "GKP", 2: "DEF", 3: "MID", 4: "FWD"}
+
+# Documented bounds for one player's gameweek projection.
+#
+# FPL's own ep_next can be slightly negative (a player expected to concede or
+# be carded with no attacking return), so negatives inside the hard bounds are
+# LEGITIMATE and must be preserved. Rejecting every negative cost three
+# publication runs on 29-30 Aug 2026 (issue #13). Values outside the hard
+# bounds mean a broken upstream or a units bug and block publication; values
+# past the warn bounds are published but surfaced as anomalies.
+XPOINTS_HARD_MIN = -5.0
+XPOINTS_HARD_MAX = 40.0  # a double-gameweek haul projection can exceed 20
+XPOINTS_WARN_MIN = -2.0
+XPOINTS_WARN_MAX = 20.0
+
 REQUIRED_FIELDS = {
     "player_id",
     "player_code",
@@ -138,8 +152,15 @@ def validation_problems(rows, expected_player_ids, target_gameweek):
         except (TypeError, ValueError):
             problems.append(f"player {row['player_id']} has non-numeric xPoints")
         else:
-            if not math.isfinite(xpoints) or xpoints < 0:
-                problems.append(f"player {row['player_id']} has invalid xPoints")
+            if (
+                not math.isfinite(xpoints)
+                or xpoints < XPOINTS_HARD_MIN
+                or xpoints > XPOINTS_HARD_MAX
+            ):
+                problems.append(
+                    f"player {row['player_id']} has out-of-bounds xPoints {xpoints!r} "
+                    f"(hard bounds {XPOINTS_HARD_MIN} to {XPOINTS_HARD_MAX})"
+                )
             elif xpoints > 0:
                 nonzero += 1
 
@@ -164,11 +185,46 @@ def validation_problems(rows, expected_player_ids, target_gameweek):
     return problems
 
 
+def anomaly_warnings(rows):
+    """Non-blocking anomalies worth a human glance. Publication proceeds."""
+    negatives, below_warn, above_warn = [], [], []
+    for row in rows:
+        try:
+            xpoints = float(row.get("xPoints"))
+        except (TypeError, ValueError):
+            continue
+        if xpoints < 0:
+            negatives.append(row.get("player_id"))
+        if xpoints < XPOINTS_WARN_MIN:
+            below_warn.append(row.get("player_id"))
+        if xpoints > XPOINTS_WARN_MAX:
+            above_warn.append(row.get("player_id"))
+
+    warnings = []
+    if negatives:
+        warnings.append(
+            f"{len(negatives)} players have negative xPoints (kept): {negatives[:5]}"
+        )
+    if below_warn:
+        warnings.append(
+            f"{len(below_warn)} players below warn floor {XPOINTS_WARN_MIN}: {below_warn[:5]}"
+        )
+    if above_warn:
+        warnings.append(
+            f"{len(above_warn)} players above warn ceiling {XPOINTS_WARN_MAX}: {above_warn[:5]}"
+        )
+    return warnings
+
+
 def write_predictions(path, rows, expected_player_ids, target_gameweek):
-    """Validate and atomically replace the production artifact."""
+    """Validate and atomically replace the production artifact.
+
+    Returns the list of non-blocking anomaly warnings (possibly empty).
+    """
     problems = validation_problems(rows, expected_player_ids, target_gameweek)
     if problems:
         raise PredictionValidationError("; ".join(problems))
+    warnings = anomaly_warnings(rows)
 
     destination = Path(path)
     temporary = destination.with_name(
@@ -183,3 +239,4 @@ def write_predictions(path, rows, expected_player_ids, target_gameweek):
     finally:
         if temporary.exists():
             temporary.unlink()
+    return warnings

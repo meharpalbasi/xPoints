@@ -95,3 +95,64 @@ class PublicationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ProjectionBoundsTests(unittest.TestCase):
+    """Negative expected points are legitimate in FPL (issue #13). Only values
+    outside the documented hard bounds may block publication."""
+
+    def setUp(self):
+        from prediction_safety import XPOINTS_HARD_MAX, XPOINTS_HARD_MIN
+        self.hard_min = XPOINTS_HARD_MIN
+        self.hard_max = XPOINTS_HARD_MAX
+
+    def test_small_negative_projection_is_accepted_and_preserved(self):
+        rows = [prediction(1, xpoints=-0.4), prediction(2, xpoints=4.0)]
+        self.assertEqual(validation_problems(rows, [1, 2], 1), [])
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "predictions.json"
+            write_predictions(path, rows, [1, 2], 1)
+            written = {r["player_id"]: r["xPoints"] for r in json.loads(path.read_text())}
+        self.assertEqual(written[1], -0.4)
+
+    def test_values_outside_hard_bounds_block_publication(self):
+        too_low = [prediction(1, xpoints=self.hard_min - 1), prediction(2)]
+        too_high = [prediction(1, xpoints=self.hard_max + 1), prediction(2)]
+        for rows in (too_low, too_high):
+            problems = validation_problems(rows, [1, 2], 1)
+            self.assertEqual(len(problems), 1, problems)
+            self.assertIn("out-of-bounds", problems[0])
+
+    def test_anomalies_are_reported_but_do_not_block(self):
+        from prediction_safety import XPOINTS_WARN_MAX, anomaly_warnings
+        rows = [prediction(1, xpoints=-0.5), prediction(2, xpoints=XPOINTS_WARN_MAX + 1)]
+        self.assertEqual(validation_problems(rows, [1, 2], 1), [])
+        warnings = anomaly_warnings(rows)
+        self.assertEqual(len(warnings), 2, warnings)
+        self.assertIn("negative", warnings[0])
+        self.assertIn("ceiling", warnings[1])
+        with tempfile.TemporaryDirectory() as tmp:
+            returned = write_predictions(Path(tmp) / "p.json", rows, [1, 2], 1)
+        self.assertEqual(returned, warnings)
+
+
+class DeadlineFreezeTests(unittest.TestCase):
+    """The per-gameweek snapshot may only be rewritten before its deadline."""
+
+    def test_archive_allowed_only_before_deadline(self):
+        import datetime as dt
+        from baseline import archive_allowed
+        deadline = "2026-09-05T17:30:00Z"
+        before = dt.datetime(2026, 9, 5, 17, 29, tzinfo=dt.timezone.utc)
+        after = dt.datetime(2026, 9, 5, 17, 31, tzinfo=dt.timezone.utc)
+        self.assertTrue(archive_allowed(before, deadline))
+        self.assertFalse(archive_allowed(after, deadline))
+        self.assertTrue(archive_allowed(after, None))
+
+    def test_content_signature_ignores_run_timestamp(self):
+        from baseline import content_signature
+        a = [prediction(1) | {"generated_at": "2026-09-01T10:00:00Z"}]
+        b = [prediction(1) | {"generated_at": "2026-09-01T11:00:00Z"}]
+        c = [prediction(1, xpoints=4.1) | {"generated_at": "2026-09-01T11:00:00Z"}]
+        self.assertEqual(content_signature(a), content_signature(b))
+        self.assertNotEqual(content_signature(a), content_signature(c))
