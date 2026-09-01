@@ -1,0 +1,82 @@
+{
+  "gameweek": 1,
+  "scored_at": "2026-09-01T19:24:36Z",
+  "deadline": "2026-08-21T17:30:00Z",
+  "data_checked": true,
+  "prediction": {
+    "generated_at": "2026-08-21T16:58:19Z",
+    "source": "fpl_ep_next",
+    "model_version": "ep-next-baseline-1",
+    "ordering": null,
+    "rows": 600
+  },
+  "populations": {
+    "all": "every player in the archive",
+    "played": "minutes > 0",
+    "starters": "minutes >= 60"
+  },
+  "n": {
+    "all": 600,
+    "played": 308,
+    "starters": 210
+  },
+  "missing_from_live": 0,
+  "predictors_available": [
+    "ep_next",
+    "zero"
+  ],
+  "metrics": {
+    "all": {
+      "ep_next": {
+        "mae": 1.5983,
+        "rmse": 2.62,
+        "spearman": 0.4813,
+        "spearman_ci95": [
+          0.4111,
+          0.5433
+        ],
+        "precision_at_10": 0.1,
+        "precision_at_20": 0.1078,
+        "captain_regret": 13.4
+      },
+      "zero": {
+        "mae": 1.5933,
+        "rmse": 3.2047
+      }
+    },
+    "played": {
+      "ep_next": {
+        "mae": 2.1097,
+        "rmse": 3.4089,
+        "spearman": 0.1626,
+        "spearman_ci95": [
+          0.0475,
+          0.2712
+        ],
+        "precision_at_10": 0.1,
+        "precision_at_20": 0.105
+      },
+      "zero": {
+        "mae": 3.1039,
+        "rmse": 4.4729
+      }
+    },
+    "starters": {
+      "ep_next": {
+        "mae": 2.5948,
+        "rmse": 4.0169,
+        "spearman": 0.086,
+        "spearman_ci95": [
+          -0.0516,
+          0.2209
+        ],
+        "precision_at_10": 0.1,
+        "precision_at_20": 0.1058
+      },
+      "zero": {
+        "mae": 3.9762,
+        "rmse": 5.2856
+      }
+    }
+  }
+}

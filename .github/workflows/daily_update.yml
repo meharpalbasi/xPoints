@@ -86,10 +86,17 @@ jobs:
         # stays frozen so predictions can be scored against actual points.
         run: python baseline.py --archive-only
 
-      - name: Commit predictions to repository
+      - name: Score finished gameweeks
+        # Grades each archived pre-deadline snapshot against official results
+        # once FPL marks the event data_checked (bonus and DEFCON settled).
+        # Gameweeks already scored are skipped; scores/ files are immutable.
+        # Scoring must never block publication, so a failure only warns.
+        run: python score.py || echo "::warning::scoring step failed — predictions were still published"
+
+      - name: Commit predictions and scores to repository
         uses: EndBug/add-and-commit@v9
         with:
-          add: "predictions.json predictions/"
+          add: "predictions.json predictions/ scores/ scorecard.json"
           message: "Update predictions.json [skip ci]"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
