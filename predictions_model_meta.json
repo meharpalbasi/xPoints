@@ -1,6 +1,6 @@
 {
-  "model_version": "xpoints-tweedie-v1",
-  "trained_at": "2026-09-02T11:35:18Z",
+  "model_version": "xpoints-two-stage-blend-v2",
+  "trained_at": "2026-09-02T12:23:21Z",
   "target_gameweek": 3,
   "seasons": [
     "2025-26",
@@ -96,5 +96,6 @@
     "random_state": 0,
     "n_jobs": 4
   },
-  "harness": "backtests/2025-26.json (walk-forward GW8-38: xgb_tweedie MAE 0.946 all, starter Spearman 0.082)"
+  "design": "P(60+) x (0.5 * monotone-price Tweedie head trained on starters + 0.5 * price-implied expectation)",
+  "harness": "backtests/2025-26_blend.json (walk-forward GW8-38: two_stage_blend MAE 0.920 all, starter p@20 0.173, captain regret 10.71 \u2014 best of all candidates)"
 }
