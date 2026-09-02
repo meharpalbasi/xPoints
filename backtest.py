@@ -22,7 +22,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
-from xgboost import XGBRegressor
+from xgboost import XGBClassifier, XGBRegressor
 
 from metrics import captain_regret, mae, mean, precision_at_k, spearman, stdev
 
@@ -215,12 +215,27 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
                 model.fit(Xf[tr], y[tr]); preds[name] = model.predict(Xf[te])
         opp = candidates()["xgb_tweedie"]()
         opp.fit(Xo[tr], np.clip(y[tr], 0, None)); preds["xgb_tweedie_opp"] = opp.predict(Xo[te])
+        # Two-stage: P(60+ minutes) x E[points | 60+], each learned on the rows
+        # where it is identifiable. The conditional head never sees non-starters,
+        # so it learns quality-among-starters instead of who-plays.
+        started = minutes[tr] >= 60
+        p60 = XGBClassifier(n_estimators=300, max_depth=4, learning_rate=0.05, subsample=0.8,
+                            colsample_bytree=0.8, random_state=0, n_jobs=4, eval_metric="logloss")
+        p60.fit(Xf[tr], started.astype(int))
+        cond = XGBRegressor(objective="reg:tweedie", tweedie_variance_power=1.3, n_estimators=300, max_depth=4,
+                            learning_rate=0.05, subsample=0.8, colsample_bytree=0.8, random_state=0, n_jobs=4)
+        cond.fit(Xf[tr][started], np.clip(y[tr][started], 0, None))
+        prob = p60.predict_proba(Xf[te])[:, 1]
+        preds["p60"] = prob                                   # rank-only: who plays
+        preds["cond_start"] = cond.predict(Xf[te])            # E[points | starts]
+        preds["two_stage"] = prob * preds["cond_start"]       # the all-player projection
         folds.append({"gw": g, "n_train": int(tr.sum()), **score_fold(preds, y[te], minutes[te])})
         print(f"GW{g:2d} train={tr.sum():5d} test={te.sum():3d} | starters ρ: "
               + " ".join(f"{m}={folds[-1]['starters'][m].get('spearman', float('nan')):.3f}"
                          for m in ("last5_mean", "price", "ridge", "xgb_mse", "xgb_tweedie")))
 
-    models = ["zero", "career_mean", "last5_mean", "price", "ridge", "xgb_mse", "xgb_tweedie", "xgb_tweedie_opp"]
+    models = ["zero", "career_mean", "last5_mean", "price", "ridge", "xgb_mse", "xgb_tweedie", "xgb_tweedie_opp",
+              "p60", "cond_start", "two_stage"]
     summary = {}
     for pop in POPULATIONS:
         summary[pop] = {}
@@ -241,13 +256,21 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
     for ref in ("xgb_tweedie", "price"):
         d = [f["starters"]["xgb_tweedie_opp"]["spearman"] - f["starters"][ref]["spearman"] for f in folds]
         paired_opp[f"vs_{ref}"] = {"mean_diff": round(mean(d), 4), "se": round(stdev(d) / math.sqrt(len(d)), 4)}
+    # Two-stage: does the conditional head beat price among starters, and does
+    # the product beat the single Tweedie model on the all-player ranking?
+    paired_two = {}
+    for cand, ref, pop in (("cond_start", "price", "starters"), ("cond_start", "xgb_tweedie", "starters"),
+                           ("two_stage", "xgb_tweedie", "all"), ("two_stage", "xgb_tweedie", "starters")):
+        d = [f[pop][cand]["spearman"] - f[pop][ref]["spearman"] for f in folds]
+        paired_two[f"{cand}_vs_{ref}_{pop}"] = {"mean_diff": round(mean(d), 4), "se": round(stdev(d) / math.sqrt(len(d)), 4)}
 
     result = {
         "season": "2025-26", "source": str(DATA), "first_target": first_target, "last_target": last_target,
         "n_features": len(cols), "features": cols, "runtime_s": round(time.time() - t0, 1),
         "populations": {"all": "every player with a row at g", "played": "minutes > 0 at g", "starters": "minutes >= 60 at g"},
         "summary": summary, "paired_vs_xgb_mse_starters_spearman": paired,
-        "opponent_block_starters_spearman": paired_opp, "team_features": TEAM_FEATURES, "folds": folds,
+        "opponent_block_starters_spearman": paired_opp, "two_stage_spearman": paired_two,
+        "team_features": TEAM_FEATURES, "folds": folds,
     }
     out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps(result, indent=2, allow_nan=False))
@@ -263,6 +286,7 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
           {k: f"{v['mean_diff']:+.3f} ± {v['se']:.3f}" for k, v in paired.items()})
     print("opponent block (xgb_tweedie_opp) starter Spearman:",
           {k: f"{v['mean_diff']:+.3f} ± {v['se']:.3f}" for k, v in paired_opp.items()})
+    print("two-stage:", {k: f"{v['mean_diff']:+.3f} ± {v['se']:.3f}" for k, v in paired_two.items()})
     return result
 
 
