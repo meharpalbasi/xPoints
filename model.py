@@ -21,7 +21,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from xgboost import XGBRegressor
+from xgboost import XGBClassifier, XGBRegressor
 
 from backtest import STATS, build_features, load_player_gameweeks
 from baseline import (BOOTSTRAP_URL, FIXTURES_URL, POSITIONS, STATUS_MAP, archive_allowed,
@@ -31,7 +31,7 @@ from fetch_data import fetch as fetch_season
 from prediction_safety import write_predictions
 
 SEASONS = ["2025-26", "2026-27"]
-MODEL_VERSION = "xpoints-tweedie-v1"
+MODEL_VERSION = "xpoints-two-stage-blend-v2"
 SOURCE = "xpoints_model"
 PARAMS = dict(objective="reg:tweedie", tweedie_variance_power=1.3, n_estimators=300, max_depth=4,
               learning_rate=0.05, subsample=0.8, colsample_bytree=0.8, random_state=0, n_jobs=4)
@@ -84,18 +84,59 @@ def prediction_frame(bootstrap, fixtures, gw, season):
     return pd.DataFrame(rows)
 
 
+PRICE_EDGES = [0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 8.0, 9.0, 10.0, 12.0, 20.0]
+BLEND_WEIGHT = 0.5  # share of the conditional head; the rest is the price-implied expectation
+
+
+def price_expectation(train_starters, targets):
+    """Mean points of training-set STARTERS per (position, price bin) — the
+    prior FPL's pricing encodes, made explicit. Falls back to the overall
+    starter mean for bins with no history."""
+    lookup = (train_starters.assign(_b=pd.cut(train_starters["price"], PRICE_EDGES))
+              .groupby(["position_id", "_b"], observed=True)["total_points"].mean())
+    overall = float(train_starters["total_points"].mean())
+    bins = pd.cut(targets["price"], PRICE_EDGES)
+    out = np.array([lookup.get((int(p), b), np.nan) for p, b in zip(targets["position_id"], bins)], dtype=float)
+    return np.where(np.isnan(out), overall, out)
+
+
 def train_and_predict(history, pred, params=PARAMS):
-    """Fit on every row with a known target; predict the appended target rows."""
+    """Two-stage, price-blended projection (the harness winner, ablation PR #19):
+
+        xPoints = P(60+ minutes) x ( w * E[points | starts] + (1-w) * price_expectation )
+
+    Stage 1 is a classifier on every completed row. Stage 2 is a Tweedie head
+    trained ONLY on rows where the player started, monotone in price so it can
+    refine price's ordering but never invert it, blended with the as-of
+    price-implied expectation. Returns per-row components for explainability.
+    """
     frame = pd.concat([history, pred], ignore_index=True).sort_values(["code", "season_gw"]).reset_index(drop=True)
     X = build_features(frame, key="code")
+    cols = list(X.columns)
     y = frame["total_points"]
     is_train = y.notna().to_numpy()
+    started = (frame["minutes"].fillna(0).to_numpy() >= 60) & is_train
     Xf = X.to_numpy(dtype=float)
-    model = XGBRegressor(**params)
-    model.fit(Xf[is_train], np.clip(y[is_train].to_numpy(dtype=float), 0, None))
-    preds = model.predict(Xf[~is_train])
+    Xt = Xf[~is_train]
+
+    clf = XGBClassifier(n_estimators=params["n_estimators"], max_depth=params["max_depth"],
+                        learning_rate=params["learning_rate"], subsample=params["subsample"],
+                        colsample_bytree=params["colsample_bytree"], random_state=params["random_state"],
+                        n_jobs=params["n_jobs"], eval_metric="logloss")
+    clf.fit(Xf[is_train], started[is_train].astype(int))
+    p60 = clf.predict_proba(Xt)[:, 1]
+
+    mono = tuple(1 if c == "price" else 0 for c in cols)
+    reg = XGBRegressor(**params, monotone_constraints=mono)
+    reg.fit(Xf[started], np.clip(y[started].to_numpy(dtype=float), 0, None))
+    cond = np.clip(reg.predict(Xt), 0, None)
+
     targets = frame.loc[~is_train].reset_index(drop=True)
-    return targets, preds, list(X.columns), int(is_train.sum())
+    pexp = price_expectation(frame.loc[started], targets)
+    blend = BLEND_WEIGHT * cond + (1 - BLEND_WEIGHT) * pexp
+    preds = p60 * blend
+    components = {"p_start60": p60, "xp_if_start": blend, "cond_head": cond, "price_expect": pexp}
+    return targets, preds, cols, int(is_train.sum()), components
 
 
 def apply_availability(xp, status, chance, fixture_count):
@@ -113,11 +154,12 @@ def apply_availability(xp, status, chance, fixture_count):
     return xp
 
 
-def build_rows(bootstrap, targets, preds, gw, generated_at, season_text):
+def build_rows(bootstrap, targets, preds, gw, generated_at, season_text, components=None):
     teams = {t["id"]: t for t in bootstrap["teams"]}
     players = {p["id"]: p for p in bootstrap["elements"]}
+    components = components or {}
     rows = []
-    for (_, t), raw in zip(targets.iterrows(), preds):
+    for i, ((_, t), raw) in enumerate(zip(targets.iterrows(), preds)):
         p = players[int(t["element"])]
         raw = float(max(raw, 0.0))
         xp = apply_availability(raw, p.get("status"), p.get("chance_of_playing_next_round"), int(t["fixture_count"]))
@@ -136,6 +178,7 @@ def build_rows(bootstrap, targets, preds, gw, generated_at, season_text):
             "home_proportion": round(float(t["home_share"]), 2),
             "generated_at": generated_at, "season": season_text, "gameweek": gw,
             "source": SOURCE, "model_version": MODEL_VERSION, "ordering": "model_desc,price_desc",
+            **{k: round(float(v[i]), 4) for k, v in components.items()},
         })
     rows.sort(key=lambda r: (-r["xPoints"], -(r["now_cost"] or 0), r["player_id"]))
     return rows
@@ -160,8 +203,8 @@ def main():
 
     history = assemble_history([load_season(s) for s in SEASONS])
     pred = prediction_frame(bootstrap, fixtures, gw, current)
-    targets, preds, features, n_train = train_and_predict(history, pred)
-    rows = build_rows(bootstrap, targets, preds, gw, generated_at, season_text)
+    targets, preds, features, n_train, components = train_and_predict(history, pred)
+    rows = build_rows(bootstrap, targets, preds, gw, generated_at, season_text, components)
 
     expected_ids = [p["id"] for p in bootstrap["elements"] if p.get("element_type") in POSITIONS]
     warnings = write_predictions(OUT_PATH, rows, expected_ids, gw)
@@ -169,7 +212,9 @@ def main():
         "model_version": MODEL_VERSION, "trained_at": generated_at, "target_gameweek": gw,
         "seasons": SEASONS, "training_rows": n_train, "n_features": len(features),
         "features": features, "params": PARAMS,
-        "harness": "backtests/2025-26.json (walk-forward GW8-38: xgb_tweedie MAE 0.946 all, starter Spearman 0.082)",
+        "design": "P(60+) x (0.5 * monotone-price Tweedie head trained on starters + 0.5 * price-implied expectation)",
+        "harness": "backtests/2025-26_blend.json (walk-forward GW8-38: two_stage_blend MAE 0.920 all, "
+                   "starter p@20 0.173, captain regret 10.71 — best of all candidates)",
     }, indent=2))
 
     if archive_allowed(dt.datetime.now(dt.timezone.utc), deadline):
