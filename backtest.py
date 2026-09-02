@@ -54,27 +54,31 @@ def load_player_gameweeks(path=DATA):
     return pg.sort_values(["element", "GW"]).reset_index(drop=True)
 
 
-def build_features(pg):
+def build_features(pg, key="element"):
     """As-of features: for a row at GW g, everything derives from GW < g.
 
-    shift(1) then roll on the per-player GW-sorted frame guarantees the
+    shift(1) then roll on the per-player, order-sorted frame guarantees the
     target gameweek never leaks into its own features. Deadline-known
     context (price, fixture count, home share, position) is used as-is.
+
+    `key` is the player identity column: "element" within one season, or a
+    stable player code when the frame spans seasons (the frame must already
+    be sorted by key, then by a season-aware gameweek order).
     """
-    g = pg.groupby("element")
+    g = pg.groupby(key)
     feats = pd.DataFrame(index=pg.index)
     for stat in STATS:
         lagged = g[stat].shift(1)
         for w in WINDOWS:
-            feats[f"{stat}_r{w}"] = lagged.groupby(pg["element"]).rolling(w, min_periods=1).mean() \
+            feats[f"{stat}_r{w}"] = lagged.groupby(pg[key]).rolling(w, min_periods=1).mean() \
                 .reset_index(level=0, drop=True)
-        feats[f"{stat}_std"] = lagged.groupby(pg["element"]).expanding().mean().reset_index(level=0, drop=True)
+        feats[f"{stat}_std"] = lagged.groupby(pg[key]).expanding().mean().reset_index(level=0, drop=True)
     # Exposure-adjusted rates through the previous gameweek
-    mins_cum = g["minutes"].shift(1).groupby(pg["element"]).cumsum()
+    mins_cum = g["minutes"].shift(1).groupby(pg[key]).cumsum()
     for stat in ("expected_goals", "expected_assists", "defensive_contribution", "bps", "total_points"):
-        cum = g[stat].shift(1).groupby(pg["element"]).cumsum()
+        cum = g[stat].shift(1).groupby(pg[key]).cumsum()
         feats[f"{stat}_per90"] = np.where(mins_cum >= 90, cum / mins_cum * 90, np.nan)
-    feats["games_played_std"] = g["minutes"].shift(1).groupby(pg["element"]).cumcount()
+    feats["games_played_std"] = g["minutes"].shift(1).groupby(pg[key]).cumcount()
     feats["played_last_gw"] = (g["minutes"].shift(1) > 0).astype(float)
     feats["started_last_gw"] = (g["starts"].shift(1) > 0).astype(float)
     # Deadline-known context
