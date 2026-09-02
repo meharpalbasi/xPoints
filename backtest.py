@@ -148,6 +148,38 @@ def build_features(pg, key="element"):
     return feats
 
 
+PRIOR_FEATURES = ["prior_xg_per90", "prior_xa_per90", "prior_pts_per90", "prior_minutes_share",
+                  "prior_starts_rate", "prior_dc_per90"]
+
+
+def load_prior_features(prev_season, cur_season, min_minutes=450):
+    """Previous-season quality priors per player, joined on stable code.
+
+    Per-90 rates are comparable across the DEFCON rule change even though raw
+    total_points are not; points per 90 is still supplied and the model
+    decides. Players below min_minutes last season get NaN (tree-friendly).
+    """
+    prev = pd.read_csv(f"data/merged_gw_{prev_season}.csv")
+    prev_codes = pd.read_csv(f"data/players_raw_{prev_season}.csv", usecols=["id", "code"]).rename(columns={"id": "element"})
+    prev = prev.merge(prev_codes, on="element", how="inner")
+    has_dc = "defensive_contribution" in prev.columns  # absent before 2025/26
+    for c in ("minutes", "expected_goals", "expected_assists", "total_points", "starts", "defensive_contribution"):
+        prev[c] = pd.to_numeric(prev[c], errors="coerce").fillna(0.0) if c in prev.columns else 0.0
+    agg = prev.groupby("code").agg(minutes=("minutes", "sum"), xg=("expected_goals", "sum"),
+                                   xa=("expected_assists", "sum"), pts=("total_points", "sum"),
+                                   starts=("starts", "sum"), dc=("defensive_contribution", "sum"))
+    ok = agg["minutes"] >= min_minutes
+    out = pd.DataFrame(index=agg.index)
+    out["prior_xg_per90"] = np.where(ok, agg["xg"] / agg["minutes"] * 90, np.nan)
+    out["prior_xa_per90"] = np.where(ok, agg["xa"] / agg["minutes"] * 90, np.nan)
+    out["prior_pts_per90"] = np.where(ok, agg["pts"] / agg["minutes"] * 90, np.nan)
+    out["prior_dc_per90"] = np.where(ok & has_dc, agg["dc"] / agg["minutes"] * 90, np.nan)
+    out["prior_minutes_share"] = agg["minutes"] / (38 * 90)
+    out["prior_starts_rate"] = agg["starts"] / 38
+    cur_codes = pd.read_csv(f"data/players_raw_{cur_season}.csv", usecols=["id", "code"]).rename(columns={"id": "element"})
+    return cur_codes.merge(out, left_on="code", right_index=True, how="left").drop(columns=["code"])
+
+
 def candidates(seed=0):
     return {
         "ridge": lambda: Ridge(alpha=10.0),
@@ -192,6 +224,14 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
     Xz = np.nan_to_num(Xf, nan=0.0)  # ridge cannot take NaN; trees can
     # Variant matrix: base features + own/opponent team form (as-of, deadline-known)
     Xo = np.hstack([Xf, pg[TEAM_FEATURES].to_numpy(dtype=float)])
+    # Variant matrix: base features + previous-season quality priors (joined on player code)
+    priors = pg[["element"]].merge(load_prior_features("2024-25", "2025-26"), on="element", how="left")
+    Xp = np.hstack([Xf, priors[PRIOR_FEATURES].to_numpy(dtype=float)])
+    # Monotone-in-price: the model may refine price's ordering but never undo it
+    mono = tuple(1 if c == "price" else 0 for c in cols)
+    mono_p = mono + (0,) * len(PRIOR_FEATURES)
+    tw = dict(objective="reg:tweedie", tweedie_variance_power=1.3, n_estimators=300, max_depth=4,
+              learning_rate=0.05, subsample=0.8, colsample_bytree=0.8, random_state=0, n_jobs=4)
 
     folds = []
     t0 = time.time()
@@ -229,13 +269,24 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
         preds["p60"] = prob                                   # rank-only: who plays
         preds["cond_start"] = cond.predict(Xf[te])            # E[points | starts]
         preds["two_stage"] = prob * preds["cond_start"]       # the all-player projection
+        # Priors and monotone-price variants of the conditional head
+        yt = np.clip(y[tr][started], 0, None)
+        c_prior = XGBRegressor(**tw).fit(Xp[tr][started], yt)
+        c_mono = XGBRegressor(**tw, monotone_constraints=mono).fit(Xf[tr][started], yt)
+        c_both = XGBRegressor(**tw, monotone_constraints=mono_p).fit(Xp[tr][started], yt)
+        preds["cond_prior"] = c_prior.predict(Xp[te])
+        preds["cond_mono"] = c_mono.predict(Xf[te])
+        preds["cond_prior_mono"] = c_both.predict(Xp[te])
+        preds["two_stage_prior_mono"] = prob * preds["cond_prior_mono"]
+        preds["xgb_tweedie_prior"] = XGBRegressor(**tw).fit(Xp[tr], np.clip(y[tr], 0, None)).predict(Xp[te])
         folds.append({"gw": g, "n_train": int(tr.sum()), **score_fold(preds, y[te], minutes[te])})
         print(f"GW{g:2d} train={tr.sum():5d} test={te.sum():3d} | starters ρ: "
               + " ".join(f"{m}={folds[-1]['starters'][m].get('spearman', float('nan')):.3f}"
                          for m in ("last5_mean", "price", "ridge", "xgb_mse", "xgb_tweedie")))
 
     models = ["zero", "career_mean", "last5_mean", "price", "ridge", "xgb_mse", "xgb_tweedie", "xgb_tweedie_opp",
-              "p60", "cond_start", "two_stage"]
+              "xgb_tweedie_prior", "p60", "cond_start", "cond_prior", "cond_mono", "cond_prior_mono",
+              "two_stage", "two_stage_prior_mono"]
     summary = {}
     for pop in POPULATIONS:
         summary[pop] = {}
@@ -287,6 +338,15 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
     print("opponent block (xgb_tweedie_opp) starter Spearman:",
           {k: f"{v['mean_diff']:+.3f} ± {v['se']:.3f}" for k, v in paired_opp.items()})
     print("two-stage:", {k: f"{v['mean_diff']:+.3f} ± {v['se']:.3f}" for k, v in paired_two.items()})
+    paired_prior = {}
+    for cand in ("cond_prior", "cond_mono", "cond_prior_mono", "xgb_tweedie_prior"):
+        d = [f["starters"][cand]["spearman"] - f["starters"]["price"]["spearman"] for f in folds]
+        paired_prior[f"{cand}_vs_price_starters"] = {"mean_diff": round(mean(d), 4), "se": round(stdev(d) / math.sqrt(len(d)), 4)}
+    d = [f["all"]["two_stage_prior_mono"]["mae"] - f["all"]["two_stage"]["mae"] for f in folds]
+    paired_prior["two_stage_prior_mono_vs_two_stage_mae_all"] = {"mean_diff": round(mean(d), 4), "se": round(stdev(d) / math.sqrt(len(d)), 4)}
+    result["priors_and_monotone"] = paired_prior
+    out.write_text(json.dumps(result, indent=2, allow_nan=False))
+    print("priors / monotone price:", {k: f"{v['mean_diff']:+.3f} ± {v['se']:.3f}" for k, v in paired_prior.items()})
     return result
 
 
