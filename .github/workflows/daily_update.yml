@@ -86,6 +86,13 @@ jobs:
         # stays frozen so predictions can be scored against actual points.
         run: python baseline.py --archive-only
 
+      - name: Shadow model (never blocks publication)
+        # Trains the harness pipeline on 2025/26 + this season and predicts the
+        # next gameweek into predictions_model.json + predictions/gw{N}_model.json.
+        # Graded by score.py against ep_next on identical rows; the clients keep
+        # reading ep_next until the scorecard says the model wins.
+        run: python model.py || echo "::warning::shadow model failed — ep_next baseline unaffected"
+
       - name: Score finished gameweeks
         # Grades each archived pre-deadline snapshot against official results
         # once FPL marks the event data_checked (bonus and DEFCON settled).
@@ -96,7 +103,7 @@ jobs:
       - name: Commit predictions and scores to repository
         uses: EndBug/add-and-commit@v9
         with:
-          add: "predictions.json predictions/ scores/ scorecard.json"
+          add: "predictions.json predictions_model.json predictions_model_meta.json predictions/ scores/ scorecard.json"
           message: "Update predictions.json [skip ci]"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
