@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T11:00:15Z",
+  "generated_at": "2026-09-02T11:35:26Z",
   "method": "Each archived pre-deadline snapshot is joined to official FPL results (event/{gw}/live) once the event is data_checked. Metrics are reported per named population; ties in rankings are broken at random and averaged. Files under scores/ are immutable once written.",
   "populations": {
     "all": "every player in the archive",
@@ -9,6 +9,11 @@
   "summary": {
     "scored_gameweeks": 2,
     "mean_ep_next_spearman_starters": 0.1295,
+    "model_vs_ep_next_starter_spearman": {
+      "gameweeks": 0,
+      "mean_diff": null,
+      "sd_diff": null
+    },
     "mean_ep_next_mae_all": 1.5328,
     "mean_zero_mae_all": 1.5215,
     "power": {
@@ -39,6 +44,11 @@
       ],
       "ep_next_precision_at_20_starters": 0.1058,
       "ep_next_captain_regret": 13.4,
+      "model_mae_all": null,
+      "model_spearman_starters": null,
+      "model_spearman_starters_ci95": null,
+      "model_precision_at_20_starters": null,
+      "model_captain_regret": null,
       "price_spearman_starters": null,
       "blend_spearman_starters": null,
       "blend_precision_at_20_starters": null
@@ -61,6 +71,11 @@
       ],
       "ep_next_precision_at_20_starters": 0.315,
       "ep_next_captain_regret": 9.84,
+      "model_mae_all": null,
+      "model_spearman_starters": null,
+      "model_spearman_starters_ci95": null,
+      "model_precision_at_20_starters": null,
+      "model_captain_regret": null,
       "price_spearman_starters": null,
       "blend_spearman_starters": null,
       "blend_precision_at_20_starters": null
