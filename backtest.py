@@ -278,6 +278,22 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
         preds["cond_mono"] = c_mono.predict(Xf[te])
         preds["cond_prior_mono"] = c_both.predict(Xp[te])
         preds["two_stage_prior_mono"] = prob * preds["cond_prior_mono"]
+        # Price-implied expectation: as-of mean points of STARTERS per (position, price bin),
+        # from the training rows only. The prior FPL's pricing encodes, made explicit.
+        edges = [0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 8.0, 9.0, 10.0, 12.0, 20.0]
+        st_tr = pg.loc[tr][minutes[tr] >= 60]
+        lookup = st_tr.assign(_b=pd.cut(st_tr["price"], edges)).groupby(["position_id", "_b"], observed=True)["total_points"].mean()
+        overall = float(st_tr["total_points"].mean())
+        te_rows = pg.loc[te]
+        te_b = pd.cut(te_rows["price"], edges)
+        price_expect = np.array([lookup.get((int(p_), b), np.nan) for p_, b in zip(te_rows["position_id"], te_b)], dtype=float)
+        price_expect = np.where(np.isnan(price_expect), overall, price_expect)
+        preds["price_expect"] = price_expect
+        preds["cond_blend"] = 0.5 * preds["cond_mono"] + 0.5 * price_expect       # value blend
+        preds["two_stage_blend"] = prob * preds["cond_blend"]                       # all-player projection
+        from metrics import average_ranks
+        r_c = np.array(average_ranks(list(preds["cond_mono"]))); r_p = np.array(average_ranks(list(preds["price"])))
+        preds["rank_blend"] = -(0.5 * r_c + 0.5 * r_p)                              # rank blend (starters ranking)
         preds["xgb_tweedie_prior"] = XGBRegressor(**tw).fit(Xp[tr], np.clip(y[tr], 0, None)).predict(Xp[te])
         folds.append({"gw": g, "n_train": int(tr.sum()), **score_fold(preds, y[te], minutes[te])})
         print(f"GW{g:2d} train={tr.sum():5d} test={te.sum():3d} | starters ρ: "
@@ -286,7 +302,7 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
 
     models = ["zero", "career_mean", "last5_mean", "price", "ridge", "xgb_mse", "xgb_tweedie", "xgb_tweedie_opp",
               "xgb_tweedie_prior", "p60", "cond_start", "cond_prior", "cond_mono", "cond_prior_mono",
-              "two_stage", "two_stage_prior_mono"]
+              "two_stage", "two_stage_prior_mono", "price_expect", "cond_blend", "rank_blend", "two_stage_blend"]
     summary = {}
     for pop in POPULATIONS:
         summary[pop] = {}
@@ -345,6 +361,15 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
     d = [f["all"]["two_stage_prior_mono"]["mae"] - f["all"]["two_stage"]["mae"] for f in folds]
     paired_prior["two_stage_prior_mono_vs_two_stage_mae_all"] = {"mean_diff": round(mean(d), 4), "se": round(stdev(d) / math.sqrt(len(d)), 4)}
     result["priors_and_monotone"] = paired_prior
+    paired_blend = {}
+    for cand in ("price_expect", "cond_blend", "rank_blend"):
+        d = [f["starters"][cand]["spearman"] - f["starters"]["price"]["spearman"] for f in folds]
+        paired_blend[f"{cand}_vs_price_starters"] = {"mean_diff": round(mean(d), 4), "se": round(stdev(d) / math.sqrt(len(d)), 4)}
+    for key, pop in (("mae", "all"), ("spearman", "all"), ("spearman", "starters"), ("p_at_20", "starters")):
+        d = [f[pop]["two_stage_blend"][key] - f[pop]["two_stage"][key] for f in folds]
+        paired_blend[f"two_stage_blend_vs_two_stage_{key}_{pop}"] = {"mean_diff": round(mean(d), 4), "se": round(stdev(d) / math.sqrt(len(d)), 4)}
+    result["price_blend"] = paired_blend
+    print("price blend:", {k: f"{v['mean_diff']:+.3f} ± {v['se']:.3f}" for k, v in paired_blend.items()})
     out.write_text(json.dumps(result, indent=2, allow_nan=False))
     print("priors / monotone price:", {k: f"{v['mean_diff']:+.3f} ± {v['se']:.3f}" for k, v in paired_prior.items()})
     return result
