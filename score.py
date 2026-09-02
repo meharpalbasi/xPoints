@@ -73,6 +73,8 @@ def checked_events(events):
 def archived_gameweeks():
     out = {}
     for path in ARCHIVE_DIR.glob("gw*.json"):
+        if path.stem.endswith("_model"):
+            continue
         try:
             out[int(path.stem[2:])] = path
         except ValueError:
@@ -116,11 +118,19 @@ def _clean(x):
     return None if (isinstance(x, float) and math.isnan(x)) else round(x, 4)
 
 
-def score_gameweek(pred_rows, live, seed=0):
-    """Pure: archived prediction rows + live stats -> metrics dict, joined rows."""
+def score_gameweek(pred_rows, live, seed=0, extra=None):
+    """Pure: archived prediction rows + live stats -> metrics dict, joined rows.
+
+    `extra` maps a predictor name to {player_id: value} for other archived
+    files graded on the same rows — e.g. the shadow model's gw{N}_model.json.
+    """
     joined, missing = join_rows(pred_rows, live)
     has_price = bool(joined) and all(j["now_cost"] is not None for j in joined)
     has_blend = bool(joined) and all(j["blend_rank"] is not None for j in joined)
+    extra = extra or {}
+    for name, values in extra.items():
+        for j in joined:
+            j[name] = float(values.get(j["player_id"], 0.0))
 
     def predictors(rows):
         p = {
@@ -131,6 +141,8 @@ def score_gameweek(pred_rows, live, seed=0):
             p["price"] = [float(j["now_cost"]) for j in rows]
         if has_blend:
             p["blend"] = [-float(j["blend_rank"]) for j in rows]  # lower rank = better
+        for name in extra:
+            p[name] = [j[name] for j in rows]
         return p
 
     result = {
@@ -146,7 +158,7 @@ def score_gameweek(pred_rows, live, seed=0):
         pop_metrics = {}
         for name, pred in predictors(rows).items():
             m = {}
-            if name in ("ep_next", "zero") and rows:
+            if (name in ("ep_next", "zero") or name in extra) and rows:
                 m["mae"] = _clean(mae(pred, actual))
                 m["rmse"] = _clean(rmse(pred, actual))
             if name != "zero" and len(rows) >= 3:
@@ -224,17 +236,29 @@ def build_scorecard(scores):
             "ep_next_spearman_starters_ci95": get(s, "starters", "ep_next", "spearman_ci95"),
             "ep_next_precision_at_20_starters": get(s, "starters", "ep_next", "precision_at_20"),
             "ep_next_captain_regret": get(s, "all", "ep_next", "captain_regret"),
+            "model_mae_all": get(s, "all", "model", "mae"),
+            "model_spearman_starters": get(s, "starters", "model", "spearman"),
+            "model_spearman_starters_ci95": get(s, "starters", "model", "spearman_ci95"),
+            "model_precision_at_20_starters": get(s, "starters", "model", "precision_at_20"),
+            "model_captain_regret": get(s, "all", "model", "captain_regret"),
             "price_spearman_starters": get(s, "starters", "price", "spearman"),
             "blend_spearman_starters": get(s, "starters", "blend", "spearman"),
             "blend_precision_at_20_starters": get(s, "starters", "blend", "precision_at_20"),
         })
 
     starter_sp = [r["ep_next_spearman_starters"] for r in rows if r["ep_next_spearman_starters"] is not None]
+    paired = [(r["model_spearman_starters"] - r["ep_next_spearman_starters"]) for r in rows
+              if r["model_spearman_starters"] is not None and r["ep_next_spearman_starters"] is not None]
     observed_sd = stdev(starter_sp) if len(starter_sp) >= 3 else float("nan")
     sd_used = observed_sd if not math.isnan(observed_sd) else PRIOR_STARTER_SPEARMAN_SD
     summary = {
         "scored_gameweeks": len(rows),
         "mean_ep_next_spearman_starters": _clean(mean(starter_sp)) if starter_sp else None,
+        "model_vs_ep_next_starter_spearman": {
+            "gameweeks": len(paired),
+            "mean_diff": _clean(mean(paired)) if paired else None,
+            "sd_diff": _clean(stdev(paired)) if len(paired) >= 2 else None,
+        },
         "mean_ep_next_mae_all": _clean(mean([r["ep_next_mae_all"] for r in rows if r["ep_next_mae_all"] is not None])) if rows else None,
         "mean_zero_mae_all": _clean(mean([r["zero_mae_all"] for r in rows if r["zero_mae_all"] is not None])) if rows else None,
         "power": {
@@ -283,7 +307,11 @@ def main():
             continue
         pred_rows = json.loads(archives[gw].read_text())
         live = live_stats(gw)
-        result, joined = score_gameweek(pred_rows, live)
+        extra = {}
+        model_path = ARCHIVE_DIR / f"gw{gw}_model.json"
+        if model_path.exists():
+            extra["model"] = {int(r["player_id"]): float(r["xPoints"]) for r in json.loads(model_path.read_text())}
+        result, joined = score_gameweek(pred_rows, live, extra=extra)
         payload = write_gameweek(gw, checked[gw], pred_rows, result, joined)
         ep = payload["metrics"]
         print(f"✅ GW{gw}: n={payload['n']} | ep_next MAE(all) {ep['all']['ep_next'].get('mae')} "
