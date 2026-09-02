@@ -12,7 +12,7 @@ def season_rows(season, code, element, points):
     rows = []
     for gw, pts in enumerate(points, start=1):
         r = {"element": element, "code": code, "GW": gw, "season": season, "season_gw": season * 100 + gw,
-             "total_points": pts, "minutes": 90, "value": 50, "price": 5.0, "position": "MID",
+             "total_points": pts, "minutes": 90 if gw % 3 else 20, "value": 50, "price": 5.0, "position": "MID",
              "position_id": 3, "team": 1, "name": f"p{code}", "fixture_count": 1, "home_share": 1.0}
         for s in ("expected_goals", "expected_assists", "bps", "bonus", "defensive_contribution", "starts",
                   "goals_scored", "assists", "clean_sheets", "saves", "expected_goals_conceded"):
@@ -48,12 +48,16 @@ class CrossSeasonTests(unittest.TestCase):
         pred = pd.concat([season_rows(2026, c, c + 500, [np.nan]) for c in range(1, 25)], ignore_index=True)
         for s in ("total_points", "minutes", "expected_goals"):
             pred[s] = np.nan
-        targets, preds, features, n_train = train_and_predict(
+        targets, preds, features, n_train, comp = train_and_predict(
             hist, pred, params=dict(objective="reg:tweedie", tweedie_variance_power=1.3, n_estimators=20,
-                                    max_depth=2, learning_rate=0.1, random_state=0, n_jobs=1))
+                                    max_depth=2, learning_rate=0.1, subsample=1.0, colsample_bytree=1.0,
+                                    random_state=0, n_jobs=1))
         self.assertEqual(len(preds), 24)
         self.assertEqual(n_train, 24 * 12)
         self.assertTrue((preds >= 0).all())                                  # Tweedie: non-negative
+        self.assertTrue(((comp["p_start60"] >= 0) & (comp["p_start60"] <= 1)).all())
+        np.testing.assert_allclose(preds, comp["p_start60"] * comp["xp_if_start"])   # the product, exactly
+        self.assertEqual(set(comp), {"p_start60", "xp_if_start", "cond_head", "price_expect"})
 
 
 @unittest.skipUnless(HAS_ML_DEPS, "model deps not installed")
