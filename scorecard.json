@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T23:57:04Z",
+  "generated_at": "2026-09-03T03:56:11Z",
   "method": "Each archived pre-deadline snapshot is joined to official FPL results (event/{gw}/live) once the event is data_checked. Metrics are reported per named population; ties in rankings are broken at random and averaged. Files under scores/ are immutable once written.",
   "populations": {
     "all": "every player in the archive",
