@@ -5,7 +5,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-06T14:03:13.076Z",
+ "site_generated_at": "2026-09-06T16:51:42.774Z",
  "rows": [
   {
    "player_id": 1,
@@ -7229,13 +7229,13 @@
    "web_name": "Bruno G.",
    "team": 1,
    "element_type": 3,
-   "status": "d",
-   "xMins": 14.1,
-   "pStart": 0.09,
-   "p60": 0.09,
-   "pAppear": 0.42,
+   "status": "a",
+   "xMins": 18.8,
+   "pStart": 0.13,
+   "p60": 0.13,
+   "pAppear": 0.57,
    "fixtures": 1,
-   "availability": 0.75,
+   "availability": 1.0,
    "evidence": 2,
    "role": "bench"
   },
@@ -10456,6 +10456,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-06T14:03:13Z",
+ "archived_at": "2026-09-06T16:51:42Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
