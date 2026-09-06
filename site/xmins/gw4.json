@@ -5,7 +5,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-06T16:51:42.774Z",
+ "site_generated_at": "2026-09-06T18:58:38.412Z",
  "rows": [
   {
    "player_id": 1,
@@ -3821,13 +3821,13 @@
    "web_name": "Garner",
    "team": 9,
    "element_type": 3,
-   "status": "a",
-   "xMins": 42.2,
-   "pStart": 0.54,
-   "p60": 0.53,
-   "pAppear": 0.87,
+   "status": "d",
+   "xMins": 31.7,
+   "pStart": 0.41,
+   "p60": 0.4,
+   "pAppear": 0.65,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.75,
    "evidence": 2,
    "role": "rotation"
   },
@@ -10454,8 +10454,24 @@
    "availability": 1.0,
    "evidence": 2,
    "role": "fringe"
+  },
+  {
+   "player_id": 654,
+   "player_code": 629068,
+   "web_name": "Graham",
+   "team": 9,
+   "element_type": 3,
+   "status": "a",
+   "xMins": 11.8,
+   "pStart": 0.13,
+   "p60": 0.11,
+   "pAppear": 0.2,
+   "fixtures": 1,
+   "availability": 1.0,
+   "evidence": 2,
+   "role": "fringe"
   }
  ],
- "archived_at": "2026-09-06T16:51:42Z",
+ "archived_at": "2026-09-06T18:58:38Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
