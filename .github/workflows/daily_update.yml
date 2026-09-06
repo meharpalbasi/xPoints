@@ -86,6 +86,13 @@ jobs:
         # stays frozen so predictions can be scored against actual points.
         run: python baseline.py --archive-only
 
+      - name: Archive the site's projections and expected minutes
+        # Freezes fplanaly.st's projections table and xMins table for the next
+        # deadline under site/, the same way predictions/gw{N}.json freezes the
+        # feed, so score_site.py can grade them once the gameweek is final.
+        # Never blocks publication.
+        run: python site_snapshot.py || echo "::warning::site snapshot failed; the feed was still published"
+
       - name: Shadow model (never blocks publication)
         # Trains the harness pipeline on 2025/26 + this season and predicts the
         # next gameweek into predictions_model.json + predictions/gw{N}_model.json.
@@ -100,10 +107,16 @@ jobs:
         # Scoring must never block publication, so a failure only warns.
         run: python score.py || echo "::warning::scoring step failed — predictions were still published"
 
+      - name: Grade the site's frozen projections and expected minutes
+        # Every frozen site projection for a final gameweek is scored by horizon
+        # week, and P(60+) with a Brier score. Entries under scores/site/ never
+        # change once written. Never blocks publication.
+        run: python score_site.py || echo "::warning::site grading failed; predictions were still published"
+
       - name: Commit predictions and scores to repository
         uses: EndBug/add-and-commit@v9
         with:
-          add: "predictions.json predictions_model.json predictions_model_meta.json predictions/ scores/ scorecard.json"
+          add: "predictions.json predictions_model.json predictions_model_meta.json predictions/ scores/ scorecard.json site/ site_scorecard.json"
           message: "Update predictions.json [skip ci]"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
