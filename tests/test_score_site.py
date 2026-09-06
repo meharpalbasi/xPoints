@@ -93,7 +93,7 @@ class FilesTests(unittest.TestCase):
         self.assertEqual(card["summary"]["minutes"]["latest_gameweek"], 4)
         self.assertEqual(len(card["summary"]["minutes"]["latest_calibration"]), 1)
         self.assertEqual(len(card["gameweeks"]), 3)
-        self.assertNotIn("—", json.dumps(card))
+        self.assertNotIn("\u2014", json.dumps(card))
 
     def test_grade_scores_only_final_gameweeks_and_never_rewrites(self):
         with tempfile.TemporaryDirectory() as tmp:
