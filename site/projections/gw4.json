@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 4,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-06T21:10:02Z"
+  "generated_at": "2026-09-07T03:59:15Z"
  },
- "site_generated_at": "2026-09-06T23:40:42.791Z",
+ "site_generated_at": "2026-09-07T09:12:08.219Z",
  "rows": [
   {
    "player_id": 1,
@@ -29,7 +29,7 @@
     "4": 5.0,
     "5": 3.9,
     "6": 4.5,
-    "7": 3.8,
+    "7": 3.9,
     "8": 4.1
    }
   },
@@ -141,8 +141,8 @@
     "4": 7.3,
     "5": 5.6,
     "6": 6.2,
-    "7": 5.1,
-    "8": 5.3
+    "7": 5.2,
+    "8": 5.4
    }
   },
   {
@@ -189,7 +189,7 @@
     "4": 3.0,
     "5": 3.3,
     "6": 3.8,
-    "7": 3.3,
+    "7": 3.4,
     "8": 3.6
    }
   },
@@ -455,7 +455,7 @@
    "web_name": "Martinez",
    "team": 6,
    "element_type": 1,
-   "rate": 2.59,
+   "rate": 2.57,
    "rate_source": "feed",
    "xp": {
     "4": 1.7,
@@ -471,7 +471,7 @@
    "web_name": "M.Bizot",
    "team": 2,
    "element_type": 1,
-   "rate": 0.59,
+   "rate": 0.58,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -519,7 +519,7 @@
    "web_name": "Cash",
    "team": 2,
    "element_type": 2,
-   "rate": 2.58,
+   "rate": 2.57,
    "rate_source": "feed",
    "xp": {
     "4": 2.3,
@@ -535,7 +535,7 @@
    "web_name": "Mings",
    "team": 2,
    "element_type": 2,
-   "rate": 10.98,
+   "rate": 10.92,
    "rate_source": "feed",
    "xp": {
     "4": 2.3,
@@ -551,7 +551,7 @@
    "web_name": "Pau",
    "team": 2,
    "element_type": 2,
-   "rate": 0.79,
+   "rate": 0.78,
    "rate_source": "feed",
    "xp": {
     "4": 0.7,
@@ -583,7 +583,7 @@
    "web_name": "Maatsen",
    "team": 2,
    "element_type": 2,
-   "rate": 2.94,
+   "rate": 2.93,
    "rate_source": "feed",
    "xp": {
     "4": 2.7,
@@ -599,7 +599,7 @@
    "web_name": "Lindel\u00f6f",
    "team": 2,
    "element_type": 2,
-   "rate": 2.11,
+   "rate": 2.1,
    "rate_source": "feed",
    "xp": {
     "4": 2.0,
@@ -919,7 +919,7 @@
    "web_name": "Petrovi\u0107",
    "team": 3,
    "element_type": 1,
-   "rate": 2.35,
+   "rate": 2.34,
    "rate_source": "feed",
    "xp": {
     "4": 2.0,
@@ -967,7 +967,7 @@
    "web_name": "Hill",
    "team": 3,
    "element_type": 2,
-   "rate": 2.36,
+   "rate": 2.35,
    "rate_source": "feed",
    "xp": {
     "4": 2.0,
@@ -983,7 +983,7 @@
    "web_name": "Truffert",
    "team": 3,
    "element_type": 2,
-   "rate": 2.01,
+   "rate": 2.0,
    "rate_source": "feed",
    "xp": {
     "4": 1.7,
@@ -1031,7 +1031,7 @@
    "web_name": "Smith",
    "team": 3,
    "element_type": 2,
-   "rate": 0.83,
+   "rate": 0.82,
    "rate_source": "feed",
    "xp": {
     "4": 0.7,
@@ -1100,7 +1100,7 @@
    "xp": {
     "4": 7.0,
     "5": 6.4,
-    "6": 5.1,
+    "6": 5.2,
     "7": 5.0,
     "8": 4.2
    }
@@ -1148,7 +1148,7 @@
    "xp": {
     "4": 2.3,
     "5": 2.4,
-    "6": 2.2,
+    "6": 2.3,
     "7": 2.4,
     "8": 2.2
    }
@@ -1319,7 +1319,7 @@
    "web_name": "Kelleher",
    "team": 4,
    "element_type": 1,
-   "rate": 4.31,
+   "rate": 4.29,
    "rate_source": "feed",
    "xp": {
     "4": 3.7,
@@ -1351,12 +1351,12 @@
    "web_name": "Collins",
    "team": 4,
    "element_type": 2,
-   "rate": 3.75,
+   "rate": 3.73,
    "rate_source": "feed",
    "xp": {
     "4": 0.8,
     "5": 3.4,
-    "6": 3.5,
+    "6": 3.6,
     "7": 3.4,
     "8": 3.6
    }
@@ -1387,7 +1387,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 6.0,
-    "5": 5.7,
+    "5": 5.8,
     "6": 4.8,
     "7": 4.6,
     "8": 3.9
@@ -1399,7 +1399,7 @@
    "web_name": "Ajer",
    "team": 4,
    "element_type": 2,
-   "rate": 5.04,
+   "rate": 5.01,
    "rate_source": "feed",
    "xp": {
     "4": 4.3,
@@ -1415,7 +1415,7 @@
    "web_name": "Kayode",
    "team": 4,
    "element_type": 2,
-   "rate": 6.68,
+   "rate": 6.64,
    "rate_source": "feed",
    "xp": {
     "4": 5.3,
@@ -1431,7 +1431,7 @@
    "web_name": "Henry",
    "team": 4,
    "element_type": 2,
-   "rate": 1.87,
+   "rate": 1.86,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -1447,7 +1447,7 @@
    "web_name": "Hickey",
    "team": 4,
    "element_type": 2,
-   "rate": 4.96,
+   "rate": 4.94,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -1495,7 +1495,7 @@
    "web_name": "Schuster",
    "team": 4,
    "element_type": 2,
-   "rate": 9.65,
+   "rate": 9.6,
    "rate_source": "feed",
    "xp": {
     "4": 1.3,
@@ -1579,7 +1579,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 7.0,
-    "5": 6.5,
+    "5": 6.6,
     "6": 5.3,
     "7": 5.0,
     "8": 4.2
@@ -1799,7 +1799,7 @@
    "web_name": "Van Hecke",
    "team": 19,
    "element_type": 2,
-   "rate": 3.43,
+   "rate": 3.41,
    "rate_source": "feed",
    "xp": {
     "4": 3.3,
@@ -1851,7 +1851,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 7.0,
-    "5": 6.0,
+    "5": 5.9,
     "6": 4.8,
     "7": 4.7,
     "8": 3.7
@@ -1867,7 +1867,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 3.3,
-    "5": 3.3,
+    "5": 3.2,
     "6": 3.0,
     "7": 3.3,
     "8": 2.8
@@ -2279,7 +2279,7 @@
    "web_name": "James",
    "team": 6,
    "element_type": 2,
-   "rate": 1.08,
+   "rate": 1.07,
    "rate_source": "feed",
    "xp": {
     "4": 0.7,
@@ -2311,7 +2311,7 @@
    "web_name": "Gusto",
    "team": 6,
    "element_type": 2,
-   "rate": 1.02,
+   "rate": 1.01,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -2327,7 +2327,7 @@
    "web_name": "Fofana",
    "team": 6,
    "element_type": 2,
-   "rate": 1.82,
+   "rate": 1.81,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -2375,12 +2375,12 @@
    "web_name": "Hato",
    "team": 6,
    "element_type": 2,
-   "rate": 2.87,
+   "rate": 2.85,
    "rate_source": "feed",
    "xp": {
     "4": 2.7,
     "5": 2.1,
-    "6": 2.6,
+    "6": 2.7,
     "7": 2.5,
     "8": 3.0
    }
@@ -2391,7 +2391,7 @@
    "web_name": "Colwill",
    "team": 6,
    "element_type": 2,
-   "rate": 0.32,
+   "rate": 0.31,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -2423,7 +2423,7 @@
    "web_name": "Acheampong",
    "team": 6,
    "element_type": 2,
-   "rate": 2.61,
+   "rate": 2.59,
    "rate_source": "feed",
    "xp": {
     "4": 1.7,
@@ -2780,7 +2780,7 @@
    "xp": {
     "4": 5.0,
     "5": 4.6,
-    "6": 4.8,
+    "6": 4.9,
     "7": 4.1,
     "8": 3.7
    }
@@ -2923,7 +2923,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 1.3,
-    "5": 1.7,
+    "5": 1.8,
     "6": 2.4,
     "7": 2.4,
     "8": 2.5
@@ -3054,7 +3054,7 @@
     "5": 1.4,
     "6": 1.9,
     "7": 1.9,
-    "8": 2.3
+    "8": 2.4
    }
   },
   {
@@ -3207,7 +3207,7 @@
    "web_name": "Lacroix",
    "team": 6,
    "element_type": 2,
-   "rate": 2.89,
+   "rate": 2.87,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
@@ -3223,7 +3223,7 @@
    "web_name": "Mu\u00f1oz",
    "team": 18,
    "element_type": 2,
-   "rate": 0.78,
+   "rate": 0.77,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -3262,7 +3262,7 @@
     "5": 1.1,
     "6": 1.7,
     "7": 1.6,
-    "8": 2.4
+    "8": 2.5
    }
   },
   {
@@ -3278,7 +3278,7 @@
     "5": 4.3,
     "6": 4.5,
     "7": 3.3,
-    "8": 4.1
+    "8": 4.2
    }
   },
   {
@@ -3623,7 +3623,7 @@
    "web_name": "Pickford",
    "team": 9,
    "element_type": 1,
-   "rate": 4.01,
+   "rate": 3.99,
    "rate_source": "feed",
    "xp": {
     "4": 3.7,
@@ -3671,14 +3671,14 @@
    "web_name": "Tarkowski",
    "team": 9,
    "element_type": 2,
-   "rate": 7.63,
+   "rate": 7.58,
    "rate_source": "feed",
    "xp": {
     "4": 7.0,
     "5": 6.4,
     "6": 5.9,
     "7": 5.2,
-    "8": 4.7
+    "8": 4.6
    }
   },
   {
@@ -3687,14 +3687,14 @@
    "web_name": "Branthwaite",
    "team": 9,
    "element_type": 2,
-   "rate": 4.69,
+   "rate": 4.66,
    "rate_source": "feed",
    "xp": {
     "4": 4.3,
-    "5": 4.2,
+    "5": 4.1,
     "6": 4.1,
     "7": 3.8,
-    "8": 3.5
+    "8": 3.4
    }
   },
   {
@@ -3735,7 +3735,7 @@
    "web_name": "Mykolenko",
    "team": 9,
    "element_type": 2,
-   "rate": 4.03,
+   "rate": 4.01,
    "rate_source": "feed",
    "xp": {
     "4": 3.7,
@@ -3789,7 +3789,7 @@
     "4": 5.0,
     "5": 5.3,
     "6": 4.3,
-    "7": 4.5,
+    "7": 4.6,
     "8": 3.3
    }
   },
@@ -3847,7 +3847,7 @@
    "web_name": "Iroegbunam",
    "team": 11,
    "element_type": 3,
-   "rate": 1.94,
+   "rate": 1.93,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -3949,7 +3949,7 @@
     "4": 2.0,
     "5": 2.5,
     "6": 2.3,
-    "7": 2.6,
+    "7": 2.7,
     "8": 2.0
    }
   },
@@ -3965,7 +3965,7 @@
     "4": 2.7,
     "5": 2.8,
     "6": 2.3,
-    "7": 2.3,
+    "7": 2.4,
     "8": 1.7
    }
   },
@@ -4007,13 +4007,13 @@
    "web_name": "Leno",
    "team": 10,
    "element_type": 1,
-   "rate": 2.46,
+   "rate": 2.45,
    "rate_source": "feed",
    "xp": {
     "4": 2.0,
     "5": 2.2,
     "6": 2.4,
-    "7": 3.0,
+    "7": 3.1,
     "8": 2.8
    }
   },
@@ -4055,7 +4055,7 @@
    "web_name": "Andersen",
    "team": 10,
    "element_type": 2,
-   "rate": 1.38,
+   "rate": 1.37,
    "rate_source": "feed",
    "xp": {
     "4": 0.7,
@@ -4087,12 +4087,12 @@
    "web_name": "J.Cuenca",
    "team": 10,
    "element_type": 2,
-   "rate": 2.32,
+   "rate": 2.31,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
     "5": 1.1,
-    "6": 1.3,
+    "6": 1.2,
     "7": 1.6,
     "8": 1.5
    }
@@ -4119,7 +4119,7 @@
    "web_name": "Bassey",
    "team": 10,
    "element_type": 2,
-   "rate": 1.24,
+   "rate": 1.23,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -4135,14 +4135,14 @@
    "web_name": "Castagne",
    "team": 10,
    "element_type": 2,
-   "rate": 5.95,
+   "rate": 5.92,
    "rate_source": "feed",
    "xp": {
     "4": 4.3,
     "5": 3.9,
     "6": 3.6,
     "7": 4.2,
-    "8": 3.5
+    "8": 3.4
    }
   },
   {
@@ -4158,7 +4158,7 @@
     "5": 2.5,
     "6": 2.7,
     "7": 2.4,
-    "8": 3.0
+    "8": 3.1
    }
   },
   {
@@ -4311,7 +4311,7 @@
    "web_name": "Sessegnon",
    "team": 10,
    "element_type": 2,
-   "rate": 3.84,
+   "rate": 3.83,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -4475,8 +4475,8 @@
    "rate_source": "feed",
    "xp": {
     "4": 8.3,
-    "5": 7.7,
-    "6": 6.9,
+    "5": 7.8,
+    "6": 7.0,
     "7": 5.0,
     "8": 4.6
    }
@@ -4491,7 +4491,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 4.0,
-    "5": 3.9,
+    "5": 4.0,
     "6": 3.7,
     "7": 2.8,
     "8": 2.8
@@ -4523,8 +4523,8 @@
    "rate_source": "feed",
    "xp": {
     "4": 6.7,
-    "5": 6.4,
-    "6": 5.9,
+    "5": 6.5,
+    "6": 6.0,
     "7": 4.4,
     "8": 4.2
    }
@@ -4583,7 +4583,7 @@
    "web_name": "Belloumi",
    "team": 11,
    "element_type": 3,
-   "rate": 5.97,
+   "rate": 5.94,
    "rate_source": "feed",
    "xp": {
     "4": 4.7,
@@ -4631,7 +4631,7 @@
    "web_name": "Crooks",
    "team": 11,
    "element_type": 3,
-   "rate": 1.55,
+   "rate": 1.54,
    "rate_source": "feed",
    "xp": {
     "4": 0.5,
@@ -4647,7 +4647,7 @@
    "web_name": "Slater",
    "team": 11,
    "element_type": 3,
-   "rate": 4.52,
+   "rate": 4.5,
    "rate_source": "feed",
    "xp": {
     "4": 3.7,
@@ -4727,7 +4727,7 @@
    "web_name": "McBurnie",
    "team": 11,
    "element_type": 4,
-   "rate": 3.33,
+   "rate": 3.31,
    "rate_source": "feed",
    "xp": {
     "4": 2.7,
@@ -4878,7 +4878,7 @@
     "5": 2.5,
     "6": 2.7,
     "7": 2.4,
-    "8": 3.0
+    "8": 3.1
    }
   },
   {
@@ -4908,7 +4908,7 @@
    "xp": {
     "4": 0.7,
     "5": 1.3,
-    "6": 1.7,
+    "6": 1.8,
     "7": 1.8,
     "8": 2.5
    }
@@ -5239,7 +5239,7 @@
    "web_name": "Bijol",
    "team": 13,
    "element_type": 2,
-   "rate": 5.03,
+   "rate": 5.0,
    "rate_source": "feed",
    "xp": {
     "4": 4.0,
@@ -5287,7 +5287,7 @@
    "web_name": "Bogle",
    "team": 13,
    "element_type": 2,
-   "rate": 8.15,
+   "rate": 8.1,
    "rate_source": "feed",
    "xp": {
     "4": 7.3,
@@ -5303,7 +5303,7 @@
    "web_name": "Gudmundsson",
    "team": 13,
    "element_type": 2,
-   "rate": 4.43,
+   "rate": 4.4,
    "rate_source": "feed",
    "xp": {
     "4": 0.7,
@@ -5319,7 +5319,7 @@
    "web_name": "Justin",
    "team": 13,
    "element_type": 2,
-   "rate": 5.29,
+   "rate": 5.26,
    "rate_source": "feed",
    "xp": {
     "4": 5.3,
@@ -5351,7 +5351,7 @@
    "web_name": "Muharemovi\u0107",
    "team": 13,
    "element_type": 2,
-   "rate": 4.69,
+   "rate": 4.66,
    "rate_source": "feed",
    "xp": {
     "4": 4.7,
@@ -5607,7 +5607,7 @@
    "web_name": "A.Becker",
    "team": 14,
    "element_type": 1,
-   "rate": 3.69,
+   "rate": 3.68,
    "rate_source": "feed",
    "xp": {
     "4": 3.3,
@@ -5703,7 +5703,7 @@
    "web_name": "Virgil",
    "team": 14,
    "element_type": 2,
-   "rate": 3.37,
+   "rate": 3.36,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
@@ -5735,7 +5735,7 @@
    "web_name": "Kerkez",
    "team": 14,
    "element_type": 2,
-   "rate": 2.48,
+   "rate": 2.47,
    "rate_source": "feed",
    "xp": {
     "4": 2.0,
@@ -5799,7 +5799,7 @@
    "web_name": "Jacquet",
    "team": 14,
    "element_type": 2,
-   "rate": 3.93,
+   "rate": 3.91,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
@@ -5831,7 +5831,7 @@
    "web_name": "Tsimikas",
    "team": 14,
    "element_type": 2,
-   "rate": 1.37,
+   "rate": 1.36,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -5863,7 +5863,7 @@
    "web_name": "Wirtz",
    "team": 14,
    "element_type": 3,
-   "rate": 3.48,
+   "rate": 3.46,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
@@ -5879,7 +5879,7 @@
    "web_name": "Gakpo",
    "team": 14,
    "element_type": 3,
-   "rate": 10.65,
+   "rate": 10.59,
    "rate_source": "feed",
    "xp": {
     "4": 9.3,
@@ -5895,7 +5895,7 @@
    "web_name": "Szoboszlai",
    "team": 14,
    "element_type": 3,
-   "rate": 5.19,
+   "rate": 5.16,
    "rate_source": "feed",
    "xp": {
     "4": 5.0,
@@ -5911,7 +5911,7 @@
    "web_name": "Ngumoha",
    "team": 14,
    "element_type": 3,
-   "rate": 2.01,
+   "rate": 2.0,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -5943,7 +5943,7 @@
    "web_name": "Gravenberch",
    "team": 14,
    "element_type": 3,
-   "rate": 4.21,
+   "rate": 4.18,
    "rate_source": "feed",
    "xp": {
     "4": 2.3,
@@ -5959,7 +5959,7 @@
    "web_name": "Mac Allister",
    "team": 14,
    "element_type": 3,
-   "rate": 2.73,
+   "rate": 2.72,
    "rate_source": "feed",
    "xp": {
     "4": 1.7,
@@ -6007,7 +6007,7 @@
    "web_name": "Nyoni",
    "team": 14,
    "element_type": 3,
-   "rate": 3.31,
+   "rate": 3.29,
    "rate_source": "feed",
    "xp": {
     "4": 0.7,
@@ -6039,7 +6039,7 @@
    "web_name": "Munoz",
    "team": 14,
    "element_type": 3,
-   "rate": 6.31,
+   "rate": 6.27,
    "rate_source": "feed",
    "xp": {
     "4": 4.3,
@@ -6071,12 +6071,12 @@
    "web_name": "Isak",
    "team": 14,
    "element_type": 4,
-   "rate": 8.07,
+   "rate": 8.02,
    "rate_source": "feed",
    "xp": {
     "4": 7.7,
     "5": 5.7,
-    "6": 5.8,
+    "6": 5.7,
     "7": 4.3,
     "8": 4.8
    }
@@ -6103,7 +6103,7 @@
    "web_name": "Koumas",
    "team": 14,
    "element_type": 3,
-   "rate": 3.56,
+   "rate": 3.54,
    "rate_source": "feed",
    "xp": {
     "4": 0.7,
@@ -6151,11 +6151,11 @@
    "web_name": "Donnarumma",
    "team": 15,
    "element_type": 1,
-   "rate": 4.44,
+   "rate": 4.43,
    "rate_source": "feed",
    "xp": {
     "4": 3.3,
-    "5": 4.0,
+    "5": 3.9,
     "6": 3.3,
     "7": 3.6,
     "8": 3.5
@@ -6167,7 +6167,7 @@
    "web_name": "Trafford",
    "team": 13,
    "element_type": 1,
-   "rate": 4.96,
+   "rate": 4.93,
    "rate_source": "feed",
    "xp": {
     "4": 5.0,
@@ -6215,11 +6215,11 @@
    "web_name": "Gu\u00e9hi",
    "team": 15,
    "element_type": 2,
-   "rate": 9.07,
+   "rate": 9.03,
    "rate_source": "feed",
    "xp": {
     "4": 6.7,
-    "5": 7.5,
+    "5": 7.4,
     "6": 5.8,
     "7": 6.0,
     "8": 5.6
@@ -6247,11 +6247,11 @@
    "web_name": "R\u00faben",
    "team": 15,
    "element_type": 2,
-   "rate": 4.47,
+   "rate": 4.45,
    "rate_source": "feed",
    "xp": {
     "4": 3.3,
-    "5": 4.1,
+    "5": 4.0,
     "6": 3.4,
     "7": 3.8,
     "8": 3.8
@@ -6263,7 +6263,7 @@
    "web_name": "Gvardiol",
    "team": 15,
    "element_type": 2,
-   "rate": 10.66,
+   "rate": 10.62,
    "rate_source": "feed",
    "xp": {
     "4": 7.3,
@@ -6295,14 +6295,14 @@
    "web_name": "Khusanov",
    "team": 15,
    "element_type": 2,
-   "rate": 4.1,
+   "rate": 4.08,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
     "5": 3.8,
     "6": 3.2,
     "7": 3.7,
-    "8": 3.6
+    "8": 3.7
    }
   },
   {
@@ -6343,7 +6343,7 @@
    "web_name": "Vitor Reis",
    "team": 15,
    "element_type": 2,
-   "rate": 2.2,
+   "rate": 2.19,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -6599,7 +6599,7 @@
    "web_name": "Lammens",
    "team": 16,
    "element_type": 1,
-   "rate": 2.01,
+   "rate": 2.0,
    "rate_source": "feed",
    "xp": {
     "4": 1.7,
@@ -6679,7 +6679,7 @@
    "web_name": "Dalot",
    "team": 16,
    "element_type": 2,
-   "rate": 2.58,
+   "rate": 2.57,
    "rate_source": "feed",
    "xp": {
     "4": 1.3,
@@ -6695,7 +6695,7 @@
    "web_name": "Maguire",
    "team": 16,
    "element_type": 2,
-   "rate": 2.73,
+   "rate": 2.72,
    "rate_source": "feed",
    "xp": {
     "4": 2.3,
@@ -6711,11 +6711,11 @@
    "web_name": "Martinez",
    "team": 16,
    "element_type": 2,
-   "rate": 2.46,
+   "rate": 2.45,
    "rate_source": "feed",
    "xp": {
     "4": 1.3,
-    "5": 1.3,
+    "5": 1.4,
     "6": 1.8,
     "7": 1.6,
     "8": 1.8
@@ -6727,7 +6727,7 @@
    "web_name": "Yoro",
    "team": 16,
    "element_type": 2,
-   "rate": 3.51,
+   "rate": 3.5,
    "rate_source": "feed",
    "xp": {
     "4": 0.7,
@@ -6743,7 +6743,7 @@
    "web_name": "Heaven",
    "team": 16,
    "element_type": 2,
-   "rate": 0.67,
+   "rate": 0.66,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -6759,7 +6759,7 @@
    "web_name": "Mazraoui",
    "team": 16,
    "element_type": 2,
-   "rate": 2.07,
+   "rate": 2.06,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -6775,14 +6775,14 @@
    "web_name": "Shaw",
    "team": 16,
    "element_type": 2,
-   "rate": 2.97,
+   "rate": 2.96,
    "rate_source": "feed",
    "xp": {
     "4": 2.3,
     "5": 2.3,
     "6": 3.0,
     "7": 2.5,
-    "8": 2.8
+    "8": 2.9
    }
   },
   {
@@ -6798,7 +6798,7 @@
     "5": 0.1,
     "6": 0.2,
     "7": 0.3,
-    "8": 0.3
+    "8": 0.4
    }
   },
   {
@@ -6827,7 +6827,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 9.0,
-    "5": 7.1,
+    "5": 7.2,
     "6": 6.7,
     "7": 5.1,
     "8": 5.2
@@ -6843,7 +6843,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 7.0,
-    "5": 6.2,
+    "5": 6.3,
     "6": 6.5,
     "7": 5.5,
     "8": 6.0
@@ -7163,7 +7163,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
-    "5": 3.6,
+    "5": 3.7,
     "6": 3.2,
     "7": 3.5,
     "8": 2.9
@@ -7197,7 +7197,7 @@
     "4": 6.0,
     "5": 6.5,
     "6": 5.1,
-    "7": 5.2,
+    "7": 5.3,
     "8": 4.0
    }
   },
@@ -7479,12 +7479,12 @@
    "web_name": "Sels",
    "team": 18,
    "element_type": 1,
-   "rate": 3.21,
+   "rate": 3.19,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
     "5": 3.3,
-    "6": 2.8,
+    "6": 2.7,
     "7": 3.0,
     "8": 2.7
    }
@@ -7511,13 +7511,13 @@
    "web_name": "N.Williams",
    "team": 18,
    "element_type": 2,
-   "rate": 5.38,
+   "rate": 5.35,
    "rate_source": "feed",
    "xp": {
     "4": 5.0,
     "5": 4.9,
     "6": 3.8,
-    "7": 3.9,
+    "7": 3.8,
     "8": 3.3
    }
   },
@@ -7543,13 +7543,13 @@
    "web_name": "Milenkovi\u0107",
    "team": 18,
    "element_type": 2,
-   "rate": 4.31,
+   "rate": 4.28,
    "rate_source": "feed",
    "xp": {
     "4": 4.0,
-    "5": 4.3,
+    "5": 4.2,
     "6": 3.5,
-    "7": 3.8,
+    "7": 3.7,
     "8": 3.4
    }
   },
@@ -7559,13 +7559,13 @@
    "web_name": "Murillo",
    "team": 18,
    "element_type": 2,
-   "rate": 4.63,
+   "rate": 4.6,
    "rate_source": "feed",
    "xp": {
     "4": 4.3,
     "5": 4.5,
-    "6": 3.7,
-    "7": 3.9,
+    "6": 3.6,
+    "7": 3.8,
     "8": 3.5
    }
   },
@@ -7575,7 +7575,7 @@
    "web_name": "Aina",
    "team": 18,
    "element_type": 2,
-   "rate": 2.36,
+   "rate": 2.34,
    "rate_source": "feed",
    "xp": {
     "4": 2.0,
@@ -7591,13 +7591,13 @@
    "web_name": "Jair Cunha",
    "team": 18,
    "element_type": 2,
-   "rate": 3.55,
+   "rate": 3.53,
    "rate_source": "feed",
    "xp": {
     "4": 3.3,
-    "5": 3.6,
-    "6": 3.0,
-    "7": 3.2,
+    "5": 3.5,
+    "6": 2.9,
+    "7": 3.1,
     "8": 2.9
    }
   },
@@ -7655,7 +7655,7 @@
    "web_name": "Netz",
    "team": 18,
    "element_type": 2,
-   "rate": 3.01,
+   "rate": 3.0,
    "rate_source": "feed",
    "xp": {
     "4": 0.7,
@@ -7943,7 +7943,7 @@
    "web_name": "Kinsky",
    "team": 19,
    "element_type": 1,
-   "rate": 3.1,
+   "rate": 3.08,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
@@ -7975,7 +7975,7 @@
    "web_name": "Senesi",
    "team": 19,
    "element_type": 2,
-   "rate": 1.94,
+   "rate": 1.93,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -7991,7 +7991,7 @@
    "web_name": "Pedro Porro",
    "team": 19,
    "element_type": 2,
-   "rate": 4.47,
+   "rate": 4.44,
    "rate_source": "feed",
    "xp": {
     "4": 2.7,
@@ -8023,7 +8023,7 @@
    "web_name": "Danso",
    "team": 20,
    "element_type": 2,
-   "rate": 4.8,
+   "rate": 4.87,
    "rate_source": "feed",
    "xp": {
     "4": 0.7,
@@ -8039,7 +8039,7 @@
    "web_name": "Robertson",
    "team": 19,
    "element_type": 2,
-   "rate": 2.32,
+   "rate": 2.31,
    "rate_source": "feed",
    "xp": {
     "4": 2.0,
@@ -8055,13 +8055,13 @@
    "web_name": "Van de Ven",
    "team": 19,
    "element_type": 2,
-   "rate": 4.96,
+   "rate": 4.94,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
     "5": 2.9,
     "6": 2.0,
-    "7": 2.6,
+    "7": 2.5,
     "8": 1.9
    }
   },
@@ -8075,7 +8075,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 6.0,
-    "5": 5.3,
+    "5": 5.2,
     "6": 4.4,
     "7": 4.4,
     "8": 3.5
@@ -8103,7 +8103,7 @@
    "web_name": "Udogie",
    "team": 19,
    "element_type": 2,
-   "rate": 8.44,
+   "rate": 8.4,
    "rate_source": "feed",
    "xp": {
     "4": 2.3,
@@ -8471,7 +8471,7 @@
    "web_name": "Roefs",
    "team": 20,
    "element_type": 1,
-   "rate": 3.23,
+   "rate": 3.28,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
@@ -8519,13 +8519,13 @@
    "web_name": "Ballard",
    "team": 20,
    "element_type": 2,
-   "rate": 4.33,
+   "rate": 4.39,
    "rate_source": "feed",
    "xp": {
     "4": 4.0,
     "5": 3.1,
     "6": 3.2,
-    "7": 3.1,
+    "7": 3.2,
     "8": 3.3
    }
   },
@@ -8535,12 +8535,12 @@
    "web_name": "Mukiele",
    "team": 20,
    "element_type": 2,
-   "rate": 7.42,
+   "rate": 7.53,
    "rate_source": "feed",
    "xp": {
     "4": 4.3,
-    "5": 3.1,
-    "6": 3.0,
+    "5": 3.2,
+    "6": 3.1,
     "7": 2.9,
     "8": 2.9
    }
@@ -8551,7 +8551,7 @@
    "web_name": "Hume",
    "team": 20,
    "element_type": 2,
-   "rate": 3.38,
+   "rate": 3.43,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
@@ -8567,7 +8567,7 @@
    "web_name": "Alderete",
    "team": 20,
    "element_type": 2,
-   "rate": 1.35,
+   "rate": 1.37,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -8583,13 +8583,13 @@
    "web_name": "Reinildo",
    "team": 20,
    "element_type": 2,
-   "rate": 3.25,
+   "rate": 3.3,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
     "5": 2.5,
-    "6": 2.7,
-    "7": 2.8,
+    "6": 2.8,
+    "7": 2.9,
     "8": 3.1
    }
   },
@@ -8631,7 +8631,7 @@
    "web_name": "O'Nien",
    "team": 20,
    "element_type": 2,
-   "rate": 0.71,
+   "rate": 0.72,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -8663,13 +8663,13 @@
    "web_name": "Meunier",
    "team": 20,
    "element_type": 2,
-   "rate": 3.25,
+   "rate": 3.3,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
     "5": 2.5,
-    "6": 2.7,
-    "7": 2.8,
+    "6": 2.8,
+    "7": 2.9,
     "8": 3.1
    }
   },
@@ -9015,7 +9015,7 @@
    "web_name": "Morita",
    "team": 11,
    "element_type": 3,
-   "rate": 0.86,
+   "rate": 0.85,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -9035,8 +9035,8 @@
    "rate_source": "feed",
    "xp": {
     "4": 2.0,
-    "5": 2.2,
-    "6": 2.4,
+    "5": 2.3,
+    "6": 2.5,
     "7": 2.2,
     "8": 2.8
    }
@@ -9063,7 +9063,7 @@
    "web_name": "Silva",
    "team": 3,
    "element_type": 2,
-   "rate": 2.72,
+   "rate": 2.7,
    "rate_source": "feed",
    "xp": {
     "4": 2.3,
@@ -9085,7 +9085,7 @@
     "4": 3.3,
     "5": 3.9,
     "6": 3.3,
-    "7": 3.6,
+    "7": 3.7,
     "8": 3.0
    }
   },
@@ -9164,7 +9164,7 @@
    "xp": {
     "4": 8.7,
     "5": 8.1,
-    "6": 7.2,
+    "6": 7.3,
     "7": 5.2,
     "8": 4.8
    }
@@ -9191,7 +9191,7 @@
    "web_name": "Hjert\u00f8-Dahl",
    "team": 11,
    "element_type": 3,
-   "rate": 2.42,
+   "rate": 2.41,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -9223,7 +9223,7 @@
    "web_name": "Stroud",
    "team": 11,
    "element_type": 3,
-   "rate": 3.15,
+   "rate": 3.14,
    "rate_source": "feed",
    "xp": {
     "4": 2.0,
@@ -9271,7 +9271,7 @@
    "web_name": "Araujo",
    "team": 14,
    "element_type": 2,
-   "rate": 11.37,
+   "rate": 11.32,
    "rate_source": "feed",
    "xp": {
     "4": 3.0,
@@ -9303,7 +9303,7 @@
    "web_name": "Diomande",
    "team": 18,
    "element_type": 2,
-   "rate": 2.05,
+   "rate": 2.03,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
@@ -9335,14 +9335,14 @@
    "web_name": "Chavarria",
    "team": 6,
    "element_type": 2,
-   "rate": 2.9,
+   "rate": 2.88,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
     "5": 0.8,
     "6": 1.0,
     "7": 0.9,
-    "8": 1.0
+    "8": 1.1
    }
   },
   {
@@ -9371,7 +9371,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
-    "5": 1.1,
+    "5": 1.2,
     "6": 1.2,
     "7": 1.0,
     "8": 1.1
@@ -9387,7 +9387,7 @@
    "rate_source": "feed",
    "xp": {
     "4": 8.0,
-    "5": 7.3,
+    "5": 7.4,
     "6": 6.5,
     "7": 4.6,
     "8": 4.2
@@ -9431,7 +9431,7 @@
    "web_name": "Gourna-Douath",
    "team": 11,
    "element_type": 3,
-   "rate": 3.66,
+   "rate": 3.64,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -9501,7 +9501,7 @@
     "4": 4.3,
     "5": 4.9,
     "6": 4.0,
-    "7": 4.2,
+    "7": 4.3,
     "8": 3.3
    }
   },
@@ -9543,7 +9543,7 @@
    "web_name": "Ruggeri",
    "team": 2,
    "element_type": 2,
-   "rate": 3.7,
+   "rate": 3.68,
    "rate_source": "feed",
    "xp": {
     "4": 0.7,
@@ -9559,7 +9559,7 @@
    "web_name": "Suzuki",
    "team": 2,
    "element_type": 1,
-   "rate": 6.67,
+   "rate": 6.63,
    "rate_source": "feed",
    "xp": {
     "4": 4.0,
@@ -9575,12 +9575,12 @@
    "web_name": "Elvedi",
    "team": 13,
    "element_type": 2,
-   "rate": 4.52,
+   "rate": 4.5,
    "rate_source": "feed",
    "xp": {
     "4": 1.7,
     "5": 1.5,
-    "6": 1.3,
+    "6": 1.2,
     "7": 1.2,
     "8": 1.2
    }
@@ -9783,7 +9783,7 @@
    "web_name": "Wan-Bissaka",
    "team": 2,
    "element_type": 2,
-   "rate": 4.75,
+   "rate": 4.72,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -9879,7 +9879,7 @@
    "web_name": "Cho",
    "team": 11,
    "element_type": 3,
-   "rate": 6.14,
+   "rate": 6.11,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -9959,7 +9959,7 @@
    "web_name": "Braithwaite",
    "team": 15,
    "element_type": 2,
-   "rate": 3.67,
+   "rate": 3.66,
    "rate_source": "feed",
    "xp": {
     "4": 0.5,
@@ -10071,7 +10071,7 @@
    "web_name": "Zetterer",
    "team": 13,
    "element_type": 1,
-   "rate": 6.17,
+   "rate": 6.14,
    "rate_source": "feed",
    "xp": {
     "4": 1.0,
@@ -10087,7 +10087,7 @@
    "web_name": "Harwood-Bellis",
    "team": 2,
    "element_type": 2,
-   "rate": 12.03,
+   "rate": 11.97,
    "rate_source": "feed",
    "xp": {
     "4": 1.8,
@@ -10119,7 +10119,7 @@
    "web_name": "Ansah",
    "team": 11,
    "element_type": 4,
-   "rate": 11.69,
+   "rate": 11.63,
    "rate_source": "feed",
    "xp": {
     "4": 1.4,
@@ -10199,7 +10199,7 @@
    "web_name": "Vaz",
    "team": 11,
    "element_type": 4,
-   "rate": 11.69,
+   "rate": 11.63,
    "rate_source": "feed",
    "xp": {
     "4": 1.4,
@@ -10263,7 +10263,7 @@
    "web_name": "Bard",
    "team": 13,
    "element_type": 2,
-   "rate": 11.38,
+   "rate": 11.31,
    "rate_source": "feed",
    "xp": {
     "4": 1.8,
@@ -10327,7 +10327,7 @@
    "web_name": "Mouzakitis",
    "team": 11,
    "element_type": 3,
-   "rate": 12.1,
+   "rate": 12.04,
    "rate_source": "feed",
    "xp": {
     "4": 1.5,
@@ -10391,7 +10391,7 @@
    "web_name": "Maitland-Niles",
    "team": 9,
    "element_type": 2,
-   "rate": 12.43,
+   "rate": 12.35,
    "rate_source": "feed",
    "xp": {
     "4": 1.8,
@@ -10407,7 +10407,7 @@
    "web_name": "Affengruber",
    "team": 10,
    "element_type": 2,
-   "rate": 14.11,
+   "rate": 14.05,
    "rate_source": "feed",
    "xp": {
     "4": 1.8,
@@ -10482,6 +10482,6 @@
    }
   }
  ],
- "archived_at": "2026-09-06T23:40:43Z",
+ "archived_at": "2026-09-07T09:12:08Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
