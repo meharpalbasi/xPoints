@@ -1,0 +1,117 @@
+{
+  "gameweek": 3,
+  "scored_at": "2026-09-07T15:41:21Z",
+  "deadline": "2026-09-04T17:30:00Z",
+  "data_checked": true,
+  "prediction": {
+    "generated_at": "2026-09-04T13:22:10Z",
+    "source": "fpl_ep_next",
+    "model_version": "ep-next-baseline-1",
+    "ordering": null,
+    "rows": 652
+  },
+  "populations": {
+    "all": "every player in the archive",
+    "played": "minutes > 0",
+    "starters": "minutes >= 60"
+  },
+  "n": {
+    "all": 652,
+    "played": 307,
+    "starters": 212
+  },
+  "missing_from_live": 0,
+  "predictors_available": [
+    "ep_next",
+    "model",
+    "zero"
+  ],
+  "metrics": {
+    "all": {
+      "ep_next": {
+        "mae": 1.2952,
+        "rmse": 2.4069,
+        "spearman": 0.7029,
+        "spearman_ci95": [
+          0.6551,
+          0.7451
+        ],
+        "precision_at_10": 0.0,
+        "precision_at_20": 0.0878,
+        "captain_regret": 13.0
+      },
+      "zero": {
+        "mae": 1.4018,
+        "rmse": 2.7759
+      },
+      "model": {
+        "mae": 1.1,
+        "rmse": 2.0511,
+        "spearman": 0.7103,
+        "spearman_ci95": [
+          0.6697,
+          0.7441
+        ],
+        "precision_at_10": 0.0,
+        "precision_at_20": 0.082,
+        "captain_regret": 6.0
+      }
+    },
+    "played": {
+      "ep_next": {
+        "mae": 2.4264,
+        "rmse": 3.423,
+        "spearman": 0.21,
+        "spearman_ci95": [
+          0.1127,
+          0.3264
+        ],
+        "precision_at_10": 0.0,
+        "precision_at_20": 0.0878
+      },
+      "zero": {
+        "mae": 2.9772,
+        "rmse": 4.0453
+      },
+      "model": {
+        "mae": 1.9534,
+        "rmse": 2.8931,
+        "spearman": 0.2255,
+        "spearman_ci95": [
+          0.124,
+          0.3275
+        ],
+        "precision_at_10": 0.0,
+        "precision_at_20": 0.0755
+      }
+    },
+    "starters": {
+      "ep_next": {
+        "mae": 2.9623,
+        "rmse": 3.893,
+        "spearman": -0.0229,
+        "spearman_ci95": [
+          -0.1551,
+          0.1082
+        ],
+        "precision_at_10": 0.0,
+        "precision_at_20": 0.1015
+      },
+      "zero": {
+        "mae": 3.7406,
+        "rmse": 4.722
+      },
+      "model": {
+        "mae": 2.3654,
+        "rmse": 3.3271,
+        "spearman": -0.0439,
+        "spearman_ci95": [
+          -0.1647,
+          0.0828
+        ],
+        "precision_at_10": 0.0,
+        "precision_at_20": 0.0778
+      }
+    }
+  }
+}
