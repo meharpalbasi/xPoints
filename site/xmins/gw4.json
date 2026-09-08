@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-07T15:41:00.356Z",
+ "site_generated_at": "2026-09-08T21:43:37.701Z",
  "rows": [
   {
    "player_id": 1,
@@ -4622,13 +4622,13 @@
    "web_name": "Crooks",
    "team": 11,
    "element_type": 3,
-   "status": "d",
-   "xMins": 20.3,
-   "pStart": 0.22,
-   "p60": 0.22,
-   "pAppear": 0.27,
+   "status": "a",
+   "xMins": 27.0,
+   "pStart": 0.3,
+   "p60": 0.29,
+   "pAppear": 0.36,
    "fixtures": 1,
-   "availability": 0.75,
+   "availability": 1.0,
    "evidence": 3,
    "role": "bench"
   },
@@ -4702,15 +4702,15 @@
    "web_name": "Zambrano",
    "team": 11,
    "element_type": 3,
-   "status": "i",
-   "xMins": 0.0,
-   "pStart": 0.0,
-   "p60": 0.0,
-   "pAppear": 0.0,
+   "status": "a",
+   "xMins": 9.5,
+   "pStart": 0.1,
+   "p60": 0.09,
+   "pAppear": 0.16,
    "fixtures": 1,
-   "availability": 0.0,
+   "availability": 1.0,
    "evidence": 3,
-   "role": "out"
+   "role": "fringe"
   },
   {
    "player_id": 295,
@@ -10473,6 +10473,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-07T15:41:00Z",
+ "archived_at": "2026-09-08T21:43:37Z",
  "deadline": "2026-09-12T12:30:00Z"
 }

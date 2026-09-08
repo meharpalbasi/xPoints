@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 4,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-07T22:41:53Z"
+  "generated_at": "2026-09-08T18:25:56Z"
  },
- "site_generated_at": "2026-09-08T01:03:53.060Z",
+ "site_generated_at": "2026-09-08T21:43:36.407Z",
  "rows": [
   {
    "player_id": 1,
@@ -4631,10 +4631,10 @@
    "web_name": "Crooks",
    "team": 11,
    "element_type": 3,
-   "rate": 2.33,
+   "rate": 2.34,
    "rate_source": "feed",
    "xp": {
-    "4": 0.5,
+    "4": 0.7,
     "5": 0.7,
     "6": 0.9,
     "7": 0.9,
@@ -4715,10 +4715,10 @@
    "rate_source": "none",
    "xp": {
     "4": 0.0,
-    "5": 0.0,
-    "6": 0.0,
-    "7": 0.0,
-    "8": 0.0
+    "5": 0.1,
+    "6": 0.2,
+    "7": 0.2,
+    "8": 0.2
    }
   },
   {
@@ -10482,6 +10482,6 @@
    }
   }
  ],
- "archived_at": "2026-09-08T01:03:53Z",
+ "archived_at": "2026-09-08T21:43:36Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
