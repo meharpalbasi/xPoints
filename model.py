@@ -8,6 +8,16 @@ are the harness's as-of set: for the prediction row, everything derives from
 matches already played, so the newest completed match is included exactly
 once (the old script's prediction row was one gameweek stale).
 
+v3 adds the deadline-known market block (backtest.market_features): the
+transfers made and ownership held before the deadline and the price move
+into it. Managers react to team news before any dataset records a status,
+so the block carries availability information the history otherwise lacks.
+In the 2025/26 walk-forward it improved the P(60+) Brier score, all-player
+MAE, starter rank correlation and starter precision at 20 against v2 on
+identical rows (backtests/2025-26_v3.json). The season in progress is read
+from FPL's own API (fpl_history.py) so the newest finished gameweeks and
+their transfer data are always in the training set.
+
 Output: predictions_model.json in the same schema as predictions.json, with
 source "xpoints_model", plus a per-gameweek archive predictions/gw{N}_model.json
 that freezes at the deadline and is graded by score.py alongside ep_next on
@@ -23,15 +33,17 @@ import numpy as np
 import pandas as pd
 from xgboost import XGBClassifier, XGBRegressor
 
-from backtest import STATS, build_features, load_player_gameweeks
+from backtest import MARKET, STATS, build_features, load_player_gameweeks
 from baseline import (BOOTSTRAP_URL, FIXTURES_URL, POSITIONS, STATUS_MAP, archive_allowed,
                       event_deadline, fetch_json, next_gameweek, season_label, step_summary,
                       team_fixture_stats)
 from fetch_data import fetch as fetch_season
+from fpl_history import load_or_fetch as load_live_rows
 from prediction_safety import write_predictions
 
-SEASONS = ["2025-26", "2026-27"]
-MODEL_VERSION = "xpoints-two-stage-blend-v2"
+SEASONS = ["2025-26", "2026-27"]  # the last one is the season in progress, read from FPL's API
+MODEL_VERSION = "xpoints-two-stage-blend-v3"
+MARKET_BLOCK = True  # v3: deadline-known market signals in both stages (backtests/2025-26_v3.json)
 SOURCE = "xpoints_model"
 PARAMS = dict(objective="reg:tweedie", tweedie_variance_power=1.3, n_estimators=300, max_depth=4,
               learning_rate=0.05, subsample=0.8, colsample_bytree=0.8, random_state=0, n_jobs=4)
@@ -44,14 +56,29 @@ def season_index(season):
     return int(season[:4])
 
 
-def load_season(season):
-    """Player-gameweek rows for one season, keyed by stable player code."""
-    pg = load_player_gameweeks(Path(f"data/merged_gw_{season}.csv"))
-    codes = pd.read_csv(f"data/players_raw_{season}.csv", usecols=["id", "code"]).rename(columns={"id": "element"})
+def stamp_season(pg, codes, season):
+    """Attach stable player codes and the season-aware gameweek order."""
     pg = pg.merge(codes, on="element", how="inner")
     pg["season"] = season_index(season)
     pg["season_gw"] = pg["season"] * 100 + pg["GW"]
     return pg
+
+
+def load_season(season):
+    """A completed season's player-gameweek rows (vaastav's files), keyed by stable player code."""
+    pg = load_player_gameweeks(Path(f"data/merged_gw_{season}.csv"))
+    codes = pd.read_csv(f"data/players_raw_{season}.csv", usecols=["id", "code"]).rename(columns={"id": "element"})
+    return stamp_season(pg, codes, season)
+
+
+def load_live_season(season, bootstrap, use_cache_only=False):
+    """The season in progress from FPL's API (fpl_history), codes from the bootstrap."""
+    rows = load_live_rows(season, bootstrap, use_cache_only=use_cache_only)
+    if rows.empty:
+        return rows
+    pg = load_player_gameweeks(rows)
+    codes = pd.DataFrame([{"element": p["id"], "code": p["code"]} for p in bootstrap["elements"]])
+    return stamp_season(pg, codes, season)
 
 
 def assemble_history(frames):
@@ -64,6 +91,7 @@ def prediction_frame(bootstrap, fixtures, gw, season):
     """One row per current player for the target gameweek: deadline-known
     context filled in, every match stat NaN (unknown — that is the point)."""
     fx = team_fixture_stats(fixtures, gw)
+    total_players = float(bootstrap.get("total_players") or 0)
     rows = []
     for p in bootstrap["elements"]:
         etype = p.get("element_type")
@@ -71,12 +99,16 @@ def prediction_frame(bootstrap, fixtures, gw, season):
             continue
         t = fx.get(p["team"], {"count": 0, "difficulty": [], "home": 0})
         n = t["count"]
+        t_in, t_out = int(p.get("transfers_in_event") or 0), int(p.get("transfers_out_event") or 0)
         row = {
             "element": p["id"], "code": p["code"], "GW": gw, "season": season,
             "season_gw": season * 100 + gw, "position": POSITIONS[etype], "position_id": etype,
             "team": p["team"], "name": p.get("web_name"), "value": p.get("now_cost"),
             "price": (p.get("now_cost") or 0) / 10.0, "fixture_count": n,
             "home_share": (t["home"] / n) if n else 0.0,
+            # Deadline-known market state, the same quantities the history rows carry
+            "selected": round(float(p.get("selected_by_percent") or 0) / 100 * total_players),
+            "transfers_in": t_in, "transfers_out": t_out, "transfers_balance": t_in - t_out,
         }
         for stat in STATS + ["expected_goals_conceded"]:
             row[stat] = np.nan
@@ -100,7 +132,7 @@ def price_expectation(train_starters, targets):
     return np.where(np.isnan(out), overall, out)
 
 
-def train_and_predict(history, pred, params=PARAMS):
+def train_and_predict(history, pred, params=PARAMS, market=None):
     """Two-stage, price-blended projection (the harness winner, ablation PR #19):
 
         xPoints = P(60+ minutes) x ( w * E[points | starts] + (1-w) * price_expectation )
@@ -108,10 +140,15 @@ def train_and_predict(history, pred, params=PARAMS):
     Stage 1 is a classifier on every completed row. Stage 2 is a Tweedie head
     trained ONLY on rows where the player started, monotone in price so it can
     refine price's ordering but never invert it, blended with the as-of
-    price-implied expectation. Returns per-row components for explainability.
+    price-implied expectation. With `market` (v3) both stages also see the
+    deadline-known market block. Returns per-row components for explainability.
     """
+    market = MARKET_BLOCK if market is None else market
     frame = pd.concat([history, pred], ignore_index=True).sort_values(["code", "season_gw"]).reset_index(drop=True)
-    X = build_features(frame, key="code")
+    for c in MARKET:  # a history without market columns reads as unknown, never as zero
+        if c not in frame.columns:
+            frame[c] = np.nan
+    X = build_features(frame, key="code", market=market)
     cols = list(X.columns)
     y = frame["total_points"]
     is_train = y.notna().to_numpy()
@@ -190,7 +227,7 @@ def main():
     args = ap.parse_args()
 
     if not args.no_fetch:
-        for s in SEASONS:
+        for s in SEASONS[:-1]:
             fetch_season(s, quiet=True)
 
     bootstrap = fetch_json(BOOTSTRAP_URL)
@@ -201,7 +238,8 @@ def main():
     current = season_index(SEASONS[-1])
     generated_at = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    history = assemble_history([load_season(s) for s in SEASONS])
+    history = assemble_history([load_season(s) for s in SEASONS[:-1]]
+                               + [load_live_season(SEASONS[-1], bootstrap, use_cache_only=args.no_fetch)])
     pred = prediction_frame(bootstrap, fixtures, gw, current)
     targets, preds, features, n_train, components = train_and_predict(history, pred)
     rows = build_rows(bootstrap, targets, preds, gw, generated_at, season_text, components)
@@ -211,10 +249,13 @@ def main():
     META_PATH.write_text(json.dumps({
         "model_version": MODEL_VERSION, "trained_at": generated_at, "target_gameweek": gw,
         "seasons": SEASONS, "training_rows": n_train, "n_features": len(features),
-        "features": features, "params": PARAMS,
-        "design": "P(60+) x (0.5 * monotone-price Tweedie head trained on starters + 0.5 * price-implied expectation)",
-        "harness": "backtests/2025-26_blend.json (walk-forward GW8-38: two_stage_blend MAE 0.920 all, "
-                   "starter p@20 0.173, captain regret 10.71 — best of all candidates)",
+        "features": features, "params": PARAMS, "market_block": MARKET_BLOCK,
+        "live_season_source": "FPL element-summary (fpl_history.py), finished gameweeks only",
+        "design": "P(60+) x (0.5 * monotone-price Tweedie head trained on starters + 0.5 * price-implied expectation), "
+                  "both stages with the deadline-known market block (transfers, ownership, price move)",
+        "harness": "backtests/2025-26_v3.json (walk-forward GW8-38, identical rows: two_stage_blend_v3h "
+                   "MAE 0.888 all against v2 0.920, starter Spearman 0.107 against 0.087, starter p@20 0.194 "
+                   "against 0.173, P(60+) Brier 0.0734 against 0.0787, base rate 0.1925)",
     }, indent=2))
 
     if archive_allowed(dt.datetime.now(dt.timezone.utc), deadline):

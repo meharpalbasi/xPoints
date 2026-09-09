@@ -57,6 +57,9 @@ K_LIST = (10, 20)
 # research report; used as the prior until enough gameweeks are scored.
 PRIOR_STARTER_SPEARMAN_SD = 0.091
 DETECT_EFFECT = 0.05
+# The promotion gate: the shadow model may replace ep_next only after this many
+# consecutive paired gameweeks say so (ROADMAP: six shadow gameweeks minimum).
+PROMOTION_WINDOW = 6
 
 
 def fetch_json(url):
@@ -93,6 +96,33 @@ def live_stats(gw):
     }
 
 
+def availability_factor(status, chance, fixture_count):
+    """The deadline-known availability rule model.py applies after the model:
+    injured / suspended / unavailable -> 0; doubtful -> FPL's stated chance;
+    blank gameweek -> 0. Applied to the archived P(60+) so the probability
+    graded is the one a manager would have been shown."""
+    if not fixture_count:
+        return 0.0
+    if status in ("i", "s", "u"):
+        return 0.0
+    if status == "d":
+        return (chance if chance is not None else 100) / 100
+    return 1.0
+
+
+def model_probabilities(model_rows):
+    """{player_id: P(60+ minutes)} from an archived model file, availability applied.
+    Empty for archives written before the model carried its components."""
+    out = {}
+    for r in model_rows:
+        p = r.get("p_start60")
+        if p is None:
+            continue
+        out[int(r["player_id"])] = float(p) * availability_factor(
+            r.get("status"), r.get("chance_of_playing_next_round"), r.get("fixture_count", 1))
+    return out
+
+
 def join_rows(pred_rows, live):
     joined, missing = [], 0
     for r in pred_rows:
@@ -118,11 +148,14 @@ def _clean(x):
     return None if (isinstance(x, float) and math.isnan(x)) else round(x, 4)
 
 
-def score_gameweek(pred_rows, live, seed=0, extra=None):
+def score_gameweek(pred_rows, live, seed=0, extra=None, probs=None):
     """Pure: archived prediction rows + live stats -> metrics dict, joined rows.
 
     `extra` maps a predictor name to {player_id: value} for other archived
     files graded on the same rows — e.g. the shadow model's gw{N}_model.json.
+    `probs` maps a name to {player_id: P(60+ minutes)}: probabilities graded
+    with a Brier score against minutes >= 60, beside the Brier of predicting
+    the population's base rate for everyone.
     """
     joined, missing = join_rows(pred_rows, live)
     has_price = bool(joined) and all(j["now_cost"] is not None for j in joined)
@@ -131,6 +164,10 @@ def score_gameweek(pred_rows, live, seed=0, extra=None):
     for name, values in extra.items():
         for j in joined:
             j[name] = float(values.get(j["player_id"], 0.0))
+    probs = probs or {}
+    for name, values in probs.items():
+        for j in joined:
+            j[name] = values.get(j["player_id"])
 
     def predictors(rows):
         p = {
@@ -170,6 +207,17 @@ def score_gameweek(pred_rows, live, seed=0, extra=None):
                 if pop_name == "all":
                     m["captain_regret"] = _clean(captain_regret(pred, actual, seed=seed))
             pop_metrics[name] = m
+        for name in probs:
+            pairs = [(float(j[name]), 1.0 if j["minutes"] >= 60 else 0.0) for j in rows if j.get(name) is not None]
+            if not pairs:
+                continue
+            base = sum(y for _, y in pairs) / len(pairs)
+            pop_metrics[name] = {
+                "n": len(pairs),
+                "brier": _clean(sum((p - y) ** 2 for p, y in pairs) / len(pairs)),
+                "base_rate": _clean(base),
+                "base_rate_brier": _clean(sum((base - y) ** 2 for _, y in pairs) / len(pairs)),
+            }
         result["metrics"][pop_name] = pop_metrics
     return result, joined
 
@@ -215,6 +263,55 @@ def load_scores():
     return dict(sorted(out.items()))
 
 
+def promotion_gate(rows, window=PROMOTION_WINDOW):
+    """Whether the shadow model has earned the feed, and if not, why not.
+
+    Over the last `window` graded gameweeks with a paired model row, all of:
+    at least `window` such gameweeks; the model's starter rank correlation
+    ahead of ep_next's on average, with the paired 95% interval clear of
+    zero; and its starter precision at 20 at least ep_next's. The scorecard
+    says ready; a person flips the feed. Nothing switches on its own.
+    """
+    paired = [r for r in rows
+              if r.get("model_spearman_starters") is not None and r.get("ep_next_spearman_starters") is not None]
+    recent = paired[-window:]
+    n = len(recent)
+    diffs = [r["model_spearman_starters"] - r["ep_next_spearman_starters"] for r in recent]
+    mean_diff = mean(diffs) if diffs else None
+    se = stdev(diffs) / math.sqrt(n) if n >= 2 else None
+    ci = [mean_diff - 1.96 * se, mean_diff + 1.96 * se] if se is not None and not math.isnan(se) else None
+    p_model = [r["model_precision_at_20_starters"] for r in recent if r.get("model_precision_at_20_starters") is not None]
+    p_feed = [r["ep_next_precision_at_20_starters"] for r in recent if r.get("ep_next_precision_at_20_starters") is not None]
+    reasons = []
+    if n < window:
+        reasons.append(f"{n} of {window} paired gameweeks graded")
+    if mean_diff is None or mean_diff <= 0:
+        reasons.append("starter rank match not ahead of ep_next on average")
+    elif ci is None or ci[0] <= 0:
+        reasons.append("paired 95% interval for starter rank match includes zero")
+    if p_model and p_feed and mean(p_model) < mean(p_feed):
+        reasons.append("starter precision at 20 below ep_next")
+    return {
+        "ready": n >= window and not reasons,
+        "window_gameweeks": window,
+        "gameweeks_in_window": n,
+        "gameweeks": [r["gameweek"] for r in recent],
+        "starter_spearman_diff": {
+            "mean": _clean(mean_diff) if mean_diff is not None else None,
+            "se": _clean(se) if se is not None and not math.isnan(se) else None,
+            "ci95": [_clean(ci[0]), _clean(ci[1])] if ci else None,
+        },
+        "precision_at_20_starters": {
+            "model_mean": _clean(mean(p_model)) if p_model else None,
+            "ep_next_mean": _clean(mean(p_feed)) if p_feed else None,
+        },
+        "reasons": reasons,
+        "rule": (f"over the last {window} paired gameweeks: model starter Spearman ahead of ep_next "
+                 "with the paired 95% interval above zero, and starter precision at 20 at least ep_next's; "
+                 "the feed is switched by a person, never by this file"),
+    }
+
+
 def build_scorecard(scores):
     def get(s, pop, pred, key):
         return s["metrics"].get(pop, {}).get(pred, {}).get(key)
@@ -241,6 +338,8 @@ def build_scorecard(scores):
             "model_spearman_starters_ci95": get(s, "starters", "model", "spearman_ci95"),
             "model_precision_at_20_starters": get(s, "starters", "model", "precision_at_20"),
             "model_captain_regret": get(s, "all", "model", "captain_regret"),
+            "model_p60_brier_all": get(s, "all", "model_p60", "brier"),
+            "model_p60_base_rate_brier_all": get(s, "all", "model_p60", "base_rate_brier"),
             "price_spearman_starters": get(s, "starters", "price", "spearman"),
             "blend_spearman_starters": get(s, "starters", "blend", "spearman"),
             "blend_precision_at_20_starters": get(s, "starters", "blend", "precision_at_20"),
@@ -251,8 +350,11 @@ def build_scorecard(scores):
               if r["model_spearman_starters"] is not None and r["ep_next_spearman_starters"] is not None]
     observed_sd = stdev(starter_sp) if len(starter_sp) >= 3 else float("nan")
     sd_used = observed_sd if not math.isnan(observed_sd) else PRIOR_STARTER_SPEARMAN_SD
+    gate = promotion_gate(rows)
     summary = {
         "scored_gameweeks": len(rows),
+        "promotion_ready": gate["ready"],
+        "promotion": gate,
         "mean_ep_next_spearman_starters": _clean(mean(starter_sp)) if starter_sp else None,
         "model_vs_ep_next_starter_spearman": {
             "gameweeks": len(paired),
@@ -307,11 +409,15 @@ def main():
             continue
         pred_rows = json.loads(archives[gw].read_text())
         live = live_stats(gw)
-        extra = {}
+        extra, probs = {}, {}
         model_path = ARCHIVE_DIR / f"gw{gw}_model.json"
         if model_path.exists():
-            extra["model"] = {int(r["player_id"]): float(r["xPoints"]) for r in json.loads(model_path.read_text())}
-        result, joined = score_gameweek(pred_rows, live, extra=extra)
+            model_rows = json.loads(model_path.read_text())
+            extra["model"] = {int(r["player_id"]): float(r["xPoints"]) for r in model_rows}
+            p60 = model_probabilities(model_rows)
+            if p60:
+                probs["model_p60"] = p60
+        result, joined = score_gameweek(pred_rows, live, extra=extra, probs=probs)
         payload = write_gameweek(gw, checked[gw], pred_rows, result, joined)
         ep = payload["metrics"]
         print(f"✅ GW{gw}: n={payload['n']} | ep_next MAE(all) {ep['all']['ep_next'].get('mae')} "
@@ -324,6 +430,10 @@ def main():
     print(f"📊 scorecard: {scorecard['summary']['scored_gameweeks']} gameweeks scored; "
           f"detecting +{p['effect_to_detect']} starter Spearman needs {p['gameweeks_needed_power_80']} GWs "
           f"(80% power) at sd {p['per_gameweek_sd_used']} [{p['sd_source']}]")
+    gate = scorecard["summary"]["promotion"]
+    print(f"🚦 promotion gate: {'READY' if gate['ready'] else 'not ready'} "
+          f"({gate['gameweeks_in_window']}/{gate['window_gameweeks']} paired gameweeks"
+          + (f"; {'; '.join(gate['reasons'])}" if gate["reasons"] else "") + ")")
 
 
 if __name__ == "__main__":

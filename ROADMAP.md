@@ -1,7 +1,7 @@
 # xPoints research audit and production roadmap
 
 Last updated: 2 September 2026  
-Status: XP-01, XP-03 and the backtest harness are merged; a two-stage, price-blended challenger (XP-04/XP-05 slice) runs in shadow from GW3 and has its first paired grade (GW3). See "Where things stand" for the hand-off.  
+Status: XP-01, XP-03 and the backtest harness are merged; a two-stage, price-blended challenger (XP-04/XP-05 slice) runs in shadow from GW3 and has its first paired grade (GW3); v3 with the market block runs from GW4. See "Where things stand" for the hand-off.  
 Scope: the xPoints model, its dbt data dependencies, evaluation, publication, and monitoring
 
 ## Executive summary
@@ -19,7 +19,7 @@ The most important conclusion from the research is not “add more XGBoost featu
 
 The existing production feed should remain the official FPL `ep_next` baseline until a challenger passes those gates. The current XGBoost script is experimental and is not suitable for production promotion.
 
-## Where things stand (9 September 2026): GW3 graded, and what to do next
+## Where things stand (9 September 2026): GW3 graded, v3 in shadow, the gate built
 
 This is the hand-off for the next working session. The reasoning is in the research artifact (https://claude.ai/code/artifact/2ca07fa6-120d-4941-b5a3-641f17002cd5) and the website roadmap (`fpl-app/roadmap.md`).
 
@@ -27,7 +27,7 @@ This is the hand-off for the next working session. The reasoning is in the resea
 
 - **Production feed:** FPL `ep_next` baseline via `baseline.py`, published by `.github/workflows/daily_update.yml` (cron `7 * * * *`; GitHub drops most ticks, accepted for now). Rows carry price tie-break ordering and `blend_rank`. Hard bounds −5..40 in `prediction_safety.py`.
 - **Archives:** `predictions/gw{N}.json` frozen at each deadline by the `--archive-only` step; `predictions/gw{N}_model.json` is the shadow model's frozen forecast. GW1–GW3 baseline archives exist; GW3 is the first model archive.
-- **Shadow model v2 (`model.py`):** `P(60+) × (0.5·E[pts|start] + 0.5·price-implied expectation)`, E[pts|start] a monotone-in-price Tweedie, trained on 2025/26 + 2026/27 joined on stable player `code`. Chosen because in `backtest.py` two-stage gave the best MAE while nothing learned from one season out-ranks price among starters, so the price prior is blended in.
+- **Shadow model v3 (`model.py`):** `P(60+) × (0.5·E[pts|start] + 0.5·price-implied expectation)`, E[pts|start] a monotone-in-price Tweedie, both stages with the deadline-known market block, trained on 2025/26 (vaastav) + 2026/27 (FPL's API) joined on stable player `code`. Chosen because in `backtest.py` two-stage gave the best MAE while nothing learned from one season out-ranks price among starters, so the price prior is blended in.
 - **Scoring:** `score.py` runs after every tick, grades gameweeks whose `data_checked` is true, writes `scores/gw{N}.json` + `gw{N}_rows.csv` and rebuilds `scorecard.json` (populations all / played / starters; MAE, RMSE, Spearman with bootstrap CI, precision@k with random tie-breaks, captain regret, power statement, `summary.model_vs_ep_next_starter_spearman`). `--gw N` and `--force` rescore.
 - **Public view:** https://fplanaly.st/app/accuracy renders `scorecard.json` (30-minute ISR). Model columns are dashes until a paired gameweek exists.
 - **Harness:** `backtest.py` walk-forward with as-of (shift-then-roll) features and a leakage test; results in `backtests/*.json`. Ablations complete: opponent form (no gain), prior-season priors (no gain), two-stage (best MAE, starters still lose to price ordering).
@@ -58,13 +58,29 @@ What it says, and what it does not:
 - The site now computes its own **expected minutes** (`app/lib/xmins.mjs` in fpl-app: recent gameweeks weighted, a mild prior, FPL's availability as a multiplier; P(60+) uses this model's `p_start60` definition), **fixture-adjusted form** and **multi-week projections** (the feed pulled apart into a rate and carried forward by fixtures, opponent strength and expected minutes). Those tables are frozen at every deadline under `site/` by `site_snapshot.py` (xPoints #22) and graded by `score_site.py` into `scores/site/` and `site_scorecard.json`; the accuracy page reads them. GW4's snapshots are already frozen (654 rows each).
 - So the P(60+) work in the queue below has a working reference implementation on the site side, with the exact inputs the queue names (`status`, `news`, `chance_of_playing_next_round`, `starts`), and a grade of its own arriving after GW4.
 
+### Shipped on 9 September (xPoints PR: model v3, promotion gate, live-season history)
+
+- **Shadow v3 (`xpoints-two-stage-blend-v3`).** The same two stages with the deadline-known **market block** in both: net transfers as a share of owners, the share of owners who sold, transfers in as a share of owners, the ownership percentile and the price move into the gameweek (`backtest.market_features`). Managers react to team news before any dataset records a status, so the block carries the availability information the history lacks; the site's expected-minutes inputs (`status`, `news`, `chance_of_playing`) are not in any historical dataset and cannot be backtested, so they stay where they were, applied after the model. Walk-forward 2025/26, 31 folds, identical rows, paired mean and se against v2:
+
+  | Measure | v2 | v3 | paired difference |
+  |---|---:|---:|---:|
+  | P(60+) Brier, all players (base rate 0.1925) | 0.0787 | 0.0734 | -0.0053 ± 0.0008 |
+  | MAE, all players | 0.920 | 0.888 | -0.0317 ± 0.0036 |
+  | Spearman, starters | 0.087 | 0.107 | +0.0205 ± 0.0064 |
+  | precision at 20, starters | 0.173 | 0.194 | +0.0208 ± 0.0097 |
+  | captain regret | 10.71 | 10.65 | -0.065 ± 0.590 |
+
+  Both success criteria from the queue are met (a Brier gain on the classifier, starter precision at 20 at least level). Starter Spearman 0.107 is still below price alone (0.144); the market block closes about a third of that gap. Results in `backtests/2025-26_v3.json`. The GW4 archive is written by v3 from the next hourly run, so GW4 is the first paired grade of v3.
+- **The season in progress comes from FPL's own API** (`fpl_history.py`, element-summary per player, finished gameweeks only, cached for six hours). vaastav's 2026/27 file held GW1 while GW3 was final and carried no transfer data, so v2 had been training without its newest completed matches; the "newest match included exactly once" claim in `model.py` is true again.
+- **Promotion gate in `score.py`.** `scorecard.json` now carries `summary.promotion_ready` and `summary.promotion` (window, gameweeks, the paired starter-Spearman difference with its 95% interval, both precision-at-20 means, the reasons it is not ready, the rule in words). Rule: over the last six paired gameweeks, model starter Spearman ahead of `ep_next` with the interval above zero, and starter precision at 20 at least level. The feed is switched by a person; the file only says ready.
+- **P(60+) graded in the scorecard.** `score.py` now grades the model's archived `p_start60` (availability applied, as a manager would have seen it) with a Brier score beside the base-rate Brier, per population, into `scores/gw{N}.json` and the scorecard rows (`model_p60_brier_all`). GW3's file is immutable and predates this; GW4 is the first. This is the number to set beside the site's `brier_60` in `site_scorecard.json` after GW4.
+
 ### Next, in order
 
-1. **Shadow v3: the P(60+) stage on FPL's free fields.** Port the site's xMins inputs into `model.py`'s classifier as as-of features (status, news recency, chance of playing, starts and minutes over the last six gameweeks, the fixture count), evaluate in `backtest.py` first, and ship with `model_version` `xpoints-two-stage-blend-v3` and the same paired archive naming (`predictions/gw{N}_model.json`). Success is a Brier improvement on the classifier and a starter precision at 20 at least level with v2.
-2. **Promotion gate in `score.py`.** A rolling rule over the last six graded gameweeks (model starter Spearman and precision at 20 at or above `ep_next`, paired interval excluding zero) that writes `promotion_ready` into `scorecard.json`; the site reads it and says so. Nothing flips automatically.
-3. **DBT-01** in `fpl_dbt`: season-aware snapshot keys and blocking gates, required before any multi-season training mart.
-4. **After GW4 is final** (deadline 12 September 12:30 UTC): the site's first horizon-week grades and the first P(60+) Brier score land in `site_scorecard.json`; compare that Brier with v2's classifier on the same rows before deciding what v3 keeps.
-5. **Parked, do not reopen without new evidence:** opponent form, prior-season priors, a Railway-dispatch trigger for the hourly job, the dbt #18 rebase.
+1. **After GW4 is final** (deadline 12 September 12:30 UTC): read `scores/gw4.json` (v3's first paired row, its P(60+) Brier) beside `scores/site/gw4.json` (the site's P(60+) Brier on the same players). One gameweek decides nothing; note it and move on.
+2. **DBT-01** in `fpl_dbt`: season-aware snapshot key, failed fetches distinguished from empty histories (retry, then skip so the previous load stands), ingestion run ids with expected and received counts, and `dbt test` blocking the R2 upload.
+3. **Availability as a feature, once it can be backtested.** `fpl_dbt`'s daily snapshots record `status`, `news` and `chance_of_playing` per player per day from this season; after a season of them exists they can join the training rows as-of and be evaluated in `backtest.py` the same way the market block was. Until then they stay a post-model rule.
+4. **Parked, do not reopen without new evidence:** opponent form, prior-season priors, a Railway-dispatch trigger for the hourly job, the dbt #18 rebase.
 
 ### Working rules agreed with the owner
 
@@ -529,7 +545,7 @@ Acceptance:
 Do these in order:
 
 - [ ] XP-01 — workflow/source resilience and negative-value policy
-- [ ] DBT-01 — season-safe snapshots and blocking data gates
+- [ ] DBT-01 — season-safe snapshots and blocking data gates (in progress, 9 September 2026)
 - [ ] DBT-02 — point-in-time multi-season training mart
 - [ ] XP-02 — shared feature builder and leakage tests
 - [ ] XP-03 — forward evaluation and public baseline scorecard
