@@ -78,7 +78,7 @@ What it says, and what it does not:
 ### Next, in order
 
 1. **After GW4 is final** (deadline 12 September 12:30 UTC): read `scores/gw4.json` (v3's first paired row, its P(60+) Brier) beside `scores/site/gw4.json` (the site's P(60+) Brier on the same players). One gameweek decides nothing; note it and move on.
-2. **DBT-01** in `fpl_dbt`: season-aware snapshot key, failed fetches distinguished from empty histories (retry, then skip so the previous load stands), ingestion run ids with expected and received counts, and `dbt test` blocking the R2 upload.
+2. **DBT-01** in `fpl_dbt`: built on 9 September as fpl_dbt PR #26 (snapshot keyed by `player_code` with `snapshot_identity.py` before each run, `raw.ingestion_runs` with `run_id` on every row, retries then skip on failure, incomplete runs stop the pipeline, blocking-tagged gates). Merge, then watch the first Railway run's log for the identity heal line and the gates.
 3. **Availability as a feature, once it can be backtested.** `fpl_dbt`'s daily snapshots record `status`, `news` and `chance_of_playing` per player per day from this season; after a season of them exists they can join the training rows as-of and be evaluated in `backtest.py` the same way the market block was. Until then they stay a post-model rule.
 4. **Parked, do not reopen without new evidence:** opponent form, prior-season priors, a Railway-dispatch trigger for the hourly job, the dbt #18 rebase.
 
@@ -545,7 +545,7 @@ Acceptance:
 Do these in order:
 
 - [ ] XP-01 — workflow/source resilience and negative-value policy
-- [ ] DBT-01 — season-safe snapshots and blocking data gates (in progress, 9 September 2026)
+- [x] DBT-01 — season-safe snapshots and blocking data gates (fpl_dbt PR #26, 9 September 2026; awaiting merge)
 - [ ] DBT-02 — point-in-time multi-season training mart
 - [ ] XP-02 — shared feature builder and leakage tests
 - [ ] XP-03 — forward evaluation and public baseline scorecard
