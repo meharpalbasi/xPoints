@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 4,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-09T14:18:34Z"
+  "generated_at": "2026-09-09T18:25:32Z"
  },
- "site_generated_at": "2026-09-09T18:25:34.863Z",
+ "site_generated_at": "2026-09-09T21:35:21.515Z",
  "rows": [
   {
    "player_id": 1,
@@ -519,13 +519,13 @@
    "web_name": "Cash",
    "team": 2,
    "element_type": 2,
-   "rate": 2.5,
+   "rate": 2.47,
    "rate_source": "feed",
    "xp": {
     "4": 1.7,
     "5": 2.4,
     "6": 2.4,
-    "7": 2.7,
+    "7": 2.6,
     "8": 2.5
    }
   },
@@ -5879,10 +5879,10 @@
    "web_name": "Gakpo",
    "team": 14,
    "element_type": 3,
-   "rate": 9.9,
+   "rate": 9.91,
    "rate_source": "feed",
    "xp": {
-    "4": 9.3,
+    "4": 7.0,
     "5": 7.0,
     "6": 7.1,
     "7": 5.5,
@@ -9495,7 +9495,7 @@
    "web_name": "Dedi\u0107",
    "team": 17,
    "element_type": 2,
-   "rate": 4.98,
+   "rate": 4.94,
    "rate_source": "feed",
    "xp": {
     "4": 3.2,
@@ -10482,6 +10482,6 @@
    }
   }
  ],
- "archived_at": "2026-09-09T18:25:34Z",
+ "archived_at": "2026-09-09T21:35:21Z",
  "deadline": "2026-09-12T12:30:00Z"
 }

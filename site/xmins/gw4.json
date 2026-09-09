@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-09T18:25:35.766Z",
+ "site_generated_at": "2026-09-09T21:35:22.432Z",
  "rows": [
   {
    "player_id": 1,
@@ -5870,13 +5870,13 @@
    "web_name": "Gakpo",
    "team": 14,
    "element_type": 3,
-   "status": "a",
-   "xMins": 75.5,
-   "pStart": 0.9,
-   "p60": 0.88,
-   "pAppear": 0.94,
+   "status": "d",
+   "xMins": 56.6,
+   "pStart": 0.68,
+   "p60": 0.66,
+   "pAppear": 0.7,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.75,
    "evidence": 3,
    "role": "nailed"
   },
@@ -10473,6 +10473,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-09T18:25:35Z",
+ "archived_at": "2026-09-09T21:35:22Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
