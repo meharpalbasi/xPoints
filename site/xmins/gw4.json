@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-09T13:01:14.890Z",
+ "site_generated_at": "2026-09-09T14:18:37.819Z",
  "rows": [
   {
    "player_id": 1,
@@ -4558,13 +4558,13 @@
    "web_name": "McNair",
    "team": 11,
    "element_type": 2,
-   "status": "a",
-   "xMins": 14.4,
-   "pStart": 0.1,
-   "p60": 0.1,
-   "pAppear": 0.34,
+   "status": "d",
+   "xMins": 10.8,
+   "pStart": 0.07,
+   "p60": 0.07,
+   "pAppear": 0.26,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.75,
    "evidence": 3,
    "role": "bench"
   },
@@ -8750,15 +8750,15 @@
    "web_name": "Mundle",
    "team": 20,
    "element_type": 3,
-   "status": "a",
-   "xMins": 11.0,
-   "pStart": 0.1,
-   "p60": 0.1,
-   "pAppear": 0.4,
+   "status": "i",
+   "xMins": 0.0,
+   "pStart": 0.0,
+   "p60": 0.0,
+   "pAppear": 0.0,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.0,
    "evidence": 3,
-   "role": "bench"
+   "role": "out"
   },
   {
    "player_id": 548,
@@ -9006,15 +9006,15 @@
    "web_name": "Morita",
    "team": 11,
    "element_type": 3,
-   "status": "a",
-   "xMins": 23.5,
-   "pStart": 0.37,
-   "p60": 0.14,
-   "pAppear": 0.43,
+   "status": "i",
+   "xMins": 0.0,
+   "pStart": 0.0,
+   "p60": 0.0,
+   "pAppear": 0.0,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.0,
    "evidence": 3,
-   "role": "rotation"
+   "role": "out"
   },
   {
    "player_id": 564,
@@ -10473,6 +10473,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-09T13:01:15Z",
+ "archived_at": "2026-09-09T14:18:37Z",
  "deadline": "2026-09-12T12:30:00Z"
 }

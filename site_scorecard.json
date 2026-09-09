@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-09T13:01:36Z",
+  "generated_at": "2026-09-09T14:18:55Z",
   "method": "The site's projections table and expected-minutes table are frozen at each deadline (site/). Once FPL marks a gameweek data_checked, every frozen projection for it is joined to official results (event/{gw}/live) and scored per named population like the feed; the horizon week is how many deadlines before the gameweek the projection was made. P(60+) is scored with the Brier score against playing sixty minutes, beside the base-rate Brier it must beat. Entries under scores/site/ never change once written.",
   "populations": {
     "all": "every player in the archive",
