@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-09T14:18:37.819Z",
+ "site_generated_at": "2026-09-09T18:25:35.766Z",
  "rows": [
   {
    "player_id": 1,
@@ -510,13 +510,13 @@
    "web_name": "Cash",
    "team": 2,
    "element_type": 2,
-   "status": "a",
-   "xMins": 76.4,
-   "pStart": 0.9,
-   "p60": 0.88,
-   "pAppear": 0.94,
+   "status": "d",
+   "xMins": 57.3,
+   "pStart": 0.68,
+   "p60": 0.66,
+   "pAppear": 0.7,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.75,
    "evidence": 3,
    "role": "nailed"
   },
@@ -2718,13 +2718,13 @@
    "web_name": "Emegha",
    "team": 6,
    "element_type": 4,
-   "status": "a",
-   "xMins": 9.2,
-   "pStart": 0.1,
-   "p60": 0.09,
-   "pAppear": 0.16,
+   "status": "d",
+   "xMins": 6.9,
+   "pStart": 0.07,
+   "p60": 0.07,
+   "pAppear": 0.12,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.75,
    "evidence": 3,
    "role": "fringe"
   },
@@ -9486,13 +9486,13 @@
    "web_name": "Dedi\u0107",
    "team": 17,
    "element_type": 2,
-   "status": "a",
-   "xMins": 81.3,
-   "pStart": 0.9,
-   "p60": 0.88,
-   "pAppear": 0.94,
+   "status": "d",
+   "xMins": 61.0,
+   "pStart": 0.68,
+   "p60": 0.66,
+   "pAppear": 0.7,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.75,
    "evidence": 3,
    "role": "nailed"
   },
@@ -10473,6 +10473,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-09T14:18:37Z",
+ "archived_at": "2026-09-09T18:25:35Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
