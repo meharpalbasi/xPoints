@@ -1,7 +1,7 @@
 # xPoints research audit and production roadmap
 
 Last updated: 2 September 2026  
-Status: XP-01, XP-03 and the backtest harness are merged; a two-stage, price-blended challenger (XP-04/XP-05 slice) runs in shadow from GW3. See "Where things stand" for the hand-off.  
+Status: XP-01, XP-03 and the backtest harness are merged; a two-stage, price-blended challenger (XP-04/XP-05 slice) runs in shadow from GW3 and has its first paired grade (GW3). See "Where things stand" for the hand-off.  
 Scope: the xPoints model, its dbt data dependencies, evaluation, publication, and monitoring
 
 ## Executive summary
@@ -19,7 +19,7 @@ The most important conclusion from the research is not “add more XGBoost featu
 
 The existing production feed should remain the official FPL `ep_next` baseline until a challenger passes those gates. The current XGBoost script is experimental and is not suitable for production promotion.
 
-## Where things stand (2 September 2026) and what to do after GW3
+## Where things stand (9 September 2026): GW3 graded, and what to do next
 
 This is the hand-off for the next working session. The reasoning is in the research artifact (https://claude.ai/code/artifact/2ca07fa6-120d-4941-b5a3-641f17002cd5) and the website roadmap (`fpl-app/roadmap.md`).
 
@@ -33,16 +33,38 @@ This is the hand-off for the next working session. The reasoning is in the resea
 - **Harness:** `backtest.py` walk-forward with as-of (shift-then-roll) features and a leakage test; results in `backtests/*.json`. Ablations complete: opponent form (no gain), prior-season priors (no gain), two-stage (best MAE, starters still lose to price ordering).
 - **Numbers to remember:** GW1/GW2 `ep_next` MAE 1.598 / 1.467 against predict-zero 1.593 / 1.450 (zero wins pooled MAE both weeks); starter ρ 0.086 [−0.05, 0.22] and 0.173 [0.04, 0.32]; `ep_next` ≈ price ranking (ρ 0.73); starter-ρ sd ≈ 0.091, so detecting +0.05 needs ~27 gameweeks at 80% power.
 
-### After GW3 (deadline Friday 4 September 2026 17:30 UTC; FPL usually flips `data_checked` on the Monday or Tuesday)
+### GW3, graded on 7 September
 
-1. Confirm `scores/gw3.json` exists and the GW3 row of `scorecard.json` carries `model_*` fields, with `summary.model_vs_ep_next_starter_spearman` non-null. If the score step warned in the workflow run, run `python score.py --gw 3 --force` locally and open a PR with only the code fix; generated files are committed by the bot and never belong in feature PRs.
-2. Check that `predictions/gw3.json` and `predictions/gw3_model.json` were written before the deadline. A missing model archive means the shadow step failed silently; read the run's warnings.
-3. Treat one gameweek as one sample. A single-GW lead of ±0.1 in starter ρ is noise. Do not promote. Record the row in the research artifact's progress section and on `/app/accuracy` (automatic).
-4. Then work the queue in this order:
-   1. **XP-05 slice:** improve the P(60+) stage with FPL `status`, `news`, `chance_of_playing_next_round` and `starts` as of the deadline. Evaluate in `backtest.py` first; ship as shadow v3 with a new `model_version` and the same `gw{N}_model.json` naming so the scorecard stays paired.
-   2. **Promotion gate in `score.py`:** a rolling rule over the last six graded gameweeks (model starter ρ and precision@20 at or above `ep_next`, paired CI excluding zero) that writes `promotion_ready` into `scorecard.json`. The site keeps `ep_next` until the flag is true and a human flips the mode.
-   3. **DBT-01:** season-aware snapshot keys and blocking gates in `fpl_dbt`, required before any multi-season training mart.
-   4. **Parked, do not reopen without new evidence:** opponent form, prior-season priors, a Railway-dispatch trigger for the hourly job, the dbt #18 rebase.
+The first paired row. Both archives were frozen at 13:22 UTC on 4 September, four hours before the deadline, and `scores/gw3.json` carries `ep_next`, `model` and `zero` on identical rows (652 players, 307 played, 212 starters).
+
+| Population | Measure | `ep_next` | model v2 | predict zero |
+|---|---|---:|---:|---:|
+| all | MAE | 1.295 | **1.100** | 1.402 |
+| played | MAE | 2.426 | **1.953** | 2.977 |
+| starters | MAE | 2.962 | **2.365** | 3.741 |
+| starters | Spearman (95% CI) | -0.023 (-0.155 to 0.108) | -0.044 (-0.165 to 0.083) | n/a |
+| starters | precision at 20 | **0.102** | 0.078 | n/a |
+| all | captain regret | 13 | **6** | n/a |
+
+What it says, and what it does not:
+
+- `ep_next` beat predict-zero on pooled MAE for the first time this season (1.295 against 1.402), so the "worse than zero" headline no longer holds for GW3; over three gameweeks the means are 1.454 against 1.482.
+- The model beat `ep_next` on MAE in every population, by a wide margin among starters (2.37 against 2.96), and its top pick missed the week's best score by 6 points against 13. That is the expected shape: the price prior and the P(60+) stage cut the big misses.
+- Ranking among starters was noise for both: neither Spearman interval excludes zero, and the paired difference is -0.021 over one gameweek. GW3 was a low-signal week (the feed's starter rank match fell from 0.173 to -0.023). Nothing here promotes anything; the measured per-gameweek sd is now 0.098, so the power line says 31 gameweeks to detect +0.05 at 80%.
+- `scorecard.json` has the row, `summary.model_vs_ep_next_starter_spearman` is populated, and https://fplanaly.st/app/accuracy shows the model columns.
+
+### What changed around the model since 2 September
+
+- The site now computes its own **expected minutes** (`app/lib/xmins.mjs` in fpl-app: recent gameweeks weighted, a mild prior, FPL's availability as a multiplier; P(60+) uses this model's `p_start60` definition), **fixture-adjusted form** and **multi-week projections** (the feed pulled apart into a rate and carried forward by fixtures, opponent strength and expected minutes). Those tables are frozen at every deadline under `site/` by `site_snapshot.py` (xPoints #22) and graded by `score_site.py` into `scores/site/` and `site_scorecard.json`; the accuracy page reads them. GW4's snapshots are already frozen (654 rows each).
+- So the P(60+) work in the queue below has a working reference implementation on the site side, with the exact inputs the queue names (`status`, `news`, `chance_of_playing_next_round`, `starts`), and a grade of its own arriving after GW4.
+
+### Next, in order
+
+1. **Shadow v3: the P(60+) stage on FPL's free fields.** Port the site's xMins inputs into `model.py`'s classifier as as-of features (status, news recency, chance of playing, starts and minutes over the last six gameweeks, the fixture count), evaluate in `backtest.py` first, and ship with `model_version` `xpoints-two-stage-blend-v3` and the same paired archive naming (`predictions/gw{N}_model.json`). Success is a Brier improvement on the classifier and a starter precision at 20 at least level with v2.
+2. **Promotion gate in `score.py`.** A rolling rule over the last six graded gameweeks (model starter Spearman and precision at 20 at or above `ep_next`, paired interval excluding zero) that writes `promotion_ready` into `scorecard.json`; the site reads it and says so. Nothing flips automatically.
+3. **DBT-01** in `fpl_dbt`: season-aware snapshot keys and blocking gates, required before any multi-season training mart.
+4. **After GW4 is final** (deadline 12 September 12:30 UTC): the site's first horizon-week grades and the first P(60+) Brier score land in `site_scorecard.json`; compare that Brier with v2's classifier on the same rows before deciding what v3 keeps.
+5. **Parked, do not reopen without new evidence:** opponent form, prior-season priors, a Railway-dispatch trigger for the hourly job, the dbt #18 rebase.
 
 ### Working rules agreed with the owner
 
