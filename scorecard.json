@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-09T09:30:53Z",
+  "generated_at": "2026-09-09T13:01:36Z",
   "method": "Each archived pre-deadline snapshot is joined to official FPL results (event/{gw}/live) once the event is data_checked. Metrics are reported per named population; ties in rankings are broken at random and averaged. Files under scores/ are immutable once written.",
   "populations": {
     "all": "every player in the archive",
@@ -8,6 +8,30 @@
   },
   "summary": {
     "scored_gameweeks": 3,
+    "promotion_ready": false,
+    "promotion": {
+      "ready": false,
+      "window_gameweeks": 6,
+      "gameweeks_in_window": 1,
+      "gameweeks": [
+        3
+      ],
+      "starter_spearman_diff": {
+        "mean": -0.021,
+        "se": null,
+        "ci95": null
+      },
+      "precision_at_20_starters": {
+        "model_mean": 0.0778,
+        "ep_next_mean": 0.1015
+      },
+      "reasons": [
+        "1 of 6 paired gameweeks graded",
+        "starter rank match not ahead of ep_next on average",
+        "starter precision at 20 below ep_next"
+      ],
+      "rule": "over the last 6 paired gameweeks: model starter Spearman ahead of ep_next with the paired 95% interval above zero, and starter precision at 20 at least ep_next's; the feed is switched by a person, never by this file"
+    },
     "mean_ep_next_spearman_starters": 0.0787,
     "model_vs_ep_next_starter_spearman": {
       "gameweeks": 1,
@@ -49,6 +73,8 @@
       "model_spearman_starters_ci95": null,
       "model_precision_at_20_starters": null,
       "model_captain_regret": null,
+      "model_p60_brier_all": null,
+      "model_p60_base_rate_brier_all": null,
       "price_spearman_starters": null,
       "blend_spearman_starters": null,
       "blend_precision_at_20_starters": null
@@ -76,6 +102,8 @@
       "model_spearman_starters_ci95": null,
       "model_precision_at_20_starters": null,
       "model_captain_regret": null,
+      "model_p60_brier_all": null,
+      "model_p60_base_rate_brier_all": null,
       "price_spearman_starters": null,
       "blend_spearman_starters": null,
       "blend_precision_at_20_starters": null
@@ -106,6 +134,8 @@
       ],
       "model_precision_at_20_starters": 0.0778,
       "model_captain_regret": 6.0,
+      "model_p60_brier_all": null,
+      "model_p60_base_rate_brier_all": null,
       "price_spearman_starters": null,
       "blend_spearman_starters": null,
       "blend_precision_at_20_starters": null

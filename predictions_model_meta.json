@@ -1,13 +1,13 @@
 {
-  "model_version": "xpoints-two-stage-blend-v2",
-  "trained_at": "2026-09-09T09:30:42Z",
+  "model_version": "xpoints-two-stage-blend-v3",
+  "trained_at": "2026-09-09T13:01:18Z",
   "target_gameweek": 4,
   "seasons": [
     "2025-26",
     "2026-27"
   ],
-  "training_rows": 29948,
-  "n_features": 75,
+  "training_rows": 31228,
+  "n_features": 80,
   "features": [
     "total_points_r1",
     "total_points_r3",
@@ -83,7 +83,12 @@
     "pos_1",
     "pos_2",
     "pos_3",
-    "pos_4"
+    "pos_4",
+    "net_transfer_share",
+    "transfers_out_share",
+    "transfers_in_share",
+    "ownership_pct_rank",
+    "price_change"
   ],
   "params": {
     "objective": "reg:tweedie",
@@ -96,6 +101,8 @@
     "random_state": 0,
     "n_jobs": 4
   },
-  "design": "P(60+) x (0.5 * monotone-price Tweedie head trained on starters + 0.5 * price-implied expectation)",
-  "harness": "backtests/2025-26_blend.json (walk-forward GW8-38: two_stage_blend MAE 0.920 all, starter p@20 0.173, captain regret 10.71 \u2014 best of all candidates)"
+  "market_block": true,
+  "live_season_source": "FPL element-summary (fpl_history.py), finished gameweeks only",
+  "design": "P(60+) x (0.5 * monotone-price Tweedie head trained on starters + 0.5 * price-implied expectation), both stages with the deadline-known market block (transfers, ownership, price move)",
+  "harness": "backtests/2025-26_v3.json (walk-forward GW8-38, identical rows: two_stage_blend_v3h MAE 0.888 all against v2 0.920, starter Spearman 0.107 against 0.087, starter p@20 0.194 against 0.173, P(60+) Brier 0.0734 against 0.0787, base rate 0.1925)"
 }

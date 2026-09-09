@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-09T09:30:38.280Z",
+ "site_generated_at": "2026-09-09T13:01:14.890Z",
  "rows": [
   {
    "player_id": 1,
@@ -10110,15 +10110,15 @@
    "web_name": "Ansah",
    "team": 11,
    "element_type": 4,
-   "status": "a",
-   "xMins": 9.2,
-   "pStart": 0.1,
-   "p60": 0.09,
-   "pAppear": 0.16,
+   "status": "i",
+   "xMins": 0.0,
+   "pStart": 0.0,
+   "p60": 0.0,
+   "pAppear": 0.0,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.0,
    "evidence": 3,
-   "role": "fringe"
+   "role": "out"
   },
   {
    "player_id": 633,
@@ -10473,6 +10473,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-09T09:30:38Z",
+ "archived_at": "2026-09-09T13:01:15Z",
  "deadline": "2026-09-12T12:30:00Z"
 }

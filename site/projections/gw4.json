@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 4,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-09T04:08:03Z"
+  "generated_at": "2026-09-09T09:30:34Z"
  },
- "site_generated_at": "2026-09-09T09:30:37.031Z",
+ "site_generated_at": "2026-09-09T13:01:13.446Z",
  "rows": [
   {
    "player_id": 1,
@@ -10119,14 +10119,14 @@
    "web_name": "Ansah",
    "team": 11,
    "element_type": 4,
-   "rate": 14.42,
-   "rate_source": "feed",
+   "rate": 0.0,
+   "rate_source": "none",
    "xp": {
-    "4": 1.4,
-    "5": 1.2,
-    "6": 1.0,
-    "7": 0.8,
-    "8": 0.7
+    "4": 0.0,
+    "5": 0.0,
+    "6": 0.0,
+    "7": 0.0,
+    "8": 0.0
    }
   },
   {
@@ -10482,6 +10482,6 @@
    }
   }
  ],
- "archived_at": "2026-09-09T09:30:37Z",
+ "archived_at": "2026-09-09T13:01:13Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
