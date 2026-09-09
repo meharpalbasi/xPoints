@@ -30,6 +30,11 @@ DATA = Path("data/merged_gw_2025-26.csv")
 STATS = ["total_points", "minutes", "expected_goals", "expected_assists", "bps", "bonus",
          "defensive_contribution", "starts", "goals_scored", "assists", "clean_sheets", "saves"]
 WINDOWS = (1, 3, 5, 10)
+# Deadline-known market columns: transfers made and ownership held before GW g's
+# deadline, straight from FPL's per-gameweek history.
+MARKET = ["selected", "transfers_in", "transfers_out", "transfers_balance"]
+MARKET_FEATURES = ["net_transfer_share", "transfers_out_share", "transfers_in_share",
+                   "ownership_pct_rank", "price_change"]
 POSITIONS = {"GK": 1, "GKP": 1, "DEF": 2, "MID": 3, "FWD": 4}
 POPULATIONS = {
     "all": lambda m: np.ones(len(m), dtype=bool),
@@ -76,15 +81,17 @@ def load_player_gameweeks(path=DATA, team_features=False):
     opponent's as-of form (from team_form_table) — deadline-known context,
     since the opponent for GW g is fixed before g's deadline.
     """
-    path = Path(path)
-    df = pd.read_csv(path)
+    df = path.copy() if isinstance(path, pd.DataFrame) else pd.read_csv(Path(path))
     df["was_home"] = df["was_home"].astype(str).str.lower().eq("true").astype(int)
     for c in STATS + ["expected_goals_conceded", "team_h_score", "team_a_score"]:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0.0)
+    for c in MARKET:
+        df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0.0) if c in df.columns else 0.0
     agg = {c: "sum" for c in STATS + ["expected_goals_conceded"]}
     agg.update({"was_home": "mean", "value": "first", "position": "first",
                 "team": "first", "name": "first", "fixture": "count"})
+    agg.update({c: "first" for c in MARKET})  # identical across a DGW's fixture rows
     pg = df.groupby(["element", "GW"], as_index=False).agg(agg)
     pg = pg.rename(columns={"fixture": "fixture_count", "was_home": "home_share"})
     pg["position_id"] = pg["position"].map(POSITIONS).fillna(3).astype(int)
@@ -93,6 +100,7 @@ def load_player_gameweeks(path=DATA, team_features=False):
     if not team_features:
         return pg
 
+    path = Path(path)
     season = path.stem.split("_")[-1]
     raw = pd.read_csv(path.parent / f"players_raw_{season}.csv", usecols=["id", "team"])
     element_team = dict(zip(raw["id"], raw["team"]))
@@ -112,8 +120,36 @@ def load_player_gameweeks(path=DATA, team_features=False):
     return pg.sort_values(["element", "GW"]).reset_index(drop=True)
 
 
-def build_features(pg, key="element"):
+def market_features(pg, key="element"):
+    """Deadline-known market signals, as-of by construction: the transfers made
+    and the ownership held before GW g's deadline, and the price move into g.
+
+    Managers react to team news hours before any historical dataset records
+    a `status`, so these carry the availability information the history
+    otherwise lacks. The transfer shares are NaN for any gameweek group whose
+    source has not populated transfers at all (every value zero), so a stale
+    feed reads as unknown rather than as "nobody moved".
+    """
+    group = pg["season_gw"] if "season_gw" in pg.columns else pg["GW"]
+    sel = pd.to_numeric(pg["selected"], errors="coerce").fillna(0.0)
+    t_in = pd.to_numeric(pg["transfers_in"], errors="coerce").fillna(0.0)
+    t_out = pd.to_numeric(pg["transfers_out"], errors="coerce").fillna(0.0)
+    populated = (t_in + t_out).groupby(group).transform("max") > 0
+    out = pd.DataFrame(index=pg.index)
+    out["net_transfer_share"] = (t_in - t_out) / sel.clip(lower=1)
+    out["transfers_out_share"] = t_out / (sel + t_out).clip(lower=1)
+    out["transfers_in_share"] = t_in / sel.clip(lower=1)
+    out.loc[~populated, ["net_transfer_share", "transfers_out_share", "transfers_in_share"]] = np.nan
+    out["ownership_pct_rank"] = sel.groupby(group).rank(pct=True)
+    out["price_change"] = pg["price"] - pg.groupby(key)["price"].shift(1)
+    return out
+
+
+def build_features(pg, key="element", market=False):
     """As-of features: for a row at GW g, everything derives from GW < g.
+
+    With market=True the deadline-known market block (market_features) is
+    appended: the v3 candidate's extra inputs.
 
     shift(1) then roll on the per-player, order-sorted frame guarantees the
     target gameweek never leaks into its own features. Deadline-known
@@ -145,6 +181,8 @@ def build_features(pg, key="element"):
     feats["home_share"] = pg["home_share"]
     for pid in (1, 2, 3, 4):
         feats[f"pos_{pid}"] = (pg["position_id"] == pid).astype(float)
+    if market:
+        feats = pd.concat([feats, market_features(pg, key)], axis=1)
     return feats
 
 
@@ -194,6 +232,7 @@ def candidates(seed=0):
 
 def score_fold(preds, actual, minutes, k=20):
     out = {}
+    started = (minutes >= 60).astype(float)
     for pop, keep in POPULATIONS.items():
         mask = keep(minutes)
         a = actual[mask].tolist()
@@ -201,9 +240,11 @@ def score_fold(preds, actual, minutes, k=20):
         for name, p in preds.items():
             pv = p[mask].tolist()
             m = {}
+            if name.startswith("p60"):  # a probability of 60+ minutes: score it as one
+                m["brier"] = float(np.mean((p[mask] - started[mask]) ** 2))
             if name not in ("price",):  # rank-only predictor has no meaningful MAE
                 m["mae"] = mae(pv, a)
-            if name != "zero" and len(a) >= 3:
+            if name not in ("zero", "p60_base") and len(a) >= 3:
                 m["spearman"] = spearman(pv, a)
                 m["p_at_20"] = precision_at_k(pv, a, k, draws=50)
                 if pop == "all":
@@ -230,6 +271,9 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
     # Monotone-in-price: the model may refine price's ordering but never undo it
     mono = tuple(1 if c == "price" else 0 for c in cols)
     mono_p = mono + (0,) * len(PRIOR_FEATURES)
+    # Variant matrix: base features + deadline-known market signals (the v3 block)
+    Xm = np.hstack([Xf, market_features(pg)[MARKET_FEATURES].to_numpy(dtype=float)])
+    mono_m = mono + (0,) * len(MARKET_FEATURES)
     tw = dict(objective="reg:tweedie", tweedie_variance_power=1.3, n_estimators=300, max_depth=4,
               learning_rate=0.05, subsample=0.8, colsample_bytree=0.8, random_state=0, n_jobs=4)
 
@@ -294,6 +338,19 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
         from metrics import average_ranks
         r_c = np.array(average_ranks(list(preds["cond_mono"]))); r_p = np.array(average_ranks(list(preds["price"])))
         preds["rank_blend"] = -(0.5 * r_c + 0.5 * r_p)                              # rank blend (starters ranking)
+        # v3: the same two stages with the market block in the classifier (the
+        # availability information the history carries) and, in v3h, in the
+        # conditional head as well. p60_base is the training base rate: the
+        # Brier score a classifier must beat to have learned anything.
+        preds["p60_base"] = np.full(int(te.sum()), float(started.mean()))
+        p60_m = XGBClassifier(n_estimators=300, max_depth=4, learning_rate=0.05, subsample=0.8,
+                              colsample_bytree=0.8, random_state=0, n_jobs=4, eval_metric="logloss")
+        p60_m.fit(Xm[tr], started.astype(int))
+        prob_m = p60_m.predict_proba(Xm[te])[:, 1]
+        preds["p60_v3"] = prob_m
+        preds["two_stage_blend_v3"] = prob_m * preds["cond_blend"]
+        c_mono_m = XGBRegressor(**tw, monotone_constraints=mono_m).fit(Xm[tr][started], yt)
+        preds["two_stage_blend_v3h"] = prob_m * (0.5 * c_mono_m.predict(Xm[te]) + 0.5 * price_expect)
         preds["xgb_tweedie_prior"] = XGBRegressor(**tw).fit(Xp[tr], np.clip(y[tr], 0, None)).predict(Xp[te])
         folds.append({"gw": g, "n_train": int(tr.sum()), **score_fold(preds, y[te], minutes[te])})
         print(f"GW{g:2d} train={tr.sum():5d} test={te.sum():3d} | starters ρ: "
@@ -302,13 +359,14 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
 
     models = ["zero", "career_mean", "last5_mean", "price", "ridge", "xgb_mse", "xgb_tweedie", "xgb_tweedie_opp",
               "xgb_tweedie_prior", "p60", "cond_start", "cond_prior", "cond_mono", "cond_prior_mono",
-              "two_stage", "two_stage_prior_mono", "price_expect", "cond_blend", "rank_blend", "two_stage_blend"]
+              "two_stage", "two_stage_prior_mono", "price_expect", "cond_blend", "rank_blend", "two_stage_blend",
+              "p60_base", "p60_v3", "two_stage_blend_v3", "two_stage_blend_v3h"]
     summary = {}
     for pop in POPULATIONS:
         summary[pop] = {}
         for m in models:
             metrics = {}
-            for key in ("mae", "spearman", "p_at_20", "captain_regret"):
+            for key in ("mae", "spearman", "p_at_20", "captain_regret", "brier"):
                 vals = [f[pop][m][key] for f in folds if key in f[pop][m] and not math.isnan(f[pop][m][key])]
                 if vals:
                     metrics[key] = {"mean": round(mean(vals), 4), "sd": round(stdev(vals), 4) if len(vals) > 1 else None}
@@ -337,7 +395,7 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
         "populations": {"all": "every player with a row at g", "played": "minutes > 0 at g", "starters": "minutes >= 60 at g"},
         "summary": summary, "paired_vs_xgb_mse_starters_spearman": paired,
         "opponent_block_starters_spearman": paired_opp, "two_stage_spearman": paired_two,
-        "team_features": TEAM_FEATURES, "folds": folds,
+        "team_features": TEAM_FEATURES, "market_features": MARKET_FEATURES, "folds": folds,
     }
     out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps(result, indent=2, allow_nan=False))
@@ -370,6 +428,23 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
         paired_blend[f"two_stage_blend_vs_two_stage_{key}_{pop}"] = {"mean_diff": round(mean(d), 4), "se": round(stdev(d) / math.sqrt(len(d)), 4)}
     result["price_blend"] = paired_blend
     print("price blend:", {k: f"{v['mean_diff']:+.3f} ± {v['se']:.3f}" for k, v in paired_blend.items()})
+    # v3 (market block): does the classifier get better calibrated, and does the
+    # projection built on it keep or improve the ranking and captaincy numbers?
+    paired_v3 = {}
+    for cand, ref, pop, key in (("p60_v3", "p60", "all", "brier"), ("p60", "p60_base", "all", "brier"),
+                                ("p60_v3", "p60_base", "all", "brier"),
+                                ("two_stage_blend_v3", "two_stage_blend", "all", "mae"),
+                                ("two_stage_blend_v3", "two_stage_blend", "starters", "spearman"),
+                                ("two_stage_blend_v3", "two_stage_blend", "starters", "p_at_20"),
+                                ("two_stage_blend_v3", "two_stage_blend", "all", "captain_regret"),
+                                ("two_stage_blend_v3h", "two_stage_blend", "all", "mae"),
+                                ("two_stage_blend_v3h", "two_stage_blend", "starters", "spearman"),
+                                ("two_stage_blend_v3h", "two_stage_blend", "starters", "p_at_20"),
+                                ("two_stage_blend_v3h", "two_stage_blend", "all", "captain_regret")):
+        d = [f[pop][cand][key] - f[pop][ref][key] for f in folds]
+        paired_v3[f"{cand}_vs_{ref}_{key}_{pop}"] = {"mean_diff": round(mean(d), 4), "se": round(stdev(d) / math.sqrt(len(d)), 4)}
+    result["market_v3"] = paired_v3
+    print("market v3:", {k: f"{v['mean_diff']:+.4f} ± {v['se']:.4f}" for k, v in paired_v3.items()})
     out.write_text(json.dumps(result, indent=2, allow_nan=False))
     print("priors / monotone price:", {k: f"{v['mean_diff']:+.3f} ± {v['se']:.3f}" for k, v in paired_prior.items()})
     return result

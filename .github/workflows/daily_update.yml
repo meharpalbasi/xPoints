@@ -93,6 +93,22 @@ jobs:
         # Never blocks publication.
         run: python site_snapshot.py || echo "::warning::site snapshot failed; the feed was still published"
 
+      - name: Pick the cache bucket for this season's history
+        # model.py rebuilds data/fpl_history_<season>.csv from FPL's element-summary
+        # (one call per player) only when the file is older than six hours or lacks
+        # the newest finished gameweek. Caching it in six-hour buckets keeps that to
+        # a few fetches a day instead of one per hourly run.
+        id: history-bucket
+        run: echo "bucket=$(date -u +%Y%m%d)-$(( 10#$(date -u +%H) / 6 ))" >> "$GITHUB_OUTPUT"
+
+      - name: Cache this season's history from FPL's API
+        uses: actions/cache@v4
+        with:
+          path: data/fpl_history_*.csv
+          key: fpl-history-${{ steps.history-bucket.outputs.bucket }}
+          restore-keys: |
+            fpl-history-
+
       - name: Shadow model (never blocks publication)
         # Trains the harness pipeline on 2025/26 + this season and predicts the
         # next gameweek into predictions_model.json + predictions/gw{N}_model.json.
