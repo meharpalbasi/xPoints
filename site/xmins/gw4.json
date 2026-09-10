@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-10T17:37:03.842Z",
+ "site_generated_at": "2026-09-10T20:41:58.176Z",
  "rows": [
   {
    "player_id": 1,
@@ -2990,15 +2990,15 @@
    "web_name": "Eccles",
    "team": 7,
    "element_type": 3,
-   "status": "a",
-   "xMins": 9.5,
-   "pStart": 0.1,
-   "p60": 0.09,
-   "pAppear": 0.16,
+   "status": "i",
+   "xMins": 0.0,
+   "pStart": 0.0,
+   "p60": 0.0,
+   "pAppear": 0.0,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.0,
    "evidence": 3,
-   "role": "fringe"
+   "role": "out"
   },
   {
    "player_id": 188,
@@ -10489,6 +10489,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-10T17:37:03Z",
+ "archived_at": "2026-09-10T20:41:58Z",
  "deadline": "2026-09-12T12:30:00Z"
 }

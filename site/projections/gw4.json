@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 4,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-10T13:29:19Z"
+  "generated_at": "2026-09-10T17:37:00Z"
  },
- "site_generated_at": "2026-09-10T17:37:02.740Z",
+ "site_generated_at": "2026-09-10T20:41:57.064Z",
  "rows": [
   {
    "player_id": 1,
@@ -3003,10 +3003,10 @@
    "rate_source": "none",
    "xp": {
     "4": 0.0,
-    "5": 0.1,
-    "6": 0.1,
-    "7": 0.2,
-    "8": 0.2
+    "5": 0.0,
+    "6": 0.0,
+    "7": 0.0,
+    "8": 0.0
    }
   },
   {
@@ -10487,17 +10487,17 @@
    "web_name": "Gboho",
    "team": 7,
    "element_type": 3,
-   "rate": 0.0,
-   "rate_source": "none",
+   "rate": 15.0,
+   "rate_source": "feed",
    "xp": {
-    "4": 0.0,
-    "5": 0.1,
-    "6": 0.2,
-    "7": 0.2,
-    "8": 0.3
+    "4": 2.0,
+    "5": 1.2,
+    "6": 1.1,
+    "7": 0.9,
+    "8": 0.9
    }
   }
  ],
- "archived_at": "2026-09-10T17:37:02Z",
+ "archived_at": "2026-09-10T20:41:57Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
