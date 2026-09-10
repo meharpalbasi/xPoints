@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-09T21:35:22.432Z",
+ "site_generated_at": "2026-09-10T13:29:22.955Z",
  "rows": [
   {
    "player_id": 1,
@@ -2158,15 +2158,15 @@
    "web_name": "Yohanna",
    "team": 5,
    "element_type": 3,
-   "status": "a",
-   "xMins": 12.1,
-   "pStart": 0.1,
-   "p60": 0.1,
-   "pAppear": 0.34,
+   "status": "i",
+   "xMins": 0.0,
+   "pStart": 0.0,
+   "p60": 0.0,
+   "pAppear": 0.0,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.0,
    "evidence": 3,
-   "role": "bench"
+   "role": "out"
   },
   {
    "player_id": 136,
@@ -3502,15 +3502,15 @@
    "web_name": "J.Rak-Sakyi",
    "team": 8,
    "element_type": 3,
-   "status": "a",
-   "xMins": 9.5,
-   "pStart": 0.1,
-   "p60": 0.09,
-   "pAppear": 0.16,
+   "status": "u",
+   "xMins": 0.0,
+   "pStart": 0.0,
+   "p60": 0.0,
+   "pAppear": 0.0,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.0,
    "evidence": 3,
-   "role": "fringe"
+   "role": "out"
   },
   {
    "player_id": 220,
@@ -4558,13 +4558,13 @@
    "web_name": "McNair",
    "team": 11,
    "element_type": 2,
-   "status": "d",
-   "xMins": 10.8,
-   "pStart": 0.07,
-   "p60": 0.07,
-   "pAppear": 0.26,
+   "status": "a",
+   "xMins": 14.4,
+   "pStart": 0.1,
+   "p60": 0.1,
+   "pAppear": 0.34,
    "fixtures": 1,
-   "availability": 0.75,
+   "availability": 1.0,
    "evidence": 3,
    "role": "bench"
   },
@@ -10430,15 +10430,15 @@
    "web_name": "Azeez",
    "team": 5,
    "element_type": 3,
-   "status": "i",
-   "xMins": 0.0,
-   "pStart": 0.0,
-   "p60": 0.0,
-   "pAppear": 0.0,
+   "status": "d",
+   "xMins": 4.7,
+   "pStart": 0.05,
+   "p60": 0.05,
+   "pAppear": 0.08,
    "fixtures": 1,
-   "availability": 0.0,
+   "availability": 0.5,
    "evidence": 3,
-   "role": "out"
+   "role": "fringe"
   },
   {
    "player_id": 653,
@@ -10473,6 +10473,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-09T21:35:22Z",
+ "archived_at": "2026-09-10T13:29:22Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
