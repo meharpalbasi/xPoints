@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-10T13:29:22.955Z",
+ "site_generated_at": "2026-09-10T17:37:03.842Z",
  "rows": [
   {
    "player_id": 1,
@@ -7102,13 +7102,13 @@
    "web_name": "Jaouen",
    "team": 17,
    "element_type": 1,
-   "status": "a",
-   "xMins": 10.3,
-   "pStart": 0.1,
-   "p60": 0.09,
-   "pAppear": 0.16,
+   "status": "d",
+   "xMins": 5.1,
+   "pStart": 0.05,
+   "p60": 0.05,
+   "pAppear": 0.08,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.5,
    "evidence": 3,
    "role": "fringe"
   },
@@ -10471,8 +10471,24 @@
    "availability": 1.0,
    "evidence": 3,
    "role": "fringe"
+  },
+  {
+   "player_id": 655,
+   "player_code": 242893,
+   "web_name": "Gboho",
+   "team": 7,
+   "element_type": 3,
+   "status": "a",
+   "xMins": 9.5,
+   "pStart": 0.1,
+   "p60": 0.09,
+   "pAppear": 0.16,
+   "fixtures": 1,
+   "availability": 1.0,
+   "evidence": 3,
+   "role": "fringe"
   }
  ],
- "archived_at": "2026-09-10T13:29:22Z",
+ "archived_at": "2026-09-10T17:37:03Z",
  "deadline": "2026-09-12T12:30:00Z"
 }

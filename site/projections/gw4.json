@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 4,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-10T08:54:18Z"
+  "generated_at": "2026-09-10T13:29:19Z"
  },
- "site_generated_at": "2026-09-10T13:29:22.136Z",
+ "site_generated_at": "2026-09-10T17:37:02.740Z",
  "rows": [
   {
    "player_id": 1,
@@ -2167,14 +2167,14 @@
    "web_name": "Yohanna",
    "team": 5,
    "element_type": 3,
-   "rate": 2.38,
-   "rate_source": "feed",
+   "rate": 2.0,
+   "rate_source": "season",
    "xp": {
     "4": 0.0,
     "5": 0.0,
     "6": 0.3,
     "7": 0.4,
-    "8": 0.4
+    "8": 0.3
    }
   },
   {
@@ -4567,12 +4567,12 @@
    "web_name": "McNair",
    "team": 11,
    "element_type": 2,
-   "rate": 1.82,
+   "rate": 2.05,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
     "5": 0.4,
-    "6": 0.4,
+    "6": 0.5,
     "7": 0.4,
     "8": 0.5
    }
@@ -7117,7 +7117,7 @@
     "4": 0.0,
     "5": 0.1,
     "6": 0.2,
-    "7": 0.3,
+    "7": 0.2,
     "8": 0.2
    }
   },
@@ -10439,14 +10439,14 @@
    "web_name": "Azeez",
    "team": 5,
    "element_type": 3,
-   "rate": 0.0,
-   "rate_source": "none",
+   "rate": 15.0,
+   "rate_source": "feed",
    "xp": {
-    "4": 0.0,
-    "5": 0.1,
-    "6": 0.1,
-    "7": 0.2,
-    "8": 0.2
+    "4": 1.0,
+    "5": 1.1,
+    "6": 1.0,
+    "7": 1.0,
+    "8": 0.7
    }
   },
   {
@@ -10480,8 +10480,24 @@
     "7": 0.7,
     "8": 0.4
    }
+  },
+  {
+   "player_id": 655,
+   "player_code": 242893,
+   "web_name": "Gboho",
+   "team": 7,
+   "element_type": 3,
+   "rate": 0.0,
+   "rate_source": "none",
+   "xp": {
+    "4": 0.0,
+    "5": 0.1,
+    "6": 0.2,
+    "7": 0.2,
+    "8": 0.3
+   }
   }
  ],
- "archived_at": "2026-09-10T13:29:22Z",
+ "archived_at": "2026-09-10T17:37:02Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
