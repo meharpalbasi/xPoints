@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 4,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-11T14:56:13Z"
+  "generated_at": "2026-09-11T18:18:50Z"
  },
- "site_generated_at": "2026-09-11T18:18:52.767Z",
+ "site_generated_at": "2026-09-11T21:37:39.476Z",
  "rows": [
   {
    "player_id": 1,
@@ -1975,14 +1975,14 @@
    "web_name": "Hinshelwood",
    "team": 5,
    "element_type": 3,
-   "rate": 15.0,
+   "rate": 7.86,
    "rate_source": "feed",
    "xp": {
-    "4": 2.6,
-    "5": 2.7,
-    "6": 2.4,
-    "7": 2.5,
-    "8": 1.8
+    "4": 0.0,
+    "5": 0.0,
+    "6": 4.0,
+    "7": 4.5,
+    "8": 3.5
    }
   },
   {
@@ -3834,7 +3834,7 @@
    "rate": 2.27,
    "rate_source": "feed",
    "xp": {
-    "4": 1.0,
+    "4": 1.3,
     "5": 1.8,
     "6": 1.8,
     "7": 2.1,
@@ -7991,14 +7991,14 @@
    "web_name": "Pedro Porro",
    "team": 19,
    "element_type": 2,
-   "rate": 3.46,
+   "rate": 3.42,
    "rate_source": "feed",
    "xp": {
     "4": 2.0,
     "5": 3.0,
     "6": 2.2,
-    "7": 3.1,
-    "8": 2.5
+    "7": 3.0,
+    "8": 2.4
    }
   },
   {
@@ -8103,11 +8103,11 @@
    "web_name": "Udogie",
    "team": 19,
    "element_type": 2,
-   "rate": 4.97,
+   "rate": 4.89,
    "rate_source": "feed",
    "xp": {
     "4": 1.7,
-    "5": 2.3,
+    "5": 2.2,
     "6": 1.5,
     "7": 2.0,
     "8": 1.5
@@ -9255,8 +9255,8 @@
    "web_name": "Mudryk",
    "team": 19,
    "element_type": 3,
-   "rate": 1.61,
-   "rate_source": "feed",
+   "rate": 2.0,
+   "rate_source": "season",
    "xp": {
     "4": 0.0,
     "5": 0.0,
@@ -10442,7 +10442,7 @@
    "rate": 15.0,
    "rate_source": "feed",
    "xp": {
-    "4": 1.0,
+    "4": 1.5,
     "5": 1.1,
     "6": 1.0,
     "7": 1.0,
@@ -10503,17 +10503,17 @@
    "web_name": "Mfuni",
    "team": 7,
    "element_type": 2,
-   "rate": 0.0,
-   "rate_source": "none",
+   "rate": 9.49,
+   "rate_source": "feed",
    "xp": {
-    "4": 0.0,
-    "5": 0.1,
-    "6": 0.2,
-    "7": 0.2,
-    "8": 0.3
+    "4": 1.0,
+    "5": 0.9,
+    "6": 0.9,
+    "7": 0.7,
+    "8": 0.6
    }
   }
  ],
- "archived_at": "2026-09-11T18:18:52Z",
+ "archived_at": "2026-09-11T21:37:39Z",
  "deadline": "2026-09-12T12:30:00Z"
 }

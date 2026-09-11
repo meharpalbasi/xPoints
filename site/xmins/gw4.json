@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-11T18:18:53.804Z",
+ "site_generated_at": "2026-09-11T21:37:40.635Z",
  "rows": [
   {
    "player_id": 1,
@@ -1966,15 +1966,15 @@
    "web_name": "Hinshelwood",
    "team": 5,
    "element_type": 3,
-   "status": "d",
-   "xMins": 11.5,
-   "pStart": 0.15,
-   "p60": 0.14,
-   "pAppear": 0.18,
+   "status": "i",
+   "xMins": 0.0,
+   "pStart": 0.0,
+   "p60": 0.0,
+   "pAppear": 0.0,
    "fixtures": 1,
-   "availability": 0.5,
+   "availability": 0.0,
    "evidence": 3,
-   "role": "bench"
+   "role": "out"
   },
   {
    "player_id": 124,
@@ -3822,13 +3822,13 @@
    "web_name": "Garner",
    "team": 9,
    "element_type": 3,
-   "status": "d",
-   "xMins": 40.4,
-   "pStart": 0.53,
-   "p60": 0.52,
-   "pAppear": 0.68,
+   "status": "a",
+   "xMins": 53.9,
+   "pStart": 0.7,
+   "p60": 0.69,
+   "pAppear": 0.9,
    "fixtures": 1,
-   "availability": 0.75,
+   "availability": 1.0,
    "evidence": 3,
    "role": "starter"
   },
@@ -10431,12 +10431,12 @@
    "team": 5,
    "element_type": 3,
    "status": "d",
-   "xMins": 4.7,
-   "pStart": 0.05,
-   "p60": 0.05,
-   "pAppear": 0.08,
+   "xMins": 7.1,
+   "pStart": 0.07,
+   "p60": 0.07,
+   "pAppear": 0.12,
    "fixtures": 1,
-   "availability": 0.5,
+   "availability": 0.75,
    "evidence": 3,
    "role": "fringe"
   },
@@ -10505,6 +10505,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-11T18:18:53Z",
+ "archived_at": "2026-09-11T21:37:40Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
