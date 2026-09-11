@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 4,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-11T10:58:41Z"
+  "generated_at": "2026-09-11T14:56:13Z"
  },
- "site_generated_at": "2026-09-11T14:56:16.182Z",
+ "site_generated_at": "2026-09-11T18:18:52.767Z",
  "rows": [
   {
    "player_id": 1,
@@ -859,10 +859,10 @@
    "rate_source": "none",
    "xp": {
     "4": 0.0,
-    "5": 0.0,
-    "6": 0.0,
-    "7": 0.0,
-    "8": 0.0
+    "5": 0.1,
+    "6": 0.2,
+    "7": 0.2,
+    "8": 0.3
    }
   },
   {
@@ -1351,8 +1351,8 @@
    "web_name": "Collins",
    "team": 4,
    "element_type": 2,
-   "rate": 4.52,
-   "rate_source": "feed",
+   "rate": 4.55,
+   "rate_source": "season",
    "xp": {
     "4": 0.0,
     "5": 0.0,
@@ -2443,10 +2443,10 @@
    "rate_source": "none",
    "xp": {
     "4": 0.0,
-    "5": 0.1,
-    "6": 0.2,
-    "7": 0.2,
-    "8": 0.3
+    "5": 0.0,
+    "6": 0.0,
+    "7": 0.0,
+    "8": 0.0
    }
   },
   {
@@ -2551,14 +2551,14 @@
    "web_name": "Caicedo",
    "team": 6,
    "element_type": 3,
-   "rate": 1.74,
-   "rate_source": "feed",
+   "rate": 2.0,
+   "rate_source": "season",
    "xp": {
     "4": 0.0,
     "5": 0.3,
     "6": 0.4,
     "7": 0.4,
-    "8": 0.4
+    "8": 0.5
    }
   },
   {
@@ -6775,7 +6775,7 @@
    "web_name": "Shaw",
    "team": 16,
    "element_type": 2,
-   "rate": 2.79,
+   "rate": 2.75,
    "rate_source": "feed",
    "xp": {
     "4": 1.7,
@@ -7991,10 +7991,10 @@
    "web_name": "Pedro Porro",
    "team": 19,
    "element_type": 2,
-   "rate": 3.47,
+   "rate": 3.46,
    "rate_source": "feed",
    "xp": {
-    "4": 2.7,
+    "4": 2.0,
     "5": 3.0,
     "6": 2.2,
     "7": 3.1,
@@ -8103,10 +8103,10 @@
    "web_name": "Udogie",
    "team": 19,
    "element_type": 2,
-   "rate": 4.98,
+   "rate": 4.97,
    "rate_source": "feed",
    "xp": {
-    "4": 2.3,
+    "4": 1.7,
     "5": 2.3,
     "6": 1.5,
     "7": 2.0,
@@ -8247,14 +8247,14 @@
    "web_name": "Maddison",
    "team": 19,
    "element_type": 3,
-   "rate": 1.72,
+   "rate": 1.93,
    "rate_source": "feed",
    "xp": {
     "4": 0.3,
     "5": 0.4,
     "6": 0.4,
     "7": 0.5,
-    "8": 0.4
+    "8": 0.5
    }
   },
   {
@@ -9255,13 +9255,13 @@
    "web_name": "Mudryk",
    "team": 19,
    "element_type": 3,
-   "rate": 1.76,
+   "rate": 1.61,
    "rate_source": "feed",
    "xp": {
-    "4": 0.3,
-    "5": 0.4,
-    "6": 0.4,
-    "7": 0.5,
+    "4": 0.0,
+    "5": 0.0,
+    "6": 0.0,
+    "7": 0.0,
     "8": 0.0
    }
   },
@@ -10514,6 +10514,6 @@
    }
   }
  ],
- "archived_at": "2026-09-11T14:56:16Z",
+ "archived_at": "2026-09-11T18:18:52Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
