@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-10T20:41:58.176Z",
+ "site_generated_at": "2026-09-11T10:58:44.869Z",
  "rows": [
   {
    "player_id": 1,
@@ -175,12 +175,12 @@
    "team": 1,
    "element_type": 2,
    "status": "d",
-   "xMins": 36.8,
-   "pStart": 0.43,
-   "p60": 0.41,
-   "pAppear": 0.47,
+   "xMins": 24.5,
+   "pStart": 0.28,
+   "p60": 0.28,
+   "pAppear": 0.31,
    "fixtures": 1,
-   "availability": 0.75,
+   "availability": 0.5,
    "evidence": 3,
    "role": "rotation"
   },
@@ -6190,13 +6190,13 @@
    "web_name": "O'Reilly",
    "team": 15,
    "element_type": 2,
-   "status": "d",
-   "xMins": 34.9,
-   "pStart": 0.43,
-   "p60": 0.41,
-   "pAppear": 0.47,
+   "status": "a",
+   "xMins": 46.6,
+   "pStart": 0.57,
+   "p60": 0.55,
+   "pAppear": 0.62,
    "fixtures": 1,
-   "availability": 0.75,
+   "availability": 1.0,
    "evidence": 3,
    "role": "rotation"
   },
@@ -10489,6 +10489,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-10T20:41:58Z",
+ "archived_at": "2026-09-11T10:58:44Z",
  "deadline": "2026-09-12T12:30:00Z"
 }
