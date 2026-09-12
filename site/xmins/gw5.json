@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-12T19:05:53.370Z",
+ "site_generated_at": "2026-09-12T23:53:13.232Z",
  "rows": [
   {
    "player_id": 1,
@@ -8574,15 +8574,15 @@
    "web_name": "Reinildo",
    "team": 20,
    "element_type": 2,
-   "status": "a",
-   "xMins": 81.3,
-   "pStart": 0.9,
-   "p60": 0.88,
-   "pAppear": 0.94,
+   "status": "s",
+   "xMins": 0.0,
+   "pStart": 0.0,
+   "p60": 0.0,
+   "pAppear": 0.0,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.0,
    "evidence": 3,
-   "role": "nailed"
+   "role": "out"
   },
   {
    "player_id": 537,
@@ -10503,8 +10503,24 @@
    "availability": 1.0,
    "evidence": 3,
    "role": "fringe"
+  },
+  {
+   "player_id": 657,
+   "player_code": 626464,
+   "web_name": "Nunes",
+   "team": 4,
+   "element_type": 3,
+   "status": "a",
+   "xMins": 9.5,
+   "pStart": 0.1,
+   "p60": 0.09,
+   "pAppear": 0.16,
+   "fixtures": 1,
+   "availability": 1.0,
+   "evidence": 3,
+   "role": "fringe"
   }
  ],
- "archived_at": "2026-09-12T19:05:53Z",
+ "archived_at": "2026-09-12T23:53:13Z",
  "deadline": "2026-09-18T17:30:00Z"
 }
