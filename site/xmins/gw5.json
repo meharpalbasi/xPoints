@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-12T23:53:13.232Z",
+ "site_generated_at": "2026-09-13T18:01:58.118Z",
  "rows": [
   {
    "player_id": 1,
@@ -6366,15 +6366,15 @@
    "web_name": "Foden",
    "team": 15,
    "element_type": 3,
-   "status": "a",
-   "xMins": 55.5,
-   "pStart": 0.57,
-   "p60": 0.56,
-   "pAppear": 0.89,
+   "status": "s",
+   "xMins": 0.0,
+   "pStart": 0.0,
+   "p60": 0.0,
+   "pAppear": 0.0,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.0,
    "evidence": 3,
-   "role": "rotation"
+   "role": "out"
   },
   {
    "player_id": 399,
@@ -7870,15 +7870,15 @@
    "web_name": "Awoniyi",
    "team": 7,
    "element_type": 4,
-   "status": "a",
-   "xMins": 59.3,
-   "pStart": 0.7,
-   "p60": 0.69,
-   "pAppear": 0.9,
+   "status": "s",
+   "xMins": 0.0,
+   "pStart": 0.0,
+   "p60": 0.0,
+   "pAppear": 0.0,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.0,
    "evidence": 3,
-   "role": "starter"
+   "role": "out"
   },
   {
    "player_id": 493,
@@ -10519,8 +10519,24 @@
    "availability": 1.0,
    "evidence": 3,
    "role": "fringe"
+  },
+  {
+   "player_id": 658,
+   "player_code": 661016,
+   "web_name": "Ibrahim",
+   "team": 5,
+   "element_type": 3,
+   "status": "a",
+   "xMins": 9.5,
+   "pStart": 0.1,
+   "p60": 0.09,
+   "pAppear": 0.16,
+   "fixtures": 1,
+   "availability": 1.0,
+   "evidence": 3,
+   "role": "fringe"
   }
  ],
- "archived_at": "2026-09-12T23:53:13Z",
+ "archived_at": "2026-09-13T18:01:58Z",
  "deadline": "2026-09-18T17:30:00Z"
 }
