@@ -6,7 +6,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-14T22:22:46.848Z",
+ "site_generated_at": "2026-09-15T13:21:15.915Z",
  "rows": [
   {
    "player_id": 1,
@@ -1662,13 +1662,13 @@
    "web_name": "Onyeka",
    "team": 7,
    "element_type": 3,
-   "status": "a",
-   "xMins": 48.7,
-   "pStart": 0.63,
-   "p60": 0.62,
-   "pAppear": 0.69,
+   "status": "d",
+   "xMins": 24.3,
+   "pStart": 0.32,
+   "p60": 0.31,
+   "pAppear": 0.34,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.5,
    "evidence": 3,
    "role": "starter"
   },
@@ -7294,13 +7294,13 @@
    "web_name": "J.Ramsey",
    "team": 17,
    "element_type": 3,
-   "status": "a",
-   "xMins": 25.4,
-   "pStart": 0.1,
-   "p60": 0.11,
-   "pAppear": 0.88,
+   "status": "d",
+   "xMins": 6.3,
+   "pStart": 0.03,
+   "p60": 0.03,
+   "pAppear": 0.22,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.25,
    "evidence": 3,
    "role": "bench"
   },
@@ -10553,6 +10553,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-14T22:22:46Z",
+ "archived_at": "2026-09-15T13:21:15Z",
  "deadline": "2026-09-18T17:30:00Z"
 }
