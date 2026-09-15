@@ -7,7 +7,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-15T18:03:39.057Z",
+ "site_generated_at": "2026-09-15T21:12:02.199Z",
  "rows": [
   {
    "player_id": 1,
@@ -159,13 +159,13 @@
    "web_name": "White",
    "team": 1,
    "element_type": 2,
-   "status": "a",
-   "xMins": 70.6,
-   "pStart": 0.91,
-   "p60": 0.63,
-   "pAppear": 0.94,
+   "status": "d",
+   "xMins": 52.9,
+   "pStart": 0.68,
+   "p60": 0.48,
+   "pAppear": 0.71,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.75,
    "evidence": 4,
    "role": "nailed"
   },
@@ -10554,6 +10554,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-15T18:03:39Z",
+ "archived_at": "2026-09-15T21:12:02Z",
  "deadline": "2026-09-18T17:30:00Z"
 }
