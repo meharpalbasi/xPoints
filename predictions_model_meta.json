@@ -1,12 +1,12 @@
 {
   "model_version": "xpoints-two-stage-blend-v3",
-  "trained_at": "2026-09-15T13:21:18Z",
+  "trained_at": "2026-09-15T18:03:43Z",
   "target_gameweek": 5,
   "seasons": [
     "2025-26",
     "2026-27"
   ],
-  "training_rows": 31228,
+  "training_rows": 31887,
   "n_features": 80,
   "features": [
     "total_points_r1",

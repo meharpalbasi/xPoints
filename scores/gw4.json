@@ -1,0 +1,135 @@
+{
+  "gameweek": 4,
+  "scored_at": "2026-09-15T18:04:22Z",
+  "deadline": "2026-09-12T12:30:00Z",
+  "data_checked": true,
+  "prediction": {
+    "generated_at": "2026-09-12T08:35:02Z",
+    "source": "fpl_ep_next",
+    "model_version": "ep-next-baseline-1",
+    "ordering": null,
+    "rows": 656
+  },
+  "populations": {
+    "all": "every player in the archive",
+    "played": "minutes > 0",
+    "starters": "minutes >= 60"
+  },
+  "n": {
+    "all": 656,
+    "played": 307,
+    "starters": 197
+  },
+  "missing_from_live": 0,
+  "predictors_available": [
+    "ep_next",
+    "model",
+    "zero"
+  ],
+  "metrics": {
+    "all": {
+      "ep_next": {
+        "mae": 1.2345,
+        "rmse": 2.2818,
+        "spearman": 0.706,
+        "spearman_ci95": [
+          0.6562,
+          0.7525
+        ],
+        "precision_at_10": 0.0,
+        "precision_at_20": 0.2208,
+        "captain_regret": 15.0
+      },
+      "zero": {
+        "mae": 1.4314,
+        "rmse": 3.0028
+      },
+      "model": {
+        "mae": 1.0994,
+        "rmse": 2.1472,
+        "spearman": 0.7327,
+        "spearman_ci95": [
+          0.6941,
+          0.7697
+        ],
+        "precision_at_10": 0.1,
+        "precision_at_20": 0.1392,
+        "captain_regret": 8.0
+      },
+      "model_p60": {
+        "n": 656,
+        "brier": 0.0781,
+        "base_rate": 0.3003,
+        "base_rate_brier": 0.2101
+      }
+    },
+    "played": {
+      "ep_next": {
+        "mae": 2.2948,
+        "rmse": 3.2285,
+        "spearman": 0.3532,
+        "spearman_ci95": [
+          0.2465,
+          0.447
+        ],
+        "precision_at_10": 0.0,
+        "precision_at_20": 0.218
+      },
+      "zero": {
+        "mae": 3.0586,
+        "rmse": 4.3894
+      },
+      "model": {
+        "mae": 2.0816,
+        "rmse": 3.0651,
+        "spearman": 0.4169,
+        "spearman_ci95": [
+          0.3161,
+          0.5072
+        ],
+        "precision_at_10": 0.1,
+        "precision_at_20": 0.1372
+      },
+      "model_p60": {
+        "n": 307,
+        "brier": 0.1324,
+        "base_rate": 0.6417,
+        "base_rate_brier": 0.2299
+      }
+    },
+    "starters": {
+      "ep_next": {
+        "mae": 2.6909,
+        "rmse": 3.5932,
+        "spearman": 0.2133,
+        "spearman_ci95": [
+          0.0779,
+          0.3476
+        ],
+        "precision_at_10": 0.0785,
+        "precision_at_20": 0.25
+      },
+      "zero": {
+        "mae": 4.0102,
+        "rmse": 5.2385
+      },
+      "model": {
+        "mae": 2.5154,
+        "rmse": 3.5021,
+        "spearman": 0.2296,
+        "spearman_ci95": [
+          0.0994,
+          0.3497
+        ],
+        "precision_at_10": 0.1,
+        "precision_at_20": 0.2
+      },
+      "model_p60": {
+        "n": 197,
+        "brier": 0.1069,
+        "base_rate": 1.0,
+        "base_rate_brier": 0.0
+      }
+    }
+  }
+}

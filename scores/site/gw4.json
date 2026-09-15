@@ -1,0 +1,114 @@
+{
+ "projections": {
+  "4": {
+   "horizon_week": 0,
+   "scored_at": "2026-09-15T18:04:23Z",
+   "snapshot_deadline": "2026-09-12T12:30:00Z",
+   "snapshot_archived_at": "2026-09-12T08:35:04Z",
+   "model": "proj-1",
+   "feed": {
+    "available": true,
+    "gameweek": 4,
+    "label": "FPL's official expected points",
+    "generated_at": "2026-09-12T04:04:59Z"
+   },
+   "n": {
+    "all": 656,
+    "played": 307,
+    "starters": 197
+   },
+   "missing_from_live": 0,
+   "metrics": {
+    "all": {
+     "mae": 1.2345,
+     "rmse": 2.2818,
+     "zero_mae": 1.4314,
+     "spearman": 0.706,
+     "spearman_ci95": [
+      0.6543,
+      0.7481
+     ],
+     "precision_at_10": 0.0,
+     "precision_at_20": 0.2145
+    },
+    "played": {
+     "mae": 2.2948,
+     "rmse": 3.2285,
+     "zero_mae": 3.0586,
+     "spearman": 0.3532,
+     "spearman_ci95": [
+      0.2473,
+      0.4508
+     ],
+     "precision_at_10": 0.0,
+     "precision_at_20": 0.2198
+    },
+    "starters": {
+     "mae": 2.6909,
+     "rmse": 3.5932,
+     "zero_mae": 4.0102,
+     "spearman": 0.2133,
+     "spearman_ci95": [
+      0.0869,
+      0.3533
+     ],
+     "precision_at_10": 0.076,
+     "precision_at_20": 0.25
+    }
+   }
+  }
+ },
+ "gameweek": 4,
+ "deadline": "2026-09-12T12:30:00Z",
+ "xmins": {
+  "scored_at": "2026-09-15T18:04:23Z",
+  "snapshot_archived_at": "2026-09-11T21:37:40Z",
+  "model": "xmins-1",
+  "n": 656,
+  "missing_from_live": 0,
+  "base_rate_60": 0.3003,
+  "brier_60": 0.0843,
+  "brier_base_rate": 0.2101,
+  "brier_skill": 0.5987,
+  "minutes_mae": 13.4873,
+  "minutes_mae_played": 18.2332,
+  "brier_appear": 0.1019,
+  "calibration": [
+   {
+    "from": 0.0,
+    "to": 0.2,
+    "n": 398,
+    "predicted": 0.0556,
+    "actual": 0.0377
+   },
+   {
+    "from": 0.2,
+    "to": 0.4,
+    "n": 27,
+    "predicted": 0.3085,
+    "actual": 0.1111
+   },
+   {
+    "from": 0.4,
+    "to": 0.6,
+    "n": 42,
+    "predicted": 0.4938,
+    "actual": 0.5952
+   },
+   {
+    "from": 0.6,
+    "to": 0.8,
+    "n": 44,
+    "predicted": 0.673,
+    "actual": 0.6136
+   },
+   {
+    "from": 0.8,
+    "to": 1.0,
+    "n": 145,
+    "predicted": 0.88,
+    "actual": 0.8759
+   }
+  ]
+ }
+}
