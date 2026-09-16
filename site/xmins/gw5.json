@@ -7,7 +7,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-15T21:12:02.199Z",
+ "site_generated_at": "2026-09-16T14:44:54.018Z",
  "rows": [
   {
    "player_id": 1,
@@ -5743,13 +5743,13 @@
    "web_name": "Gomez",
    "team": 14,
    "element_type": 2,
-   "status": "d",
-   "xMins": 6.6,
-   "pStart": 0.07,
-   "p60": 0.06,
-   "pAppear": 0.11,
+   "status": "a",
+   "xMins": 8.8,
+   "pStart": 0.09,
+   "p60": 0.08,
+   "pAppear": 0.14,
    "fixtures": 1,
-   "availability": 0.75,
+   "availability": 1.0,
    "evidence": 4,
    "role": "fringe"
   },
@@ -10554,6 +10554,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-15T21:12:02Z",
+ "archived_at": "2026-09-16T14:44:54Z",
  "deadline": "2026-09-18T17:30:00Z"
 }
