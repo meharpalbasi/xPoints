@@ -7,7 +7,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-16T18:47:19.014Z",
+ "site_generated_at": "2026-09-16T21:59:39.660Z",
  "rows": [
   {
    "player_id": 1,
@@ -863,13 +863,13 @@
    "web_name": "Gomes",
    "team": 2,
    "element_type": 3,
-   "status": "a",
-   "xMins": 14.9,
-   "pStart": 0.22,
-   "p60": 0.11,
-   "pAppear": 0.27,
+   "status": "d",
+   "xMins": 11.2,
+   "pStart": 0.16,
+   "p60": 0.09,
+   "pAppear": 0.2,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.75,
    "evidence": 4,
    "role": "fringe"
   },
@@ -2639,13 +2639,13 @@
    "web_name": "Jo\u00e3o Pedro",
    "team": 6,
    "element_type": 4,
-   "status": "a",
-   "xMins": 81.0,
-   "pStart": 0.91,
-   "p60": 0.9,
-   "pAppear": 0.94,
+   "status": "d",
+   "xMins": 60.8,
+   "pStart": 0.68,
+   "p60": 0.67,
+   "pAppear": 0.71,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.75,
    "evidence": 4,
    "role": "nailed"
   },
@@ -10554,6 +10554,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-16T18:47:19Z",
+ "archived_at": "2026-09-16T21:59:39Z",
  "deadline": "2026-09-18T17:30:00Z"
 }

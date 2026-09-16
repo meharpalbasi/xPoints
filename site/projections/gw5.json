@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 5,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-16T14:44:49Z"
+  "generated_at": "2026-09-16T18:47:14Z"
  },
- "site_generated_at": "2026-09-16T18:47:18.115Z",
+ "site_generated_at": "2026-09-16T21:59:38.443Z",
  "rows": [
   {
    "player_id": 1,
@@ -519,13 +519,13 @@
    "web_name": "Cash",
    "team": 2,
    "element_type": 2,
-   "rate": 2.93,
+   "rate": 2.83,
    "rate_source": "feed",
    "xp": {
-    "5": 1.9,
+    "5": 1.8,
     "6": 1.8,
-    "7": 2.0,
-    "8": 1.9,
+    "7": 1.9,
+    "8": 1.8,
     "9": 2.0
    }
   },
@@ -1671,14 +1671,14 @@
    "web_name": "Onyeka",
    "team": 7,
    "element_type": 3,
-   "rate": 2.92,
+   "rate": 2.74,
    "rate_source": "feed",
    "xp": {
-    "5": 1.6,
+    "5": 1.5,
     "6": 2.0,
-    "7": 1.8,
-    "8": 2.1,
-    "9": 2.0
+    "7": 1.7,
+    "8": 2.0,
+    "9": 1.9
    }
   },
   {
@@ -2650,7 +2650,7 @@
    "rate": 9.87,
    "rate_source": "feed",
    "xp": {
-    "5": 8.2,
+    "5": 6.1,
     "6": 7.7,
     "7": 6.1,
     "8": 6.2,
@@ -3943,12 +3943,12 @@
    "web_name": "R\u00f6hl",
    "team": 9,
    "element_type": 3,
-   "rate": 2.42,
+   "rate": 2.36,
    "rate_source": "feed",
    "xp": {
     "5": 1.1,
     "6": 1.4,
-    "7": 1.7,
+    "7": 1.6,
     "8": 1.3,
     "9": 1.7
    }
@@ -10562,6 +10562,6 @@
    }
   }
  ],
- "archived_at": "2026-09-16T18:47:18Z",
+ "archived_at": "2026-09-16T21:59:38Z",
  "deadline": "2026-09-18T17:30:00Z"
 }
