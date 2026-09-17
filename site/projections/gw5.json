@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 5,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-17T16:40:28Z"
+  "generated_at": "2026-09-17T20:06:33Z"
  },
- "site_generated_at": "2026-09-17T20:06:37.124Z",
+ "site_generated_at": "2026-09-17T22:49:29.451Z",
  "rows": [
   {
    "player_id": 1,
@@ -3591,14 +3591,14 @@
    "web_name": "Nketiah",
    "team": 8,
    "element_type": 4,
-   "rate": 4.7,
+   "rate": 3.53,
    "rate_source": "feed",
    "xp": {
-    "5": 1.9,
-    "6": 1.9,
-    "7": 1.8,
-    "8": 2.0,
-    "9": 1.7
+    "5": 1.4,
+    "6": 1.5,
+    "7": 1.5,
+    "8": 1.7,
+    "9": 1.5
    }
   },
   {
@@ -10562,6 +10562,6 @@
    }
   }
  ],
- "archived_at": "2026-09-17T20:06:37Z",
+ "archived_at": "2026-09-17T22:49:29Z",
  "deadline": "2026-09-18T17:30:00Z"
 }
