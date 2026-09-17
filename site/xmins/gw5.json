@@ -7,7 +7,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-17T16:40:32.669Z",
+ "site_generated_at": "2026-09-17T20:06:38.212Z",
  "rows": [
   {
    "player_id": 1,
@@ -3327,13 +3327,13 @@
    "web_name": "Sarr",
    "team": 8,
    "element_type": 3,
-   "status": "d",
-   "xMins": 4.1,
-   "pStart": 0.04,
-   "p60": 0.04,
-   "pAppear": 0.07,
+   "status": "a",
+   "xMins": 8.2,
+   "pStart": 0.09,
+   "p60": 0.08,
+   "pAppear": 0.14,
    "fixtures": 1,
-   "availability": 0.5,
+   "availability": 1.0,
    "evidence": 4,
    "role": "fringe"
   },
@@ -3583,13 +3583,13 @@
    "web_name": "Nketiah",
    "team": 8,
    "element_type": 4,
-   "status": "d",
-   "xMins": 29.0,
-   "pStart": 0.47,
-   "p60": 0.22,
-   "pAppear": 0.5,
+   "status": "a",
+   "xMins": 38.7,
+   "pStart": 0.62,
+   "p60": 0.29,
+   "pAppear": 0.67,
    "fixtures": 1,
-   "availability": 0.75,
+   "availability": 1.0,
    "evidence": 4,
    "role": "starter"
   },
@@ -10554,6 +10554,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-17T16:40:32Z",
+ "archived_at": "2026-09-17T20:06:38Z",
  "deadline": "2026-09-18T17:30:00Z"
 }

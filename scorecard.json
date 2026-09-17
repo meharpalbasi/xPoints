@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-17T16:40:55Z",
+  "generated_at": "2026-09-17T20:07:11Z",
   "method": "Each archived pre-deadline snapshot is joined to official FPL results (event/{gw}/live) once the event is data_checked. Metrics are reported per named population; ties in rankings are broken at random and averaged. Files under scores/ are immutable once written.",
   "populations": {
     "all": "every player in the archive",
@@ -11,30 +11,27 @@
     "promotion_ready": false,
     "promotion": {
       "ready": false,
+      "model_version": "xpoints-two-stage-blend-v3",
       "window_gameweeks": 6,
-      "gameweeks_in_window": 2,
+      "gameweeks_in_window": 1,
       "gameweeks": [
-        3,
         4
       ],
       "starter_spearman_diff": {
-        "mean": -0.0023,
-        "se": 0.0187,
-        "ci95": [
-          -0.0389,
-          0.0342
-        ]
+        "mean": 0.0163,
+        "se": null,
+        "ci95": null
       },
       "precision_at_20_starters": {
-        "model_mean": 0.1389,
-        "ep_next_mean": 0.1758
+        "model_mean": 0.2,
+        "ep_next_mean": 0.25
       },
       "reasons": [
-        "2 of 6 paired gameweeks graded",
-        "starter rank match not ahead of ep_next on average",
+        "1 of 6 paired gameweeks graded",
+        "paired 95% interval for starter rank match includes zero",
         "starter precision at 20 below ep_next"
       ],
-      "rule": "over the last 6 paired gameweeks: model starter Spearman ahead of ep_next with the paired 95% interval above zero, and starter precision at 20 at least ep_next's; the feed is switched by a person, never by this file"
+      "rule": "over the last 6 paired gameweeks of one model version: model starter Spearman ahead of ep_next with the paired 95% interval above zero, and starter precision at 20 (present every gameweek) at least ep_next's; the feed is switched by a person, never by this file"
     },
     "mean_ep_next_spearman_starters": 0.1124,
     "model_vs_ep_next_starter_spearman": {
@@ -59,6 +56,8 @@
       "deadline": "2026-08-21T17:30:00Z",
       "generated_at": "2026-08-21T16:58:19Z",
       "source": "fpl_ep_next",
+      "model_version": null,
+      "model_coverage": null,
       "n_all": 600,
       "n_played": 308,
       "n_starters": 210,
@@ -88,6 +87,8 @@
       "deadline": "2026-08-28T17:30:00Z",
       "generated_at": "2026-08-28T01:01:20Z",
       "source": "fpl_ep_next",
+      "model_version": null,
+      "model_coverage": null,
       "n_all": 616,
       "n_played": 308,
       "n_starters": 209,
@@ -117,6 +118,8 @@
       "deadline": "2026-09-04T17:30:00Z",
       "generated_at": "2026-09-04T13:22:10Z",
       "source": "fpl_ep_next",
+      "model_version": "xpoints-two-stage-blend-v2",
+      "model_coverage": null,
       "n_all": 652,
       "n_played": 307,
       "n_starters": 212,
@@ -149,6 +152,8 @@
       "deadline": "2026-09-12T12:30:00Z",
       "generated_at": "2026-09-12T08:35:02Z",
       "source": "fpl_ep_next",
+      "model_version": "xpoints-two-stage-blend-v3",
+      "model_coverage": null,
       "n_all": 656,
       "n_played": 307,
       "n_starters": 197,
