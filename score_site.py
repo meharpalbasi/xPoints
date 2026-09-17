@@ -37,6 +37,13 @@ SCORECARD_PATH = Path("site_scorecard.json")
 CALIBRATION_EDGES = (0.0, 0.2, 0.4, 0.6, 0.8, 1.0001)
 
 
+def _num(v):
+    try:
+        return None if v is None else float(v)
+    except (TypeError, ValueError):
+        return None
+
+
 def _clean(x):
     if x is None:
         return None
@@ -119,7 +126,7 @@ def score_xmins_rows(rows, live):
         xm = r.get("xMins")
         if p60 is None or xm is None:
             continue
-        pairs.append({"p60": float(p60), "xmins": float(xm), "minutes": stats["minutes"], "sixty": 1.0 if stats["minutes"] >= 60 else 0.0, "appeared": 1.0 if stats["minutes"] > 0 else 0.0, "p_appear": r.get("pAppear")})
+        pairs.append({"p60": float(p60), "xmins": float(xm), "minutes": stats["minutes"], "sixty": 1.0 if stats["minutes"] >= 60 else 0.0, "appeared": 1.0 if stats["minutes"] > 0 else 0.0, "p_appear": r.get("pAppear"), "p60_site": _num(r.get("p60Site")), "p60_model": _num(r.get("p60Model"))})
     if not pairs:
         return {"n": 0, "missing_from_live": missing}
     n = len(pairs)
@@ -135,6 +142,8 @@ def score_xmins_rows(rows, live):
             "actual": _clean(mean([p["sixty"] for p in inside])) if inside else None,
         })
     appear = [p for p in pairs if p["p_appear"] is not None]
+    site_half = [p for p in pairs if p["p60_site"] is not None]
+    model_half = [p for p in pairs if p["p60_model"] is not None]
     return {
         "n": n,
         "missing_from_live": missing,
@@ -145,6 +154,14 @@ def score_xmins_rows(rows, live):
         "minutes_mae": _clean(mean([abs(p["xmins"] - p["minutes"]) for p in pairs])),
         "minutes_mae_played": _clean(mean([abs(p["xmins"] - p["minutes"]) for p in pairs if p["minutes"] > 0])) if any(p["minutes"] > 0 for p in pairs) else None,
         "brier_appear": _clean(mean([(float(p["p_appear"]) - p["appeared"]) ** 2 for p in appear])) if appear else None,
+        # The two halves of the served P(60+), graded on the rows that carry them, so the
+        # scorecard says every gameweek whether the blend, the site's estimate or the
+        # xPoints model's is the better number.
+        "n_site": len(site_half),
+        "brier_60_site": _clean(mean([(p["p60_site"] - p["sixty"]) ** 2 for p in site_half])) if site_half else None,
+        "n_model": len(model_half),
+        "brier_60_model": _clean(mean([(p["p60_model"] - p["sixty"]) ** 2 for p in model_half])) if model_half else None,
+        "brier_60_on_model_rows": _clean(mean([(p["p60"] - p["sixty"]) ** 2 for p in model_half])) if model_half else None,
         "calibration": buckets,
     }
 
@@ -184,7 +201,7 @@ def build_scorecard(scores):
             by_week.setdefault(k, []).append(row)
         if s.get("xmins") and s["xmins"].get("n"):
             x = s["xmins"]
-            minutes_rows.append({"gameweek": gw, "n": x["n"], "brier_60": x.get("brier_60"), "brier_base_rate": x.get("brier_base_rate"), "brier_skill": x.get("brier_skill"), "minutes_mae": x.get("minutes_mae"), "minutes_mae_played": x.get("minutes_mae_played"), "base_rate_60": x.get("base_rate_60"), "calibration": x.get("calibration")})
+            minutes_rows.append({"gameweek": gw, "n": x["n"], "brier_60": x.get("brier_60"), "brier_60_site": x.get("brier_60_site"), "brier_60_model": x.get("brier_60_model"), "n_model": x.get("n_model"), "brier_base_rate": x.get("brier_base_rate"), "brier_skill": x.get("brier_skill"), "minutes_mae": x.get("minutes_mae"), "minutes_mae_played": x.get("minutes_mae_played"), "base_rate_60": x.get("base_rate_60"), "calibration": x.get("calibration")})
     def avg(items, key):
         xs = [i[key] for i in items if i.get(key) is not None]
         return _clean(mean(xs)) if xs else None
@@ -200,7 +217,8 @@ def build_scorecard(scores):
             "joined to official results (event/{gw}/live) and scored per named population like the "
             "feed; the horizon week is how many deadlines before the gameweek the projection was made. "
             "P(60+) is scored with the Brier score against playing sixty minutes, beside the base-rate "
-            "Brier it must beat. Entries under scores/site/ never change once written."
+            "Brier it must beat; from Gameweek 6 the served number is a blend of the site's estimate and "
+            "the xPoints model's, and each half is graded too. Entries under scores/site/ never change once written."
         ),
         "populations": {k: v[0] for k, v in POPULATIONS.items()},
         "summary": {
@@ -209,6 +227,8 @@ def build_scorecard(scores):
             "minutes": {
                 "gameweeks": len(minutes_rows),
                 "mean_brier_60": avg(minutes_rows, "brier_60"),
+                "mean_brier_60_site": avg(minutes_rows, "brier_60_site"),
+                "mean_brier_60_model": avg(minutes_rows, "brier_60_model"),
                 "mean_brier_base_rate": avg(minutes_rows, "brier_base_rate"),
                 "mean_brier_skill": avg(minutes_rows, "brier_skill"),
                 "mean_minutes_mae": avg(minutes_rows, "minutes_mae"),
