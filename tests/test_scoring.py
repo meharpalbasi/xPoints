@@ -69,9 +69,9 @@ class ScoreGameweekTests(unittest.TestCase):
         self.assertEqual(card["summary"]["power"]["gameweeks_needed_power_80"], 27)
 
 
-def gw_row(gw, model_sp, feed_sp, model_p20=0.2, feed_p20=0.2, version="v3"):
-    return {"gameweek": gw, "model_version": version, "model_spearman_starters": model_sp, "ep_next_spearman_starters": feed_sp,
-            "model_precision_at_20_starters": model_p20, "ep_next_precision_at_20_starters": feed_p20}
+def gw_row(gw, model_sp, feed_sp, model_p20=0.2, feed_p20=0.2, version="v3", coverage=1.0):
+    return {"gameweek": gw, "model_version": version, "model_coverage_share": coverage, "model_spearman_starters": model_sp,
+            "ep_next_spearman_starters": feed_sp, "model_precision_at_20_starters": model_p20, "ep_next_precision_at_20_starters": feed_p20}
 
 
 class PromotionGateTests(unittest.TestCase):
@@ -163,7 +163,7 @@ class ChallengerCoverageTests(unittest.TestCase):
 
 class GateVersionTests(unittest.TestCase):
     def test_precision_must_be_present_for_every_gameweek_in_the_window(self):
-        rows = [{"gameweek": g, "model_version": "v3", "model_spearman_starters": 0.2 + 0.01 * (g % 2), "ep_next_spearman_starters": 0.1} for g in range(1, 7)]
+        rows = [{"gameweek": g, "model_version": "v3", "model_coverage_share": 1.0, "model_spearman_starters": 0.2 + 0.01 * (g % 2), "ep_next_spearman_starters": 0.1} for g in range(1, 7)]
         gate = promotion_gate(rows)
         self.assertFalse(gate["ready"])
         self.assertIn("starter precision at 20 missing for 6 of 6 gameweeks", gate["reasons"])
@@ -191,6 +191,54 @@ class GateVersionTests(unittest.TestCase):
                 "metrics": {"all": {"ep_next": {"mae": 1.5}, "zero": {"mae": 1.4}},
                             "starters": {"ep_next": {"spearman": 0.1, "spearman_ci95": [0, 0.2], "precision_at_20": 0.2}}}}
         scores = {3: dict(base), 4: {**base, "challenger": {"model_version": "v3"}, "coverage": {"model": {"predicted": 10, "missing": 0}}}}
-        card = build_scorecard(scores, model_versions={3: "v2"})
+        card = build_scorecard(scores, archive_info={3: {"model_version": "v2", "coverage_share": 1.0}})
         self.assertEqual([r["model_version"] for r in card["gameweeks"]], ["v2", "v3"])
+        self.assertEqual([r["model_coverage_share"] for r in card["gameweeks"]], [1.0, 1.0])
         self.assertEqual(card["gameweeks"][1]["model_coverage"], {"predicted": 10, "missing": 0})
+
+
+class CoverageGateTests(unittest.TestCase):
+    def test_a_thin_challenger_cannot_pass_the_gate(self):
+        # The follow-up review's reproduction: 30 starters, an inverted baseline, a
+        # challenger that predicts only three of them correctly.
+        preds = [pred(i, 30 - i) for i in range(1, 31)]
+        stats = {i: {"minutes": 90, "total_points": i} for i in range(1, 31)}
+        result, _ = score_gameweek(preds, stats, extra={"model": {28: 28, 29: 29, 30: 30}})
+        m = result["metrics"]["starters"]["model"]
+        self.assertEqual(m["n"], 3)
+        self.assertAlmostEqual(m["coverage"], 0.1)
+        self.assertIsNone(m["precision_at_20"], "top-20 overlap over three players is not a number")
+        self.assertEqual(m["ep_next_same_rows"]["n"], 3)
+        self.assertEqual(m["ep_next_same_rows"]["spearman"], -1.0)
+        rows = [gw_row(g, 1.0, -1.0, model_p20=None, feed_p20=0.1, coverage=0.1) for g in range(1, 7)]
+        gate = promotion_gate(rows)
+        self.assertFalse(gate["ready"])
+        self.assertEqual(gate["gameweeks_in_window"], 0)
+        self.assertIn("model coverage below 95% for 6 graded gameweeks, not counted", gate["reasons"])
+
+    def test_the_gate_reads_the_baseline_on_the_challengers_rows(self):
+        rows = [gw_row(g, 0.30, 0.10) for g in range(1, 7)]
+        for r in rows:
+            r["ep_next_spearman_starters_on_model_rows"] = 0.31        # on identical rows the feed is ahead
+            r["ep_next_precision_at_20_starters_on_model_rows"] = 0.2
+        gate = promotion_gate(rows)
+        self.assertFalse(gate["ready"])
+        self.assertIn("starter rank match not ahead of ep_next on average", gate["reasons"])
+        for r in rows:
+            r["ep_next_spearman_starters_on_model_rows"] = 0.10 + 0.001 * r["gameweek"]
+        self.assertTrue(promotion_gate(rows)["ready"])
+
+    def test_summary_comparison_follows_the_gate(self):
+        base = {"deadline": "d", "prediction": {"generated_at": "g", "source": "s"},
+                "n": {"all": 10, "played": 5, "starters": 3},
+                "metrics": {"all": {"ep_next": {"mae": 1.5}, "zero": {"mae": 1.4}, "model": {"mae": 1.2}},
+                            "starters": {"ep_next": {"spearman": 0.1, "spearman_ci95": [0, 0.2], "precision_at_20": 0.2},
+                                         "model": {"spearman": 0.3, "precision_at_20": 0.2, "ep_next_same_rows": {"spearman": 0.12, "precision_at_20": 0.2}}}}}
+        scores = {3: {**base, "challenger": {"model_version": "v2"}, "coverage": {"model": {"predicted": 10, "missing": 0}}},
+                  4: {**base, "challenger": {"model_version": "v3"}, "coverage": {"model": {"predicted": 10, "missing": 0}}}}
+        card = build_scorecard(scores)
+        cmp_ = card["summary"]["model_vs_ep_next_starter_spearman"]
+        self.assertEqual(cmp_["model_version"], "v3")
+        self.assertEqual(cmp_["gameweeks"], 1)
+        self.assertAlmostEqual(cmp_["mean_diff"], 0.3 - 0.12, places=4)
+        self.assertEqual(card["gameweeks"][1]["ep_next_spearman_starters_on_model_rows"], 0.12)
