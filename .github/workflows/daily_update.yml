@@ -13,15 +13,6 @@ on:
     # deadline; baseline.py only rewrites files when the data actually changed.
     - cron: "7 * * * *"
   workflow_dispatch:
-    inputs:
-      mode:
-        description: Prediction source to attempt
-        required: true
-        default: baseline
-        type: choice
-        options:
-          - baseline
-          - model
 
 # Never let two runs race on predictions.json / the per-GW archive.
 concurrency:
@@ -48,37 +39,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Generate validated prediction candidate
-        id: generate
-        env:
-          PREDICTION_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'baseline' }}
-        run: |
-          if [ "$PREDICTION_MODE" = "model" ]; then
-            if python script.py; then
-              echo "source=model" >> "$GITHUB_OUTPUT"
-              echo "fallback_used=false" >> "$GITHUB_OUTPUT"
-            else
-              echo "::warning::model candidate failed validation — publishing ep_next baseline"
-              python baseline.py
-              echo "source=fpl_ep_next" >> "$GITHUB_OUTPUT"
-              echo "fallback_used=true" >> "$GITHUB_OUTPUT"
-            fi
-          else
-            python baseline.py
-            echo "source=fpl_ep_next" >> "$GITHUB_OUTPUT"
-            echo "fallback_used=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Record publication source
-        run: |
-          echo "### Prediction publication" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Requested mode: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'baseline' }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Published source: ${{ steps.generate.outputs.source }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Fallback used: ${{ steps.generate.outputs.fallback_used }}" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Warn if the model fell back
-        if: steps.generate.outputs.fallback_used == 'true'
-        run: echo "::warning::Model mode was requested but the ep_next baseline was published instead"
+      - name: Publish the feed
+        # The published source is a code decision, never a run-time switch: the
+        # baseline (FPL's ep_next) is published until the promotion gate in
+        # scorecard.json says the shadow model has earned it and a person changes
+        # this step. The old "model" mode ran the legacy script.py, not the model
+        # whose shadow grades are reviewed, so it was removed (17 September 2026).
+        run: python baseline.py
 
       - name: Archive pre-deadline snapshot
         # Copies predictions.json to predictions/gw{N}.json while the target

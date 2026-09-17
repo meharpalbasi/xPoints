@@ -69,8 +69,8 @@ class ScoreGameweekTests(unittest.TestCase):
         self.assertEqual(card["summary"]["power"]["gameweeks_needed_power_80"], 27)
 
 
-def gw_row(gw, model_sp, feed_sp, model_p20=0.2, feed_p20=0.2):
-    return {"gameweek": gw, "model_spearman_starters": model_sp, "ep_next_spearman_starters": feed_sp,
+def gw_row(gw, model_sp, feed_sp, model_p20=0.2, feed_p20=0.2, version="v3"):
+    return {"gameweek": gw, "model_version": version, "model_spearman_starters": model_sp, "ep_next_spearman_starters": feed_sp,
             "model_precision_at_20_starters": model_p20, "ep_next_precision_at_20_starters": feed_p20}
 
 
@@ -139,3 +139,58 @@ class ModelProbabilityTests(unittest.TestCase):
         self.assertAlmostEqual(m["base_rate_brier"], 0.25)
         self.assertEqual(result["metrics"]["starters"]["model_p60"]["n"], 2)
         self.assertNotIn("model_p60", result["predictors_available"])
+
+
+class ChallengerCoverageTests(unittest.TestCase):
+    def test_a_missing_challenger_prediction_is_missing_not_zero(self):
+        preds = [pred(1, 5.0), pred(2, 3.0), pred(3, 1.0), pred(4, 0.5)]
+        stats = {1: {"minutes": 90, "total_points": 8}, 2: {"minutes": 90, "total_points": 2},
+                 3: {"minutes": 10, "total_points": 1}, 4: {"minutes": 0, "total_points": 0}}
+        result, _ = score_gameweek(preds, stats, extra={"model": {1: 6.0, 2: 2.0, 3: 1.0}})
+        self.assertEqual(result["coverage"]["model"], {"predicted": 3, "missing": 1})
+        m = result["metrics"]["all"]["model"]
+        self.assertEqual(m["n"], 3)
+        self.assertAlmostEqual(m["mae"], (2 + 0 + 0) / 3, places=3)  # player 4 never read as a zero prediction
+        self.assertEqual(result["metrics"]["all"]["ep_next"].get("n"), None)
+        self.assertEqual(result["n"]["all"], 4)
+
+    def test_challenger_meta_names_the_version(self):
+        from score import challenger_meta
+        self.assertIsNone(challenger_meta([]))
+        self.assertEqual(challenger_meta([{"model_version": "v3", "source": "xpoints_model", "generated_at": "g"}, {}]),
+                         {"model_version": "v3", "source": "xpoints_model", "generated_at": "g", "rows": 2})
+
+
+class GateVersionTests(unittest.TestCase):
+    def test_precision_must_be_present_for_every_gameweek_in_the_window(self):
+        rows = [{"gameweek": g, "model_version": "v3", "model_spearman_starters": 0.2 + 0.01 * (g % 2), "ep_next_spearman_starters": 0.1} for g in range(1, 7)]
+        gate = promotion_gate(rows)
+        self.assertFalse(gate["ready"])
+        self.assertIn("starter precision at 20 missing for 6 of 6 gameweeks", gate["reasons"])
+
+    def test_only_one_model_version_counts(self):
+        rows = [gw_row(g, 0.21 + 0.01 * (g % 2), 0.1) for g in range(1, 9)]
+        for r in rows[:2]:
+            r["model_version"] = "v2"
+        for r in rows[2:]:
+            r["model_version"] = "v3"
+        gate = promotion_gate(rows)
+        self.assertEqual(gate["model_version"], "v3")
+        self.assertEqual(gate["gameweeks"], [3, 4, 5, 6, 7, 8])
+        self.assertTrue(gate["ready"])
+        older = promotion_gate(rows, version="v2")
+        self.assertEqual(older["gameweeks"], [1, 2])
+        self.assertFalse(older["ready"])
+        unknown = promotion_gate([gw_row(g, 0.3, 0.1, version=None) for g in range(1, 7)])   # no versions at all
+        self.assertEqual(unknown["gameweeks_in_window"], 0)
+        self.assertIsNone(unknown["model_version"])
+
+    def test_scorecard_rows_take_the_version_from_the_file_or_the_archive(self):
+        base = {"deadline": "d", "prediction": {"generated_at": "g", "source": "s"},
+                "n": {"all": 10, "played": 5, "starters": 3},
+                "metrics": {"all": {"ep_next": {"mae": 1.5}, "zero": {"mae": 1.4}},
+                            "starters": {"ep_next": {"spearman": 0.1, "spearman_ci95": [0, 0.2], "precision_at_20": 0.2}}}}
+        scores = {3: dict(base), 4: {**base, "challenger": {"model_version": "v3"}, "coverage": {"model": {"predicted": 10, "missing": 0}}}}
+        card = build_scorecard(scores, model_versions={3: "v2"})
+        self.assertEqual([r["model_version"] for r in card["gameweeks"]], ["v2", "v3"])
+        self.assertEqual(card["gameweeks"][1]["model_coverage"], {"predicted": 10, "missing": 0})
