@@ -7,7 +7,7 @@
   2,
   1
  ],
- "site_generated_at": "2026-09-16T21:59:39.660Z",
+ "site_generated_at": "2026-09-17T11:23:19.306Z",
  "rows": [
   {
    "player_id": 1,
@@ -463,13 +463,13 @@
    "web_name": "M.Bizot",
    "team": 2,
    "element_type": 1,
-   "status": "a",
-   "xMins": 20.7,
-   "pStart": 0.22,
-   "p60": 0.21,
-   "pAppear": 0.27,
+   "status": "d",
+   "xMins": 15.5,
+   "pStart": 0.16,
+   "p60": 0.15,
+   "pAppear": 0.2,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.75,
    "evidence": 4,
    "role": "fringe"
   },
@@ -2911,13 +2911,13 @@
    "web_name": "Amenda",
    "team": 7,
    "element_type": 2,
-   "status": "a",
-   "xMins": 82.5,
-   "pStart": 0.91,
-   "p60": 0.9,
-   "pAppear": 0.94,
+   "status": "d",
+   "xMins": 20.6,
+   "pStart": 0.23,
+   "p60": 0.22,
+   "pAppear": 0.24,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.25,
    "evidence": 4,
    "role": "nailed"
   },
@@ -3903,13 +3903,13 @@
    "web_name": "Armstrong",
    "team": 9,
    "element_type": 3,
-   "status": "a",
-   "xMins": 80.9,
-   "pStart": 0.91,
-   "p60": 0.9,
-   "pAppear": 0.94,
+   "status": "d",
+   "xMins": 60.7,
+   "pStart": 0.68,
+   "p60": 0.67,
+   "pAppear": 0.71,
    "fixtures": 1,
-   "availability": 1.0,
+   "availability": 0.75,
    "evidence": 4,
    "role": "nailed"
   },
@@ -10554,6 +10554,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-16T21:59:39Z",
+ "archived_at": "2026-09-17T11:23:19Z",
  "deadline": "2026-09-18T17:30:00Z"
 }

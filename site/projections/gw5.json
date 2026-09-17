@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 5,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-16T21:59:34Z"
+  "generated_at": "2026-09-17T05:56:18Z"
  },
- "site_generated_at": "2026-09-17T00:15:05.053Z",
+ "site_generated_at": "2026-09-17T11:23:18.330Z",
  "rows": [
   {
    "player_id": 1,
@@ -2922,7 +2922,7 @@
    "rate": 1.17,
    "rate_source": "feed",
    "xp": {
-    "5": 1.0,
+    "5": 0.3,
     "6": 1.8,
     "7": 2.1,
     "8": 2.4,
@@ -3914,7 +3914,7 @@
    "rate": 3.61,
    "rate_source": "feed",
    "xp": {
-    "5": 3.5,
+    "5": 2.6,
     "6": 3.0,
     "7": 3.3,
     "8": 2.5,
@@ -10562,6 +10562,6 @@
    }
   }
  ],
- "archived_at": "2026-09-17T00:15:05Z",
+ "archived_at": "2026-09-17T11:23:18Z",
  "deadline": "2026-09-18T17:30:00Z"
 }
