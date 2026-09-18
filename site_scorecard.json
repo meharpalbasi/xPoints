@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-18T17:01:23Z",
-  "method": "The site's projections table and expected-minutes table are frozen at each deadline (site/). Once FPL marks a gameweek data_checked, every frozen projection for it is joined to official results (event/{gw}/live) and scored per named population like the feed; the horizon week is how many deadlines before the gameweek the projection was made. P(60+) is scored with the Brier score against playing sixty minutes, beside the base-rate Brier it must beat. Entries under scores/site/ never change once written.",
+  "generated_at": "2026-09-18T19:30:14Z",
+  "method": "The site's projections table and expected-minutes table are frozen at each deadline (site/). Once FPL marks a gameweek data_checked, every frozen projection for it is joined to official results (event/{gw}/live) and scored per named population like the feed; the horizon week is how many deadlines before the gameweek the projection was made. P(60+) is scored with the Brier score against playing sixty minutes, beside the base-rate Brier it must beat; from Gameweek 6 the served number is a blend of the site's estimate and the xPoints model's, and each half is graded too. Entries under scores/site/ never change once written.",
   "populations": {
     "all": "every player in the archive",
     "played": "minutes > 0",
@@ -20,6 +20,8 @@
     "minutes": {
       "gameweeks": 1,
       "mean_brier_60": 0.0843,
+      "mean_brier_60_site": null,
+      "mean_brier_60_model": null,
       "mean_brier_base_rate": 0.2101,
       "mean_brier_skill": 0.5987,
       "mean_minutes_mae": 13.4873,
@@ -86,6 +88,9 @@
       "gameweek": 4,
       "n": 656,
       "brier_60": 0.0843,
+      "brier_60_site": null,
+      "brier_60_model": null,
+      "n_model": null,
       "brier_base_rate": 0.2101,
       "brier_skill": 0.5987,
       "minutes_mae": 13.4873,
