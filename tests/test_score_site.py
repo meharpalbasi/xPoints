@@ -168,3 +168,30 @@ class SnapshotTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class HalvesTests(unittest.TestCase):
+    def test_the_two_halves_are_graded_on_the_rows_that_carry_them(self):
+        rows = [
+            {"player_id": 1, "xMins": 80, "p60": 0.7, "p60Site": 0.8, "p60Model": 0.6, "pAppear": 0.9},
+            {"player_id": 2, "xMins": 10, "p60": 0.2, "p60Site": 0.2, "p60Model": None, "pAppear": 0.5},
+            {"player_id": 3, "xMins": 70, "p60": 0.5, "pAppear": 0.8},
+        ]
+        stats = {1: {"minutes": 90}, 2: {"minutes": 0}, 3: {"minutes": 60}}
+        r = score_xmins_rows(rows, stats)
+        self.assertEqual(r["n"], 3)
+        self.assertEqual(r["n_site"], 2)
+        self.assertEqual(r["n_model"], 1)
+        self.assertAlmostEqual(r["brier_60_site"], ((0.8 - 1) ** 2 + (0.2 - 0) ** 2) / 2, places=6)
+        self.assertAlmostEqual(r["brier_60_model"], (0.6 - 1) ** 2, places=6)
+        self.assertAlmostEqual(r["brier_60_on_model_rows"], (0.7 - 1) ** 2, places=6)
+        old = score_xmins_rows([{"player_id": 3, "xMins": 70, "p60": 0.5, "pAppear": 0.8}], stats)
+        self.assertIsNone(old["brier_60_site"])
+        self.assertIsNone(old["brier_60_model"])
+
+    def test_scorecard_carries_the_halves(self):
+        scores = {6: {"projections": {}, "xmins": {"n": 600, "brier_60": 0.08, "brier_60_site": 0.085, "brier_60_model": 0.078, "n_model": 590, "brier_base_rate": 0.21, "brier_skill": 0.6, "minutes_mae": 13.0, "minutes_mae_played": 18.0, "base_rate_60": 0.3, "calibration": []}}}
+        card = build_scorecard(scores)
+        self.assertAlmostEqual(card["summary"]["minutes"]["mean_brier_60_site"], 0.085)
+        self.assertAlmostEqual(card["summary"]["minutes"]["mean_brier_60_model"], 0.078)
+        self.assertEqual(card["minutes"][0]["n_model"], 590)

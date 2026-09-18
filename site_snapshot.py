@@ -106,6 +106,9 @@ def shape_xmins(table, gw):
             "xMins": _num(p.get("xMins")),
             "pStart": _num(p.get("pStart")),
             "p60": _num(p.get("p60")),
+            "p60Site": _num(p.get("p60Site")),
+            "p60Model": _num(p.get("p60Model")),
+            "p60Source": p.get("p60Source"),
             "pAppear": _num(p.get("pAppear")),
             "fixtures": p.get("fixtures"),
             "availability": _num(p.get("availability")),
@@ -121,6 +124,7 @@ def shape_xmins(table, gw):
         "gameweek": gw,
         "model": table.get("model"),
         "gameweeks_used": table.get("gameweeksUsed"),
+        "p60_model": table.get("p60Model"),
         "site_generated_at": table.get("generatedAt"),
         "rows": rows,
     }
