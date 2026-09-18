@@ -60,6 +60,9 @@ DETECT_EFFECT = 0.05
 # The promotion gate: the shadow model may replace ep_next only after this many
 # consecutive paired gameweeks say so (ROADMAP: six shadow gameweeks minimum).
 PROMOTION_WINDOW = 6
+# A gameweek counts towards promotion only when the challenger predicted at least
+# this share of the graded players; below it the two are not scored on the same pool.
+MIN_COVERAGE = 0.95
 
 
 def fetch_json(url):
@@ -210,6 +213,7 @@ def score_gameweek(pred_rows, live, seed=0, extra=None, probs=None):
             m = {}
             if name in extra:
                 m["n"] = len(pred)
+                m["coverage"] = _clean(len(pred) / len(rows)) if rows else None
             if (name in ("ep_next", "zero") or name in extra) and pred:
                 m["mae"] = _clean(mae(pred, actual))
                 m["rmse"] = _clean(rmse(pred, actual))
@@ -218,9 +222,22 @@ def score_gameweek(pred_rows, live, seed=0, extra=None, probs=None):
                 m["spearman"] = _clean(spearman(pred, actual))
                 m["spearman_ci95"] = [_clean(lo), _clean(hi)]
                 for k in K_LIST:
-                    m[f"precision_at_{k}"] = _clean(precision_at_k(pred, actual, k, seed=seed))
+                    # Top-k overlap means nothing over fewer than k players.
+                    m[f"precision_at_{k}"] = _clean(precision_at_k(pred, actual, k, seed=seed)) if len(pred) >= k else None
                 if pop_name == "all":
                     m["captain_regret"] = _clean(captain_regret(pred, actual, seed=seed))
+            if name in extra and pred:
+                # The baseline on exactly the challenger's rows: the paired comparison
+                # the gate uses, so both are always scored on the same players.
+                base = [float(j["xPoints"]) for _, j in kept]
+                same = {"n": len(base), "mae": _clean(mae(base, actual))}
+                if len(base) >= 3:
+                    same["spearman"] = _clean(spearman(base, actual))
+                    for k in K_LIST:
+                        same[f"precision_at_{k}"] = _clean(precision_at_k(base, actual, k, seed=seed)) if len(base) >= k else None
+                    if pop_name == "all":
+                        same["captain_regret"] = _clean(captain_regret(base, actual, seed=seed))
+                m["ep_next_same_rows"] = same
             pop_metrics[name] = m
         for name in probs:
             pairs = [(float(j[name]), 1.0 if j["minutes"] >= 60 else 0.0) for j in rows if j.get(name) is not None]
@@ -306,17 +323,29 @@ def promotion_gate(rows, window=PROMOTION_WINDOW, version=None):
         known = [r.get("model_version") for r in paired if r.get("model_version")]
         version = known[-1] if known else None
     paired = [r for r in paired if version is not None and r.get("model_version") == version]
-    recent = paired[-window:]
+    # Only gameweeks where the challenger covered the graded pool count; the
+    # baseline is then read on exactly the challenger's rows.
+    covered = [r for r in paired if (r.get("model_coverage_share") or 0) >= MIN_COVERAGE]
+    thin = len(paired) - len(covered)
+    recent = covered[-window:]
     n = len(recent)
-    diffs = [r["model_spearman_starters"] - r["ep_next_spearman_starters"] for r in recent]
+
+    def base(r, key, fallback):
+        v = r.get(f"ep_next_{key}_on_model_rows")
+        return v if v is not None else r.get(fallback)
+
+    diffs = [r["model_spearman_starters"] - base(r, "spearman_starters", "ep_next_spearman_starters") for r in recent]
     mean_diff = mean(diffs) if diffs else None
     se = stdev(diffs) / math.sqrt(n) if n >= 2 else None
     ci = [mean_diff - 1.96 * se, mean_diff + 1.96 * se] if se is not None and not math.isnan(se) else None
     p_model = [r["model_precision_at_20_starters"] for r in recent if r.get("model_precision_at_20_starters") is not None]
-    p_feed = [r["ep_next_precision_at_20_starters"] for r in recent if r.get("ep_next_precision_at_20_starters") is not None]
+    p_feed = [base(r, "precision_at_20_starters", "ep_next_precision_at_20_starters") for r in recent
+              if base(r, "precision_at_20_starters", "ep_next_precision_at_20_starters") is not None]
     reasons = []
     if n < window:
         reasons.append(f"{n} of {window} paired gameweeks graded")
+    if thin:
+        reasons.append(f"model coverage below {int(MIN_COVERAGE * 100)}% for {thin} graded gameweek{'s' if thin != 1 else ''}, not counted")
     if mean_diff is None or mean_diff <= 0:
         reasons.append("starter rank match not ahead of ep_next on average")
     elif ci is None or ci[0] <= 0:
@@ -328,6 +357,7 @@ def promotion_gate(rows, window=PROMOTION_WINDOW, version=None):
     return {
         "ready": n >= window and not reasons,
         "model_version": version,
+        "coverage_required": MIN_COVERAGE,
         "window_gameweeks": window,
         "gameweeks_in_window": n,
         "gameweeks": [r["gameweek"] for r in recent],
@@ -341,38 +371,70 @@ def promotion_gate(rows, window=PROMOTION_WINDOW, version=None):
             "ep_next_mean": _clean(mean(p_feed)) if p_feed else None,
         },
         "reasons": reasons,
-        "rule": (f"over the last {window} paired gameweeks of one model version: model starter Spearman ahead of ep_next "
-                 "with the paired 95% interval above zero, and starter precision at 20 (present every gameweek) at least ep_next's; "
+        "rule": (f"over the last {window} paired gameweeks of one model version, each with the model covering at least "
+                 f"{int(MIN_COVERAGE * 100)}% of the graded players and ep_next read on the same players: model starter Spearman "
+                 "ahead with the paired 95% interval above zero, and starter precision at 20 (present every gameweek) at least ep_next's; "
                  "the feed is switched by a person, never by this file"),
     }
 
 
-def archive_model_versions():
-    """{gw: model_version} from the frozen model archives, for score files written before the challenger was recorded."""
+def archive_model_info():
+    """{gw: {model_version, coverage_share}} from the frozen archives, for score
+    files written before the challenger's version and coverage were recorded.
+    Coverage is the share of the feed's players the model archive also holds."""
     out = {}
     for path in ARCHIVE_DIR.glob("gw*_model.json"):
         try:
+            gw = int(path.stem[2:-6])
             rows = json.loads(path.read_text())
-            out[int(path.stem[2:-6])] = (rows[0] or {}).get("model_version") if rows else None
-        except (ValueError, OSError, IndexError, AttributeError):
+            info = {"model_version": (rows[0] or {}).get("model_version") if rows else None, "coverage_share": None}
+            feed_path = ARCHIVE_DIR / f"gw{gw}.json"
+            if feed_path.exists():
+                feed_ids = {int(r["player_id"]) for r in json.loads(feed_path.read_text())}
+                model_ids = {int(r["player_id"]) for r in rows}
+                info["coverage_share"] = _clean(len(feed_ids & model_ids) / len(feed_ids)) if feed_ids else None
+            out[gw] = info
+        except (ValueError, OSError, IndexError, AttributeError, KeyError, TypeError):
             continue
     return out
 
 
-def build_scorecard(scores, model_versions=None):
+def archive_model_versions():
+    """{gw: model_version}, kept for callers that only need the version."""
+    return {gw: info["model_version"] for gw, info in archive_model_info().items()}
+
+
+def coverage_share(score, archive_info=None):
+    """Share of the feed's graded players the challenger predicted, from the score file or the archives."""
+    cov = (score.get("coverage") or {}).get("model")
+    if cov and (cov.get("predicted") or 0) + (cov.get("missing") or 0) > 0:
+        return _clean(cov["predicted"] / (cov["predicted"] + cov["missing"]))
+    return (archive_info or {}).get("coverage_share")
+
+
+def build_scorecard(scores, model_versions=None, archive_info=None):
     def get(s, pop, pred, key):
         return s["metrics"].get(pop, {}).get(pred, {}).get(key)
 
+    def same(s, pop, key):
+        return ((s["metrics"].get(pop, {}).get("model", {}) or {}).get("ep_next_same_rows") or {}).get(key)
+
     model_versions = model_versions or {}
+    archive_info = archive_info or {}
     rows = []
     for gw, s in scores.items():
+        info = archive_info.get(gw) or {}
         rows.append({
             "gameweek": gw,
             "deadline": s.get("deadline"),
             "generated_at": s["prediction"].get("generated_at"),
             "source": s["prediction"].get("source"),
-            "model_version": (s.get("challenger") or {}).get("model_version") or model_versions.get(gw),
+            "model_version": (s.get("challenger") or {}).get("model_version") or model_versions.get(gw) or info.get("model_version"),
             "model_coverage": (s.get("coverage") or {}).get("model"),
+            "model_coverage_share": coverage_share(s, info),
+            "ep_next_mae_all_on_model_rows": same(s, "all", "mae"),
+            "ep_next_spearman_starters_on_model_rows": same(s, "starters", "spearman"),
+            "ep_next_precision_at_20_starters_on_model_rows": same(s, "starters", "precision_at_20"),
             "n_all": s["n"]["all"],
             "n_played": s["n"]["played"],
             "n_starters": s["n"]["starters"],
@@ -396,17 +458,19 @@ def build_scorecard(scores, model_versions=None):
         })
 
     starter_sp = [r["ep_next_spearman_starters"] for r in rows if r["ep_next_spearman_starters"] is not None]
-    paired = [(r["model_spearman_starters"] - r["ep_next_spearman_starters"]) for r in rows
-              if r["model_spearman_starters"] is not None and r["ep_next_spearman_starters"] is not None]
+    gate = promotion_gate(rows)
+    in_gate = {gw for gw in gate["gameweeks"]}
+    paired = [(r["model_spearman_starters"] - (r.get("ep_next_spearman_starters_on_model_rows") if r.get("ep_next_spearman_starters_on_model_rows") is not None else r["ep_next_spearman_starters"]))
+              for r in rows if r["gameweek"] in in_gate]
     observed_sd = stdev(starter_sp) if len(starter_sp) >= 3 else float("nan")
     sd_used = observed_sd if not math.isnan(observed_sd) else PRIOR_STARTER_SPEARMAN_SD
-    gate = promotion_gate(rows)
     summary = {
         "scored_gameweeks": len(rows),
         "promotion_ready": gate["ready"],
         "promotion": gate,
         "mean_ep_next_spearman_starters": _clean(mean(starter_sp)) if starter_sp else None,
         "model_vs_ep_next_starter_spearman": {
+            "model_version": gate["model_version"],
             "gameweeks": len(paired),
             "mean_diff": _clean(mean(paired)) if paired else None,
             "sd_diff": _clean(stdev(paired)) if len(paired) >= 2 else None,
@@ -475,7 +539,7 @@ def main():
               f"vs zero {ep['all']['zero'].get('mae')} | starters Spearman "
               f"{ep['starters']['ep_next'].get('spearman')} CI {ep['starters']['ep_next'].get('spearman_ci95')}")
 
-    scorecard = build_scorecard(load_scores(), model_versions=archive_model_versions())
+    scorecard = build_scorecard(load_scores(), archive_info=archive_model_info())
     SCORECARD_PATH.write_text(json.dumps(scorecard, indent=2, allow_nan=False))
     p = scorecard["summary"]["power"]
     print(f"📊 scorecard: {scorecard['summary']['scored_gameweeks']} gameweeks scored; "
