@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18T12:51:21Z",
+  "generated_at": "2026-09-18T17:01:23Z",
   "method": "Each archived pre-deadline snapshot is joined to official FPL results (event/{gw}/live) once the event is data_checked. Metrics are reported per named population; ties in rankings are broken at random and averaged. Files under scores/ are immutable once written.",
   "populations": {
     "all": "every player in the archive",
@@ -12,6 +12,7 @@
     "promotion": {
       "ready": false,
       "model_version": "xpoints-two-stage-blend-v3",
+      "coverage_required": 0.95,
       "window_gameweeks": 6,
       "gameweeks_in_window": 1,
       "gameweeks": [
@@ -31,13 +32,14 @@
         "paired 95% interval for starter rank match includes zero",
         "starter precision at 20 below ep_next"
       ],
-      "rule": "over the last 6 paired gameweeks of one model version: model starter Spearman ahead of ep_next with the paired 95% interval above zero, and starter precision at 20 (present every gameweek) at least ep_next's; the feed is switched by a person, never by this file"
+      "rule": "over the last 6 paired gameweeks of one model version, each with the model covering at least 95% of the graded players and ep_next read on the same players: model starter Spearman ahead with the paired 95% interval above zero, and starter precision at 20 (present every gameweek) at least ep_next's; the feed is switched by a person, never by this file"
     },
     "mean_ep_next_spearman_starters": 0.1124,
     "model_vs_ep_next_starter_spearman": {
-      "gameweeks": 2,
-      "mean_diff": -0.0023,
-      "sd_diff": 0.0264
+      "model_version": "xpoints-two-stage-blend-v3",
+      "gameweeks": 1,
+      "mean_diff": 0.0163,
+      "sd_diff": null
     },
     "mean_ep_next_mae_all": 1.3988,
     "mean_zero_mae_all": 1.469,
@@ -58,6 +60,10 @@
       "source": "fpl_ep_next",
       "model_version": null,
       "model_coverage": null,
+      "model_coverage_share": null,
+      "ep_next_mae_all_on_model_rows": null,
+      "ep_next_spearman_starters_on_model_rows": null,
+      "ep_next_precision_at_20_starters_on_model_rows": null,
       "n_all": 600,
       "n_played": 308,
       "n_starters": 210,
@@ -89,6 +95,10 @@
       "source": "fpl_ep_next",
       "model_version": null,
       "model_coverage": null,
+      "model_coverage_share": null,
+      "ep_next_mae_all_on_model_rows": null,
+      "ep_next_spearman_starters_on_model_rows": null,
+      "ep_next_precision_at_20_starters_on_model_rows": null,
       "n_all": 616,
       "n_played": 308,
       "n_starters": 209,
@@ -120,6 +130,10 @@
       "source": "fpl_ep_next",
       "model_version": "xpoints-two-stage-blend-v2",
       "model_coverage": null,
+      "model_coverage_share": 1.0,
+      "ep_next_mae_all_on_model_rows": null,
+      "ep_next_spearman_starters_on_model_rows": null,
+      "ep_next_precision_at_20_starters_on_model_rows": null,
       "n_all": 652,
       "n_played": 307,
       "n_starters": 212,
@@ -154,6 +168,10 @@
       "source": "fpl_ep_next",
       "model_version": "xpoints-two-stage-blend-v3",
       "model_coverage": null,
+      "model_coverage_share": 1.0,
+      "ep_next_mae_all_on_model_rows": null,
+      "ep_next_spearman_starters_on_model_rows": null,
+      "ep_next_precision_at_20_starters_on_model_rows": null,
       "n_all": 656,
       "n_played": 307,
       "n_starters": 197,
