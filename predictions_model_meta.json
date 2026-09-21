@@ -1,12 +1,12 @@
 {
-  "model_version": "xpoints-two-stage-blend-v3",
-  "trained_at": "2026-09-21T10:34:03Z",
+  "model_version": "xpoints-minutes-blend-v4",
+  "trained_at": "2026-09-21T16:27:18Z",
   "target_gameweek": 6,
   "seasons": [
     "2025-26",
     "2026-27"
   ],
-  "training_rows": 31887,
+  "training_rows": 32554,
   "n_features": 80,
   "features": [
     "total_points_r1",
@@ -103,6 +103,6 @@
   },
   "market_block": true,
   "live_season_source": "FPL element-summary (fpl_history.py), finished gameweeks only",
-  "design": "P(60+) x (0.5 * monotone-price Tweedie head trained on starters + 0.5 * price-implied expectation), both stages with the deadline-known market block (transfers, ownership, price move)",
-  "harness": "backtests/2025-26_v3.json (walk-forward GW8-38, identical rows: two_stage_blend_v3h MAE 0.888 all against v2 0.920, starter Spearman 0.107 against 0.087, starter p@20 0.194 against 0.173, P(60+) Brier 0.0734 against 0.0787, base rate 0.1925)"
+  "design": "P(60+) x (0.5 * monotone-price Tweedie head trained on 60+ rows + 0.5 * price-implied expectation) + P(1-59) x the position's mean points for a short appearance; both classifiers and the head see the deadline-known market block (transfers, ownership, price move)",
+  "harness": "backtests/2025-26_v4.json (walk-forward GW8-38, identical rows, against v3: bias -0.038 against -0.185, RMSE 1.899 against 1.923, starter Spearman 0.118 against 0.107, starter p@20 0.194 against 0.194, MAE 0.923 against 0.888; v3 ran below the actual mean in 31 of 31 folds)"
 }
