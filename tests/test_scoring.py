@@ -1,6 +1,6 @@
 import unittest
 
-from score import (availability_factor, build_scorecard, checked_events, model_probabilities,
+from score import (availability_factor, calibration_summary, build_scorecard, checked_events, model_probabilities,
                    promotion_gate, score_gameweek)
 
 
@@ -253,3 +253,23 @@ class BiasTests(unittest.TestCase):
         self.assertAlmostEqual(result["metrics"]["all"]["ep_next"]["bias"], (10 - 11) / 4, places=4)
         self.assertAlmostEqual(result["metrics"]["all"]["model"]["bias"], (6.5 - 11) / 4, places=4)
         self.assertAlmostEqual(result["metrics"]["all"]["zero"]["bias"], -11 / 4, places=4)
+
+
+class CalibrationSummaryTests(unittest.TestCase):
+    def test_versions_are_never_pooled_and_old_files_take_derived_numbers(self):
+        base = {"deadline": "d", "prediction": {"generated_at": "g", "source": "s"}, "n": {"all": 10, "played": 5, "starters": 3},
+                "metrics": {"all": {"ep_next": {"mae": 1.5}, "zero": {"mae": 1.4}, "model": {"mae": 1.1}}, "starters": {}}}
+        newer = {**base, "challenger": {"model_version": "v4"},
+                 "metrics": {"all": {"ep_next": {"mae": 1.3, "bias": 0.02, "rmse": 2.3}, "zero": {"mae": 1.4}, "model": {"mae": 1.15, "bias": -0.03, "rmse": 2.1}}, "starters": {}}}
+        derive = lambda gw: {"ep_next": {"bias": 0.06, "rmse": 2.4}, "model": {"bias": -0.25, "rmse": 2.2}} if gw == 3 else {}
+        card = build_scorecard({3: base, 6: newer}, archive_info={3: {"model_version": "v2", "coverage_share": 1.0}}, derive=derive)
+        r3, r6 = card["gameweeks"]
+        self.assertEqual((r3["model_bias_all"], r3["ep_next_rmse_all"]), (-0.25, 2.4))     # derived, the file had none
+        self.assertEqual((r6["model_bias_all"], r6["model_rmse_all"]), (-0.03, 2.1))       # recorded in the file
+        cal = card["summary"]["calibration"]
+        self.assertEqual(sorted(cal["models"]), ["v2", "v4"])
+        self.assertEqual(cal["models"]["v2"]["gameweeks"], [3])
+        self.assertEqual(cal["models"]["v4"]["mean_bias_all"], -0.03)
+        self.assertEqual(cal["models"]["v4"]["ep_next_mean_bias_same_gameweeks"], 0.02)
+        self.assertAlmostEqual(cal["ep_next"]["mean_bias_all"], 0.04)
+        self.assertEqual(calibration_summary([], None)["models"], {})
