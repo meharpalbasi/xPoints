@@ -403,6 +403,30 @@ def archive_model_info():
     return out
 
 
+def derived_calibration(gw):
+    """Pooled bias and RMSE for the feed and the model, recomputed from the frozen
+    rows file and the model archive. Score files are immutable, so gameweeks graded
+    before these were recorded get them here; nothing on disk is rewritten."""
+    rows_path = SCORES_DIR / f"gw{gw}_rows.csv"
+    if not rows_path.exists():
+        return {}
+    with rows_path.open() as f:
+        rows = list(csv.DictReader(f))
+    if not rows:
+        return {}
+    actual = [float(r["actual_points"]) for r in rows]
+    feed = [float(r["xPoints"]) for r in rows]
+    out = {"ep_next": {"bias": _clean(mean(feed) - mean(actual)), "rmse": _clean(rmse(feed, actual))}}
+    model_path = ARCHIVE_DIR / f"gw{gw}_model.json"
+    if model_path.exists():
+        values = {int(r["player_id"]): float(r["xPoints"]) for r in json.loads(model_path.read_text())}
+        pairs = [(values[int(r["player_id"])], float(r["actual_points"])) for r in rows if int(r["player_id"]) in values]
+        if pairs:
+            pred, act = [p for p, _ in pairs], [a for _, a in pairs]
+            out["model"] = {"bias": _clean(mean(pred) - mean(act)), "rmse": _clean(rmse(pred, act))}
+    return out
+
+
 def archive_model_versions():
     """{gw: model_version}, kept for callers that only need the version."""
     return {gw: info["model_version"] for gw, info in archive_model_info().items()}
@@ -416,7 +440,34 @@ def coverage_share(score, archive_info=None):
     return (archive_info or {}).get("coverage_share")
 
 
-def build_scorecard(scores, model_versions=None, archive_info=None):
+def calibration_summary(rows, version):
+    """Mean pooled bias and RMSE: the feed over every graded gameweek, the model
+    for the gate's version and, separately, for each earlier version (never pooled)."""
+    def avg(items, key):
+        xs = [r[key] for r in items if r.get(key) is not None]
+        return _clean(mean(xs)) if xs else None
+    by_version = {}
+    for r in rows:
+        if r.get("model_bias_all") is None and r.get("model_rmse_all") is None:
+            continue
+        by_version.setdefault(r.get("model_version") or "unversioned", []).append(r)
+    return {
+        "note": ("bias is mean prediction minus mean actual over every player in the archive; expected points "
+                 "target the mean, so zero is the aim. RMSE is the error a mean-targeting forecast minimises; "
+                 "MAE rewards shrinking towards the median of a target where half the players score zero."),
+        "ep_next": {"gameweeks": len([r for r in rows if r.get("ep_next_bias_all") is not None]),
+                    "mean_bias_all": avg(rows, "ep_next_bias_all"), "mean_rmse_all": avg(rows, "ep_next_rmse_all")},
+        "model_version": version,
+        "models": {v: {"gameweeks": [r["gameweek"] for r in items], "mean_bias_all": avg(items, "model_bias_all"),
+                       "mean_rmse_all": avg(items, "model_rmse_all"), "mean_mae_all": avg(items, "model_mae_all"),
+                       "ep_next_mean_bias_same_gameweeks": avg(items, "ep_next_bias_all"),
+                       "ep_next_mean_rmse_same_gameweeks": avg(items, "ep_next_rmse_all"),
+                       "ep_next_mean_mae_same_gameweeks": avg(items, "ep_next_mae_all")}
+                   for v, items in by_version.items()},
+    }
+
+
+def build_scorecard(scores, model_versions=None, archive_info=None, derive=None):
     def get(s, pop, pred, key):
         return s["metrics"].get(pop, {}).get(pred, {}).get(key)
 
@@ -428,6 +479,11 @@ def build_scorecard(scores, model_versions=None, archive_info=None):
     rows = []
     for gw, s in scores.items():
         info = archive_info.get(gw) or {}
+        derived = (derive(gw) if derive else {}) or {}
+
+        def calib(pred, key):
+            v = get(s, "all", pred, key)
+            return v if v is not None else (derived.get(pred) or {}).get(key)
         rows.append({
             "gameweek": gw,
             "deadline": s.get("deadline"),
@@ -449,11 +505,11 @@ def build_scorecard(scores, model_versions=None, archive_info=None):
             "ep_next_spearman_starters_ci95": get(s, "starters", "ep_next", "spearman_ci95"),
             "ep_next_precision_at_20_starters": get(s, "starters", "ep_next", "precision_at_20"),
             "ep_next_captain_regret": get(s, "all", "ep_next", "captain_regret"),
-            "ep_next_rmse_all": get(s, "all", "ep_next", "rmse"),
-            "ep_next_bias_all": get(s, "all", "ep_next", "bias"),
+            "ep_next_rmse_all": calib("ep_next", "rmse"),
+            "ep_next_bias_all": calib("ep_next", "bias"),
             "model_mae_all": get(s, "all", "model", "mae"),
-            "model_rmse_all": get(s, "all", "model", "rmse"),
-            "model_bias_all": get(s, "all", "model", "bias"),
+            "model_rmse_all": calib("model", "rmse"),
+            "model_bias_all": calib("model", "bias"),
             "model_spearman_starters": get(s, "starters", "model", "spearman"),
             "model_spearman_starters_ci95": get(s, "starters", "model", "spearman_ci95"),
             "model_precision_at_20_starters": get(s, "starters", "model", "precision_at_20"),
@@ -477,6 +533,7 @@ def build_scorecard(scores, model_versions=None, archive_info=None):
         "promotion_ready": gate["ready"],
         "promotion": gate,
         "mean_ep_next_spearman_starters": _clean(mean(starter_sp)) if starter_sp else None,
+        "calibration": calibration_summary(rows, gate["model_version"]),
         "model_vs_ep_next_starter_spearman": {
             "model_version": gate["model_version"],
             "gameweeks": len(paired),
@@ -547,7 +604,7 @@ def main():
               f"vs zero {ep['all']['zero'].get('mae')} | starters Spearman "
               f"{ep['starters']['ep_next'].get('spearman')} CI {ep['starters']['ep_next'].get('spearman_ci95')}")
 
-    scorecard = build_scorecard(load_scores(), archive_info=archive_model_info())
+    scorecard = build_scorecard(load_scores(), archive_info=archive_model_info(), derive=derived_calibration)
     SCORECARD_PATH.write_text(json.dumps(scorecard, indent=2, allow_nan=False))
     p = scorecard["summary"]["power"]
     print(f"📊 scorecard: {scorecard['summary']['scored_gameweeks']} gameweeks scored; "
