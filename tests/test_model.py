@@ -56,8 +56,11 @@ class CrossSeasonTests(unittest.TestCase):
         self.assertEqual(n_train, 24 * 12)
         self.assertTrue((preds >= 0).all())                                  # Tweedie: non-negative
         self.assertTrue(((comp["p_start60"] >= 0) & (comp["p_start60"] <= 1)).all())
-        np.testing.assert_allclose(preds, comp["p_start60"] * comp["xp_if_start"])   # the product, exactly
-        self.assertEqual(set(comp), {"p_start60", "xp_if_start", "cond_head", "price_expect"})
+        # 60+ minutes and the short appearance, each priced, summed exactly
+        np.testing.assert_allclose(preds, comp["p_start60"] * comp["xp_if_start"] + comp["p_short"] * comp["xp_if_short"])
+        self.assertEqual(set(comp), {"p_start60", "xp_if_start", "cond_head", "price_expect", "p_short", "xp_if_short"})
+        self.assertTrue(((comp["p_short"] >= 0) & (comp["p_start60"] + comp["p_short"] <= 1 + 1e-9)).all())
+        self.assertTrue((comp["xp_if_short"] > 0).all())                     # the fixture has short appearances (20 minutes every third week)
 
 
 @unittest.skipUnless(HAS_ML_DEPS, "model deps not installed")

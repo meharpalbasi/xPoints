@@ -217,6 +217,10 @@ def score_gameweek(pred_rows, live, seed=0, extra=None, probs=None):
             if (name in ("ep_next", "zero") or name in extra) and pred:
                 m["mae"] = _clean(mae(pred, actual))
                 m["rmse"] = _clean(rmse(pred, actual))
+                # Mean prediction minus mean actual. Expected points target the mean, so the
+                # pooled bias is the calibration check; within "played" or "starters" it is
+                # selected on the outcome and reads low for any honest forecast.
+                m["bias"] = _clean(mean(pred) - mean(actual))
             if name != "zero" and len(pred) >= 3:
                 lo, hi = bootstrap_spearman_ci(pred, actual, seed=seed)
                 m["spearman"] = _clean(spearman(pred, actual))
@@ -445,7 +449,11 @@ def build_scorecard(scores, model_versions=None, archive_info=None):
             "ep_next_spearman_starters_ci95": get(s, "starters", "ep_next", "spearman_ci95"),
             "ep_next_precision_at_20_starters": get(s, "starters", "ep_next", "precision_at_20"),
             "ep_next_captain_regret": get(s, "all", "ep_next", "captain_regret"),
+            "ep_next_rmse_all": get(s, "all", "ep_next", "rmse"),
+            "ep_next_bias_all": get(s, "all", "ep_next", "bias"),
             "model_mae_all": get(s, "all", "model", "mae"),
+            "model_rmse_all": get(s, "all", "model", "rmse"),
+            "model_bias_all": get(s, "all", "model", "bias"),
             "model_spearman_starters": get(s, "starters", "model", "spearman"),
             "model_spearman_starters_ci95": get(s, "starters", "model", "spearman_ci95"),
             "model_precision_at_20_starters": get(s, "starters", "model", "precision_at_20"),

@@ -24,7 +24,7 @@ import pandas as pd
 from sklearn.linear_model import Ridge
 from xgboost import XGBClassifier, XGBRegressor
 
-from metrics import captain_regret, mae, mean, precision_at_k, spearman, stdev
+from metrics import captain_regret, mae, mean, precision_at_k, rmse, spearman, stdev
 
 DATA = Path("data/merged_gw_2025-26.csv")
 STATS = ["total_points", "minutes", "expected_goals", "expected_assists", "bps", "bonus",
@@ -244,6 +244,13 @@ def score_fold(preds, actual, minutes, k=20):
                 m["brier"] = float(np.mean((p[mask] - started[mask]) ** 2))
             if name not in ("price",):  # rank-only predictor has no meaningful MAE
                 m["mae"] = mae(pv, a)
+            if name not in ("price", "rank_blend") and not name.startswith("p60") and a:
+                # Expected points should target the mean: bias is mean prediction minus mean
+                # actual (only the pooled population is free of selection on the outcome),
+                # and RMSE is the error a mean-targeting forecast minimises, where MAE
+                # rewards shrinking towards the median of a zero-heavy target.
+                m["bias"] = float(np.mean(p[mask]) - np.mean(actual[mask]))
+                m["rmse"] = rmse(pv, a)
             if name not in ("zero", "p60_base") and len(a) >= 3:
                 m["spearman"] = spearman(pv, a)
                 m["p_at_20"] = precision_at_k(pv, a, k, draws=50)
@@ -278,6 +285,7 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
               learning_rate=0.05, subsample=0.8, colsample_bytree=0.8, random_state=0, n_jobs=4)
 
     folds = []
+    calibration, oof_pred, oof_actual, oof_start_cond, oof_start_actual = [], [], [], [], []
     t0 = time.time()
     for g in range(first_target, last_target + 1):
         tr, te = gw < g, gw == g
@@ -352,6 +360,56 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
         c_mono_m = XGBRegressor(**tw, monotone_constraints=mono_m).fit(Xm[tr][started], yt)
         preds["two_stage_blend_v3h"] = prob_m * (0.5 * c_mono_m.predict(Xm[te]) + 0.5 * price_expect)
         preds["xgb_tweedie_prior"] = XGBRegressor(**tw).fit(Xp[tr], np.clip(y[tr], 0, None)).predict(Xp[te])
+        # v4: what v3 leaves out. v3 is P(60+) x E[points | 60+], so an appearance of 1 to 59
+        # minutes is priced at nothing, and its pooled mean runs below the actual mean by about
+        # the points those appearances score. Three candidate repairs, judged on the same rows:
+        #   v4_short       add P(1-59) x the as-of mean points of a short appearance by position
+        #   v4_short_head  the same with a learned head for E[points | 1-59]
+        #   v4_scalar      multiply v3 by one factor fitted on the prior folds' own predictions
+        v3h = preds["two_stage_blend_v3h"]
+        cond_m = 0.5 * c_mono_m.predict(Xm[te]) + 0.5 * price_expect
+        short_tr = (minutes[tr] > 0) & (minutes[tr] < 60)
+        short_clf = XGBClassifier(n_estimators=300, max_depth=4, learning_rate=0.05, subsample=0.8,
+                                  colsample_bytree=0.8, random_state=0, n_jobs=4, eval_metric="logloss")
+        short_clf.fit(Xm[tr], short_tr.astype(int))
+        p_short = np.minimum(short_clf.predict_proba(Xm[te])[:, 1], 1 - prob_m)
+        tr_short_rows = pg.loc[tr][short_tr]
+        short_by_pos = tr_short_rows.groupby("position_id")["total_points"].mean()
+        short_overall = float(tr_short_rows["total_points"].mean()) if len(tr_short_rows) else 1.0
+        short_pts = te_rows["position_id"].map(short_by_pos).fillna(short_overall).to_numpy(dtype=float)
+        preds["two_stage_v4_short"] = v3h + p_short * short_pts
+        if short_tr.sum() >= 300:
+            short_head = XGBRegressor(**tw).fit(Xm[tr][short_tr], np.clip(y[tr][short_tr], 0, None))
+            short_head_pts = np.clip(short_head.predict(Xm[te]), 0, None)
+        else:
+            short_head_pts = short_pts
+        preds["two_stage_v4_short_head"] = v3h + p_short * short_head_pts
+        # v4_short_cal: the short term, plus the conditional head scaled by how far it ran
+        # below actual starters' points on the PRIOR folds (as-of, never this fold's results).
+        head_scale = (sum(oof_start_actual) / sum(oof_start_cond)) if oof_start_cond and sum(oof_start_cond) > 0 else 1.0
+        preds["two_stage_v4_short_cal"] = prob_m * cond_m * head_scale + p_short * short_pts
+        scalar = (sum(oof_actual) / sum(oof_pred)) if oof_pred and sum(oof_pred) > 0 else 1.0
+        preds["two_stage_v4_scalar"] = v3h * scalar
+        oof_pred.append(float(v3h.sum()))
+        oof_actual.append(float(y[te].sum()))
+        m_te = minutes[te]
+        started_te, short_te = m_te >= 60, (m_te > 0) & (m_te < 60)
+        oof_start_cond.append(float(cond_m[started_te].sum()))
+        oof_start_actual.append(float(y[te][started_te].sum()))
+        calibration.append({
+            "gw": g, "n": int(te.sum()), "scalar_used": round(scalar, 4), "head_scale_used": round(head_scale, 4),
+            "mean_v4_short_cal": float(preds["two_stage_v4_short_cal"].mean()),
+            "mean_actual": float(y[te].mean()), "mean_v3": float(v3h.mean()),
+            "mean_v4_short": float(preds["two_stage_v4_short"].mean()),
+            "p60_mean": float(prob_m.mean()), "p60_actual": float(started_te.mean()),
+            "p_short_mean": float(p_short.mean()), "p_short_actual": float(short_te.mean()),
+            # The conditional head is E[points | 60+], so among actual starters it should match their mean.
+            "cond_mean_starters": float(cond_m[started_te].mean()) if started_te.any() else None,
+            "actual_mean_starters": float(y[te][started_te].mean()) if started_te.any() else None,
+            "short_pts_mean": float(short_pts[short_te].mean()) if short_te.any() else None,
+            "actual_mean_short": float(y[te][short_te].mean()) if short_te.any() else None,
+            "share_of_points_from_short": float(y[te][short_te].sum() / y[te].sum()) if y[te].sum() > 0 else None,
+        })
         folds.append({"gw": g, "n_train": int(tr.sum()), **score_fold(preds, y[te], minutes[te])})
         print(f"GW{g:2d} train={tr.sum():5d} test={te.sum():3d} | starters ρ: "
               + " ".join(f"{m}={folds[-1]['starters'][m].get('spearman', float('nan')):.3f}"
@@ -360,13 +418,14 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
     models = ["zero", "career_mean", "last5_mean", "price", "ridge", "xgb_mse", "xgb_tweedie", "xgb_tweedie_opp",
               "xgb_tweedie_prior", "p60", "cond_start", "cond_prior", "cond_mono", "cond_prior_mono",
               "two_stage", "two_stage_prior_mono", "price_expect", "cond_blend", "rank_blend", "two_stage_blend",
-              "p60_base", "p60_v3", "two_stage_blend_v3", "two_stage_blend_v3h"]
+              "p60_base", "p60_v3", "two_stage_blend_v3", "two_stage_blend_v3h",
+              "two_stage_v4_short", "two_stage_v4_short_head", "two_stage_v4_short_cal", "two_stage_v4_scalar"]
     summary = {}
     for pop in POPULATIONS:
         summary[pop] = {}
         for m in models:
             metrics = {}
-            for key in ("mae", "spearman", "p_at_20", "captain_regret", "brier"):
+            for key in ("mae", "rmse", "bias", "spearman", "p_at_20", "captain_regret", "brier"):
                 vals = [f[pop][m][key] for f in folds if key in f[pop][m] and not math.isnan(f[pop][m][key])]
                 if vals:
                     metrics[key] = {"mean": round(mean(vals), 4), "sd": round(stdev(vals), 4) if len(vals) > 1 else None}
@@ -444,6 +503,23 @@ def run(first_target=8, last_target=38, out=Path("backtests/2025-26.json")):
         d = [f[pop][cand][key] - f[pop][ref][key] for f in folds]
         paired_v3[f"{cand}_vs_{ref}_{key}_{pop}"] = {"mean_diff": round(mean(d), 4), "se": round(stdev(d) / math.sqrt(len(d)), 4)}
     result["market_v3"] = paired_v3
+    # v4: does pricing the short appearance fix the pooled mean without costing the ranking?
+    paired_v4 = {}
+    for cand in ("two_stage_v4_short", "two_stage_v4_short_head", "two_stage_v4_short_cal", "two_stage_v4_scalar"):
+        for pop, key in (("all", "bias"), ("all", "rmse"), ("all", "mae"), ("all", "spearman"), ("starters", "spearman"),
+                         ("starters", "p_at_20"), ("all", "captain_regret")):
+            d = [f[pop][cand][key] - f[pop]["two_stage_blend_v3h"][key] for f in folds]
+            paired_v4[f"{cand}_vs_v3h_{key}_{pop}"] = {"mean_diff": round(mean(d), 4), "se": round(stdev(d) / math.sqrt(len(d)), 4)}
+    result["calibration_v4"] = paired_v4
+    result["calibration_folds"] = calibration
+    avg = lambda k: round(mean([c[k] for c in calibration if c.get(k) is not None]), 4)
+    result["calibration_summary"] = {k: avg(k) for k in ("mean_actual", "mean_v3", "mean_v4_short", "mean_v4_short_cal", "head_scale_used", "p60_mean", "p60_actual", "p_short_mean",
+                                                        "p_short_actual", "cond_mean_starters", "actual_mean_starters", "short_pts_mean",
+                                                        "actual_mean_short", "share_of_points_from_short")}
+    low = sum(1 for c in calibration if c["mean_v3"] < c["mean_actual"])
+    result["calibration_summary"]["folds_v3_below_actual"] = f"{low} of {len(calibration)}"
+    print("calibration:", result["calibration_summary"])
+    print("v4:", {k: f"{v['mean_diff']:+.4f} ± {v['se']:.4f}" for k, v in paired_v4.items()})
     print("market v3:", {k: f"{v['mean_diff']:+.4f} ± {v['se']:.4f}" for k, v in paired_v3.items()})
     out.write_text(json.dumps(result, indent=2, allow_nan=False))
     print("priors / monotone price:", {k: f"{v['mean_diff']:+.3f} ± {v['se']:.3f}" for k, v in paired_prior.items()})

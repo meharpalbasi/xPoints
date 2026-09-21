@@ -95,6 +95,34 @@ GW4 deadline is Saturday 12 September 2026 12:30 UTC; FPL usually marks the game
 
 Commands: `python3 -m unittest discover -s tests` (all xPoints tests), `python3 backtest.py --out backtests/<name>.json` (about two and a half minutes), `python3 model.py --no-fetch` (uses the cached season under `data/`), `python3 score.py` (skips graded gameweeks), `python3 score_site.py`. Generated artifacts (`predictions*.json`, `scores/`, `scorecard.json`, `site_scorecard.json`) never go in a feature PR.
 
+### v4, 21 September 2026: the short appearance, priced
+
+The 17 September review said the model's pooled mean ran low because `P(60+) x E[points | 60+]` gives an appearance of 1 to 59 minutes nothing. The first reading of GW4 disputed that, from the wrong evidence: the model looked exact among players who played 1 to 59 minutes and low among those who played 60+, but both populations are selected on the outcome, so neither can locate a bias. The walk-forward harness settles it (`backtests/2025-26_v4.json`, 31 folds, identical rows):
+
+| Check | Result |
+|---|---|
+| v3 pooled mean against actual | 0.973 against 1.157: below in **31 of 31** folds |
+| P(60+), mean against rate | 0.2595 against 0.2599: calibrated |
+| P(1 to 59), mean against rate | 0.118 against 0.120: calibrated |
+| E[points given 60+] among actual starters | 3.75 against 3.88: slightly low |
+| Share of all points scored in short appearances | 12.8%, 1.23 points each |
+
+The gap is the missing term (0.12 x 1.23 = 0.15 of the 0.185) plus a small shortfall in the conditional head. Prospectively the same: GW3 bias -0.249 and GW4 -0.213, with 0.19 and 0.21 points a player scored in short appearances.
+
+| Candidate, against v3 on identical rows | bias | RMSE | MAE | Spearman, starters | p@20, starters |
+|---|---:|---:|---:|---:|---:|
+| v3 | -0.185 | 1.923 | 0.888 | 0.107 | 0.194 |
+| **v4: + P(1 to 59) x position mean of a short appearance** | **-0.038** | **1.899** | 0.923 | **0.118** | 0.194 |
+| the same with a learned head for the short appearance | -0.052 | 1.899 | 0.918 | 0.118 | 0.198 |
+| v4 plus an as-of scale on the conditional head | +0.012 | 1.900 | 0.940 | 0.117 | 0.193 |
+| one scalar fitted on prior folds | +0.025 | 1.936 | 0.951 | 0.107 | 0.194 |
+
+- **Shipped as `xpoints-minutes-blend-v4`**: the simplest repair that wins. Paired against v3: RMSE -0.0245 +/- 0.0023, starter Spearman +0.0105 +/- 0.0023, precision at 20 unchanged, captain regret +0.23 +/- 0.23 (one fold, noise). Every row carries `p_short` and `xp_if_short` beside the existing components.
+- **MAE rises, and should.** On a target where half the players score zero, MAE rewards shrinking towards the median; v3's low MAE was partly that. RMSE is the error a mean-targeting forecast minimises and it fell. The scorecard now records `rmse` and pooled `bias` for the feed and the model in every score file and row (`model_bias_all`, `ep_next_bias_all`, `model_rmse_all`, `ep_next_rmse_all`), so the accuracy page can show them. Bias within "played" or "starters" is selected on the outcome and reads low for any honest forecast; only the pooled number is a calibration check.
+- **The scalar was the wrong fix**: it moved the mean and made RMSE and MAE worse, because it inflates starters to pay for appearances it still does not price.
+- **Cost: the gate restarts.** The gate counts one version at a time, so v4 starts at 0 of 6 from GW6 (deadline 10 October, after the international break); GW5, frozen under v3, will be v3's second and last row. Worth it: a forecast whose mean is 16% low is the wrong thing to promote, and every tool on the site now reads one forecast.
+- **Tests run under the Python that has the ML stack** (`/opt/anaconda3/bin/python3 -m unittest discover -s tests`, 57 tests); the system `python3` on this machine skips the model tests.
+
 ### Working rules agreed with the owner
 
 - `ep_next` stays champion until the model demonstrably wins over a sustained window. Shadow first, always.

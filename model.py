@@ -18,6 +18,17 @@ identical rows (backtests/2025-26_v3.json). The season in progress is read
 from FPL's own API (fpl_history.py) so the newest finished gameweeks and
 their transfer data are always in the training set.
 
+v4 prices the short appearance. v3 was P(60+) x E[points | 60+], which gives
+an appearance of 1 to 59 minutes nothing; those appearances score 12.8% of
+all points, so v3's pooled mean ran below the actual mean in 31 of 31
+walk-forward folds (0.97 against 1.16) while its P(60+) was calibrated almost
+exactly. v4 adds P(1-59) x the as-of mean points of a short appearance in the
+position. On identical rows that took the bias from -0.185 to -0.038, RMSE
+from 1.923 to 1.899 and starter rank correlation from 0.107 to 0.118, with
+MAE up (0.888 to 0.923) as it must be when a forecast stops shrinking
+towards the median of a zero-heavy target (backtests/2025-26_v4.json). A
+single scalar, the obvious repair, made RMSE worse and was rejected.
+
 Output: predictions_model.json in the same schema as predictions.json, with
 source "xpoints_model", plus a per-gameweek archive predictions/gw{N}_model.json
 that freezes at the deadline and is graded by score.py alongside ep_next on
@@ -42,7 +53,7 @@ from fpl_history import load_or_fetch as load_live_rows
 from prediction_safety import write_predictions
 
 SEASONS = ["2025-26", "2026-27"]  # the last one is the season in progress, read from FPL's API
-MODEL_VERSION = "xpoints-two-stage-blend-v3"
+MODEL_VERSION = "xpoints-minutes-blend-v4"
 MARKET_BLOCK = True  # v3: deadline-known market signals in both stages (backtests/2025-26_v3.json)
 SOURCE = "xpoints_model"
 PARAMS = dict(objective="reg:tweedie", tweedie_variance_power=1.3, n_estimators=300, max_depth=4,
@@ -133,9 +144,10 @@ def price_expectation(train_starters, targets):
 
 
 def train_and_predict(history, pred, params=PARAMS, market=None):
-    """Two-stage, price-blended projection (the harness winner, ablation PR #19):
+    """Minutes-weighted, price-blended projection (harness: backtests/2025-26_v4.json):
 
-        xPoints = P(60+ minutes) x ( w * E[points | starts] + (1-w) * price_expectation )
+        xPoints = P(60+ minutes) x ( w * E[points | 60+] + (1-w) * price_expectation )
+                + P(1-59 minutes) x mean points of a short appearance in the position
 
     Stage 1 is a classifier on every completed row. Stage 2 is a Tweedie head
     trained ONLY on rows where the player started, monotone in price so it can
@@ -163,6 +175,21 @@ def train_and_predict(history, pred, params=PARAMS, market=None):
     clf.fit(Xf[is_train], started[is_train].astype(int))
     p60 = clf.predict_proba(Xt)[:, 1]
 
+    # The short appearance (1 to 59 minutes): its own classifier, capped so the two
+    # probabilities never pass one, times what such an appearance has scored in the
+    # position. Few rows and little signal, so a position mean, not a learned head.
+    minutes_all = frame["minutes"].fillna(0).to_numpy()
+    short = (minutes_all > 0) & (minutes_all < 60) & is_train
+    short_clf = XGBClassifier(n_estimators=params["n_estimators"], max_depth=params["max_depth"],
+                              learning_rate=params["learning_rate"], subsample=params["subsample"],
+                              colsample_bytree=params["colsample_bytree"], random_state=params["random_state"],
+                              n_jobs=params["n_jobs"], eval_metric="logloss")
+    if short.any() and not short[is_train].all():
+        short_clf.fit(Xf[is_train], short[is_train].astype(int))
+        p_short = np.minimum(short_clf.predict_proba(Xt)[:, 1], 1 - p60)
+    else:
+        p_short = np.zeros(len(Xt))
+
     mono = tuple(1 if c == "price" else 0 for c in cols)
     reg = XGBRegressor(**params, monotone_constraints=mono)
     reg.fit(Xf[started], np.clip(y[started].to_numpy(dtype=float), 0, None))
@@ -171,8 +198,13 @@ def train_and_predict(history, pred, params=PARAMS, market=None):
     targets = frame.loc[~is_train].reset_index(drop=True)
     pexp = price_expectation(frame.loc[started], targets)
     blend = BLEND_WEIGHT * cond + (1 - BLEND_WEIGHT) * pexp
-    preds = p60 * blend
-    components = {"p_start60": p60, "xp_if_start": blend, "cond_head": cond, "price_expect": pexp}
+    short_rows = frame.loc[short]
+    short_by_pos = short_rows.groupby("position_id")["total_points"].mean()
+    short_overall = float(short_rows["total_points"].mean()) if len(short_rows) else 1.0
+    xp_short = targets["position_id"].map(short_by_pos).fillna(short_overall).to_numpy(dtype=float)
+    preds = p60 * blend + p_short * xp_short
+    components = {"p_start60": p60, "xp_if_start": blend, "cond_head": cond, "price_expect": pexp,
+                  "p_short": p_short, "xp_if_short": xp_short}
     return targets, preds, cols, int(is_train.sum()), components
 
 
@@ -251,11 +283,12 @@ def main():
         "seasons": SEASONS, "training_rows": n_train, "n_features": len(features),
         "features": features, "params": PARAMS, "market_block": MARKET_BLOCK,
         "live_season_source": "FPL element-summary (fpl_history.py), finished gameweeks only",
-        "design": "P(60+) x (0.5 * monotone-price Tweedie head trained on starters + 0.5 * price-implied expectation), "
-                  "both stages with the deadline-known market block (transfers, ownership, price move)",
-        "harness": "backtests/2025-26_v3.json (walk-forward GW8-38, identical rows: two_stage_blend_v3h "
-                   "MAE 0.888 all against v2 0.920, starter Spearman 0.107 against 0.087, starter p@20 0.194 "
-                   "against 0.173, P(60+) Brier 0.0734 against 0.0787, base rate 0.1925)",
+        "design": "P(60+) x (0.5 * monotone-price Tweedie head trained on 60+ rows + 0.5 * price-implied expectation) "
+                  "+ P(1-59) x the position's mean points for a short appearance; both classifiers and the head "
+                  "see the deadline-known market block (transfers, ownership, price move)",
+        "harness": "backtests/2025-26_v4.json (walk-forward GW8-38, identical rows, against v3: bias -0.038 against "
+                   "-0.185, RMSE 1.899 against 1.923, starter Spearman 0.118 against 0.107, starter p@20 0.194 "
+                   "against 0.194, MAE 0.923 against 0.888; v3 ran below the actual mean in 31 of 31 folds)",
     }, indent=2))
 
     if archive_allowed(dt.datetime.now(dt.timezone.utc), deadline):

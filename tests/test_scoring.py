@@ -242,3 +242,14 @@ class CoverageGateTests(unittest.TestCase):
         self.assertEqual(cmp_["gameweeks"], 1)
         self.assertAlmostEqual(cmp_["mean_diff"], 0.3 - 0.12, places=4)
         self.assertEqual(card["gameweeks"][1]["ep_next_spearman_starters_on_model_rows"], 0.12)
+
+
+class BiasTests(unittest.TestCase):
+    def test_pooled_bias_is_mean_prediction_minus_mean_actual(self):
+        preds = [pred(1, 5.0), pred(2, 3.0), pred(3, 1.0), pred(4, 1.0)]
+        stats = {1: {"minutes": 90, "total_points": 8}, 2: {"minutes": 90, "total_points": 2},
+                 3: {"minutes": 10, "total_points": 1}, 4: {"minutes": 0, "total_points": 0}}
+        result, _ = score_gameweek(preds, stats, extra={"model": {1: 4.0, 2: 2.0, 3: 0.5, 4: 0.0}})
+        self.assertAlmostEqual(result["metrics"]["all"]["ep_next"]["bias"], (10 - 11) / 4, places=4)
+        self.assertAlmostEqual(result["metrics"]["all"]["model"]["bias"], (6.5 - 11) / 4, places=4)
+        self.assertAlmostEqual(result["metrics"]["all"]["zero"]["bias"], -11 / 4, places=4)
