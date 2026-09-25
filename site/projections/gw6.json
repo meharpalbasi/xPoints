@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 6,
   "label": "FPL's official expected points",
-  "generated_at": "2026-09-24T22:10:17Z"
+  "generated_at": "2026-09-25T01:18:53Z"
  },
- "site_generated_at": "2026-09-25T01:18:57.085Z",
+ "site_generated_at": "2026-09-25T07:28:27.140Z",
  "rows": [
   {
    "player_id": 1,
@@ -423,14 +423,14 @@
    "web_name": "Havertz",
    "team": 1,
    "element_type": 4,
-   "rate": 4.82,
+   "rate": 3.62,
    "rate_source": "feed",
    "xp": {
-    "6": 3.2,
-    "7": 3.5,
-    "8": 4.1,
-    "9": 3.5,
-    "10": 4.0
+    "6": 2.4,
+    "7": 2.8,
+    "8": 3.5,
+    "9": 3.1,
+    "10": 3.6
    }
   },
   {
@@ -10690,6 +10690,6 @@
    }
   }
  ],
- "archived_at": "2026-09-25T01:18:57Z",
+ "archived_at": "2026-09-25T07:28:27Z",
  "deadline": "2026-10-10T10:00:00Z"
 }
