@@ -11,10 +11,10 @@
  "p60_model": {
   "version": "xpoints-minutes-blend-v4",
   "gameweek": 6,
-  "generatedAt": "2026-09-26T22:35:22Z",
+  "generatedAt": "2026-09-27T01:15:17Z",
   "players": 667
  },
- "site_generated_at": "2026-09-27T01:15:15.416Z",
+ "site_generated_at": "2026-09-27T07:54:26.180Z",
  "rows": [
   {
    "player_id": 1,
@@ -500,9 +500,9 @@
    "status": "d",
    "xMins": 59.9,
    "pStart": 0.69,
-   "p60": 0.68,
+   "p60": 0.67,
    "p60Site": 0.68,
-   "p60Model": 0.67,
+   "p60Model": 0.66,
    "p60Source": "blend",
    "pAppear": 0.71,
    "fixtures": 1,
@@ -9926,7 +9926,7 @@
    "pStart": 0.49,
    "p60": 0.45,
    "p60Site": 0.49,
-   "p60Model": 0.4,
+   "p60Model": 0.41,
    "p60Source": "blend",
    "pAppear": 0.77,
    "fixtures": 1,
@@ -10800,7 +10800,7 @@
    "pStart": 0.35,
    "p60": 0.45,
    "p60Site": 0.34,
-   "p60Model": 0.56,
+   "p60Model": 0.55,
    "p60Source": "blend",
    "pAppear": 0.69,
    "fixtures": 1,
@@ -11786,9 +11786,9 @@
    "status": "a",
    "xMins": 16.3,
    "pStart": 0.08,
-   "p60": 0.15,
+   "p60": 0.16,
    "p60Site": 0.09,
-   "p60Model": 0.21,
+   "p60Model": 0.22,
    "p60Source": "blend",
    "pAppear": 0.57,
    "fixtures": 1,
@@ -12690,6 +12690,6 @@
    "role": "fringe"
   }
  ],
- "archived_at": "2026-09-27T01:15:15Z",
+ "archived_at": "2026-09-27T07:54:26Z",
  "deadline": "2026-10-10T10:00:00Z"
 }
