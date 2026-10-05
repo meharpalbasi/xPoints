@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 6,
   "label": "FPL's official expected points",
-  "generated_at": "2026-10-04T20:00:16Z"
+  "generated_at": "2026-10-04T22:56:01Z"
  },
- "site_generated_at": "2026-10-04T22:56:04.278Z",
+ "site_generated_at": "2026-10-05T01:46:44.073Z",
  "rows": [
   {
    "player_id": 1,
@@ -6759,14 +6759,14 @@
    "web_name": "Mazraoui",
    "team": 16,
    "element_type": 2,
-   "rate": 1.34,
+   "rate": 1.19,
    "rate_source": "feed",
    "xp": {
     "6": 0.2,
     "7": 0.3,
     "8": 0.5,
     "9": 0.5,
-    "10": 0.7
+    "10": 0.6
    }
   },
   {
@@ -9415,13 +9415,13 @@
    "web_name": "Khalaili",
    "team": 8,
    "element_type": 2,
-   "rate": 5.96,
+   "rate": 6.0,
    "rate_source": "feed",
    "xp": {
     "6": 4.0,
     "7": 3.8,
-    "8": 4.8,
-    "9": 4.1,
+    "8": 4.9,
+    "9": 4.2,
     "10": 3.8
    }
   },
@@ -10690,6 +10690,6 @@
    }
   }
  ],
- "archived_at": "2026-10-04T22:56:04Z",
+ "archived_at": "2026-10-05T01:46:44Z",
  "deadline": "2026-10-10T10:00:00Z"
 }
