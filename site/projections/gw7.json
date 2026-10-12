@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 7,
   "label": "FPL's official expected points",
-  "generated_at": "2026-10-11T20:06:30Z"
+  "generated_at": "2026-10-12T05:24:20Z"
  },
- "site_generated_at": "2026-10-11T23:37:13.990Z",
+ "site_generated_at": "2026-10-12T15:00:43.864Z",
  "rows": [
   {
    "player_id": 1,
@@ -151,10 +151,10 @@
    "web_name": "Hincapie",
    "team": 1,
    "element_type": 2,
-   "rate": 2.33,
+   "rate": 2.32,
    "rate_source": "feed",
    "xp": {
-    "7": 0.3,
+    "7": 0.2,
     "8": 0.4,
     "9": 0.4,
     "10": 0.4,
@@ -314,7 +314,7 @@
    "rate": 2.96,
    "rate_source": "feed",
    "xp": {
-    "7": 0.7,
+    "7": 0.5,
     "8": 0.8,
     "9": 0.8,
     "10": 0.9,
@@ -10690,6 +10690,6 @@
    }
   }
  ],
- "archived_at": "2026-10-11T23:37:14Z",
+ "archived_at": "2026-10-12T15:00:44Z",
  "deadline": "2026-10-17T10:00:00Z"
 }
