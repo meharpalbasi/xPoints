@@ -1,0 +1,233 @@
+{
+ "projections": {
+  "4": {
+   "horizon_week": 2,
+   "scored_at": "2026-10-13T19:08:12Z",
+   "snapshot_deadline": "2026-09-12T12:30:00Z",
+   "snapshot_archived_at": "2026-09-12T08:35:04Z",
+   "model": "proj-1",
+   "feed": {
+    "available": true,
+    "gameweek": 4,
+    "label": "FPL's official expected points",
+    "generated_at": "2026-09-12T04:04:59Z"
+   },
+   "n": {
+    "all": 656,
+    "played": 315,
+    "starters": 206
+   },
+   "missing_from_live": 0,
+   "metrics": {
+    "all": {
+     "mae": 1.3008,
+     "rmse": 2.3231,
+     "zero_mae": 1.3887,
+     "spearman": 0.5884,
+     "spearman_ci95": [
+      0.53,
+      0.6397
+     ],
+     "precision_at_10": 0.0735,
+     "precision_at_20": 0.1542
+    },
+    "played": {
+     "mae": 2.134,
+     "rmse": 3.1191,
+     "zero_mae": 2.8921,
+     "spearman": 0.2492,
+     "spearman_ci95": [
+      0.1446,
+      0.3514
+     ],
+     "precision_at_10": 0.0755,
+     "precision_at_20": 0.1645
+    },
+    "starters": {
+     "mae": 2.5728,
+     "rmse": 3.5138,
+     "zero_mae": 3.6311,
+     "spearman": 0.0067,
+     "spearman_ci95": [
+      -0.1361,
+      0.1552
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.2375
+    }
+   }
+  },
+  "5": {
+   "horizon_week": 1,
+   "scored_at": "2026-10-13T19:08:12Z",
+   "snapshot_deadline": "2026-09-18T17:30:00Z",
+   "snapshot_archived_at": "2026-09-18T17:00:43Z",
+   "model": "proj-1",
+   "feed": {
+    "available": true,
+    "gameweek": 5,
+    "label": "FPL's official expected points",
+    "generated_at": "2026-09-18T12:50:56Z"
+   },
+   "n": {
+    "all": 659,
+    "played": 315,
+    "starters": 206
+   },
+   "missing_from_live": 0,
+   "metrics": {
+    "all": {
+     "mae": 1.2299,
+     "rmse": 2.2692,
+     "zero_mae": 1.3824,
+     "spearman": 0.6398,
+     "spearman_ci95": [
+      0.5945,
+      0.6886
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.2083
+    },
+    "played": {
+     "mae": 2.1187,
+     "rmse": 3.0814,
+     "zero_mae": 2.8921,
+     "spearman": 0.2849,
+     "spearman_ci95": [
+      0.1806,
+      0.3895
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.2145
+    },
+    "starters": {
+     "mae": 2.5223,
+     "rmse": 3.4556,
+     "zero_mae": 3.6311,
+     "spearman": 0.0417,
+     "spearman_ci95": [
+      -0.0987,
+      0.1871
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.2375
+    }
+   }
+  },
+  "6": {
+   "horizon_week": 0,
+   "scored_at": "2026-10-13T19:08:12Z",
+   "snapshot_deadline": "2026-10-10T10:00:00Z",
+   "snapshot_archived_at": "2026-10-10T06:53:03Z",
+   "model": "proj-2",
+   "feed": {
+    "available": true,
+    "gameweek": 6,
+    "label": "FPL's official expected points",
+    "generated_at": "2026-10-10T00:39:11Z"
+   },
+   "n": {
+    "all": 667,
+    "played": 315,
+    "starters": 206
+   },
+   "missing_from_live": 0,
+   "metrics": {
+    "all": {
+     "mae": 1.1645,
+     "rmse": 2.359,
+     "zero_mae": 1.3658,
+     "spearman": 0.7122,
+     "spearman_ci95": [
+      0.6623,
+      0.7597
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.0693
+    },
+    "played": {
+     "mae": 2.2619,
+     "rmse": 3.3606,
+     "zero_mae": 2.8921,
+     "spearman": 0.3555,
+     "spearman_ci95": [
+      0.2518,
+      0.4486
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.0685
+    },
+    "starters": {
+     "mae": 2.6694,
+     "rmse": 3.6912,
+     "zero_mae": 3.6311,
+     "spearman": 0.1665,
+     "spearman_ci95": [
+      0.0307,
+      0.3043
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.1098
+    }
+   }
+  }
+ },
+ "gameweek": 6,
+ "deadline": "2026-10-10T10:00:00Z",
+ "xmins": {
+  "scored_at": "2026-10-13T19:08:12Z",
+  "snapshot_archived_at": "2026-10-10T06:53:04Z",
+  "model": "xmins-1",
+  "n": 667,
+  "missing_from_live": 0,
+  "base_rate_60": 0.3088,
+  "brier_60": 0.0804,
+  "brier_base_rate": 0.2135,
+  "brier_skill": 0.6233,
+  "minutes_mae": 13.2627,
+  "minutes_mae_played": 19.8352,
+  "brier_appear": 0.0968,
+  "n_site": 667,
+  "brier_60_site": 0.086,
+  "n_model": 667,
+  "brier_60_model": 0.082,
+  "brier_60_on_model_rows": 0.0804,
+  "calibration": [
+   {
+    "from": 0.0,
+    "to": 0.2,
+    "n": 406,
+    "predicted": 0.0416,
+    "actual": 0.0369
+   },
+   {
+    "from": 0.2,
+    "to": 0.4,
+    "n": 38,
+    "predicted": 0.2789,
+    "actual": 0.3684
+   },
+   {
+    "from": 0.4,
+    "to": 0.6,
+    "n": 48,
+    "predicted": 0.4815,
+    "actual": 0.5417
+   },
+   {
+    "from": 0.6,
+    "to": 0.8,
+    "n": 50,
+    "predicted": 0.7098,
+    "actual": 0.76
+   },
+   {
+    "from": 0.8,
+    "to": 1.0,
+    "n": 125,
+    "predicted": 0.8923,
+    "actual": 0.904
+   }
+  ]
+ }
+}
