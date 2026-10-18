@@ -1,7 +1,7 @@
 # xPoints research audit and production roadmap
 
 Last updated: 2 September 2026  
-Status: XP-01, XP-03 and the backtest harness are merged; a two-stage, price-blended challenger (XP-04/XP-05 slice) runs in shadow from GW3 and has its first paired grade (GW3); v3 with the market block runs from GW4. See "Where things stand" for the hand-off.  
+Status: XP-01, XP-03 and the backtest harness are merged; a two-stage, price-blended challenger (XP-04/XP-05 slice) runs in shadow from GW3; v3 with the market block runs from GW4 and has its first paired grade (GW4). See "Where things stand" for the hand-off.  
 Scope: the xPoints model, its dbt data dependencies, evaluation, publication, and monitoring
 
 ## Executive summary
@@ -19,7 +19,7 @@ The most important conclusion from the research is not “add more XGBoost featu
 
 The existing production feed should remain the official FPL `ep_next` baseline until a challenger passes those gates. The current XGBoost script is experimental and is not suitable for production promotion.
 
-## Where things stand (9 September 2026): GW3 graded, v3 in shadow, the gate built
+## Where things stand (17 September 2026): GW4 graded, v3's first paired row, the gate at 2 of 6
 
 This is the hand-off for the next working session. The reasoning is in the research artifact (https://claude.ai/code/artifact/2ca07fa6-120d-4941-b5a3-641f17002cd5) and the website roadmap (`fpl-app/roadmap.md`).
 
@@ -81,6 +81,33 @@ What it says, and what it does not:
 2. **DBT-01** in `fpl_dbt`: built on 9 September as fpl_dbt PR #26 (snapshot keyed by `player_code` with `snapshot_identity.py` before each run, `raw.ingestion_runs` with `run_id` on every row, retries then skip on failure, incomplete runs stop the pipeline, blocking-tagged gates). Merge, then watch the first Railway run's log for the identity heal line and the gates.
 3. **Availability as a feature, once it can be backtested.** `fpl_dbt`'s daily snapshots record `status`, `news` and `chance_of_playing` per player per day from this season; after a season of them exists they can join the training rows as-of and be evaluated in `backtest.py` the same way the market block was. Until then they stay a post-model rule.
 4. **Parked, do not reopen without new evidence:** opponent form, prior-season priors, a Railway-dispatch trigger for the hourly job, the dbt #18 rebase.
+
+### GW4, graded on 15 September: v3's first paired row
+
+Both archives were frozen at 08:35 UTC on 12 September, four hours before the deadline, `gw4_model.json` carries `xpoints-two-stage-blend-v3` and `p_start60`, and `scores/gw4.json` grades `ep_next`, the model and predict-zero on 656 identical rows (307 played, 197 starters).
+
+| Population | Measure | `ep_next` | model v3 | predict zero |
+|---|---|---:|---:|---:|
+| all | MAE | 1.235 | **1.099** | 1.431 |
+| played | MAE | 2.295 | **2.082** | 3.059 |
+| starters | MAE | 2.691 | **2.515** | 4.010 |
+| starters | Spearman (95% CI) | 0.213 (0.078 to 0.348) | **0.230** (0.099 to 0.350) | n/a |
+| starters | precision at 20 | **0.250** | 0.200 | n/a |
+| all | captain regret | 15 | **8** | n/a |
+| all | P(60+) Brier (base rate 0.210) | n/a | **0.078** | n/a |
+
+- The model beat the feed on MAE in every population again, and on captain regret again (8 against 15). Its starter ranking edged ahead for the first time (0.230 against 0.213, both intervals clear of zero: GW4 was the feed's best ranking week so far). The feed still picks more of the top 20 starters (0.25 against 0.20).
+- **The two P(60+) numbers on the same players:** the model's classifier scored a Brier of 0.078, the site's expected-minutes model (`xmins-1`, `scores/site/gw4.json`) 0.084, both against a base rate of 0.210. The model's is better by 0.006, so the checklist's "port the site's inputs into the model" step does not apply; the arrow points the other way (see next).
+- **The gate:** 2 of 6 paired gameweeks, paired starter-Spearman difference -0.002 (95% interval -0.039 to 0.034), precision at 20 model 0.139 against feed 0.176. Not ready, as expected. The measured per-gameweek sd is now 0.105, so detecting +0.05 takes 35 gameweeks at 80% power.
+- **The site's own grades landed:** `site_scorecard.json` has its first horizon-week row (week 0 is the feed itself, so it matches) and the first minutes row: Brier 0.084, skill 0.60 against the base rate, minutes MAE 13.5 (18.2 among those who played), calibration close in every bin except 0.2 to 0.4 (27 players, predicted 0.31, actual 0.11). GW5's archives were frozen under v3 on 17 September.
+
+### Next, in order (revised 17 September)
+
+1. **Let the gate count.** Nothing to decide before GW9. Do not touch `MODEL_VERSION`, `BLEND_WEIGHT` or the features on the strength of two gameweeks.
+2. **Give the site's expected minutes the model's P(60+).** The classifier beat the site's `xmins-1` on identical rows (0.078 against 0.084 Brier). The model's archive is public (`predictions_model.json`, `p_start60` per player, refreshed hourly), so `app/lib/xmins.mjs` in fpl-app can blend it in as an input, or the site can serve it beside its own; the site's grading (`score_site.py`) then says which is better every gameweek. Half a day on the site side; nothing changes in this repo.
+3. **DBT-01 is merged (fpl_dbt #26):** watch the Railway log for the identity-heal line and the Step 5 gates on the first runs; `raw.ingestion_runs` should hold a `complete` row per player-details run.
+4. **Availability as a feature, once it can be backtested** (unchanged): after a season of dbt daily snapshots.
+5. **Parked, do not reopen without new evidence:** opponent form, prior-season priors, a Railway-dispatch trigger, the dbt #18 rebase.
 
 ### After GW4: the checklist for whoever picks this up
 
