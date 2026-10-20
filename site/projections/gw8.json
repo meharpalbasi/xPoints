@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 8,
   "label": "FPL's official expected points",
-  "generated_at": "2026-10-20T04:20:50Z"
+  "generated_at": "2026-10-20T09:54:41Z"
  },
- "site_generated_at": "2026-10-20T09:54:44.559Z",
+ "site_generated_at": "2026-10-20T14:52:20.974Z",
  "rows": [
   {
    "player_id": 1,
@@ -586,11 +586,11 @@
    "rate": 2.36,
    "rate_source": "season",
    "xp": {
-    "8": 0.0,
-    "9": 0.0,
-    "10": 0.0,
-    "11": 0.0,
-    "12": 0.0
+    "8": 0.7,
+    "9": 1.2,
+    "10": 1.2,
+    "11": 1.4,
+    "12": 1.4
    }
   },
   {
@@ -9783,14 +9783,14 @@
    "web_name": "Wan-Bissaka",
    "team": 2,
    "element_type": 2,
-   "rate": 7.96,
+   "rate": 7.42,
    "rate_source": "feed",
    "xp": {
-    "8": 2.6,
-    "9": 3.3,
-    "10": 2.6,
+    "8": 0.0,
+    "9": 0.0,
+    "10": 0.0,
     "11": 2.7,
-    "12": 2.2
+    "12": 2.3
    }
   },
   {
@@ -10706,6 +10706,6 @@
    }
   }
  ],
- "archived_at": "2026-10-20T09:54:44Z",
+ "archived_at": "2026-10-20T14:52:21Z",
  "deadline": "2026-10-23T17:30:00Z"
 }
