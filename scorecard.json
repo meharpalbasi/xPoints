@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T14:53:09Z",
+  "generated_at": "2026-10-20T19:07:09Z",
   "method": "Each archived pre-deadline snapshot is joined to official FPL results (event/{gw}/live) once the event is data_checked. Metrics are reported per named population; ties in rankings are broken at random and averaged. Files under scores/ are immutable once written.",
   "populations": {
     "all": "every player in the archive",
@@ -7,39 +7,43 @@
     "starters": "minutes >= 60"
   },
   "summary": {
-    "scored_gameweeks": 6,
+    "scored_gameweeks": 7,
     "promotion_ready": false,
     "promotion": {
       "ready": false,
       "model_version": "xpoints-minutes-blend-v4",
       "coverage_required": 0.95,
       "window_gameweeks": 6,
-      "gameweeks_in_window": 1,
+      "gameweeks_in_window": 2,
       "gameweeks": [
-        6
+        6,
+        7
       ],
       "starter_spearman_diff": {
-        "mean": -0.1259,
-        "se": null,
-        "ci95": null
+        "mean": -0.0224,
+        "se": 0.1035,
+        "ci95": [
+          -0.2253,
+          0.1806
+        ]
       },
       "precision_at_20_starters": {
-        "model_mean": 0.2388,
-        "ep_next_mean": 0.111
+        "model_mean": 0.1853,
+        "ep_next_mean": 0.1055
       },
       "reasons": [
-        "1 of 6 paired gameweeks graded",
+        "2 of 6 paired gameweeks graded",
         "starter rank match not ahead of ep_next on average"
       ],
       "rule": "over the last 6 paired gameweeks of one model version, each with the model covering at least 95% of the graded players and ep_next read on the same players: model starter Spearman ahead with the paired 95% interval above zero, and starter precision at 20 (present every gameweek) at least ep_next's; the feed is switched by a person, never by this file"
     },
-    "mean_ep_next_spearman_starters": 0.1193,
+    "mean_ep_next_spearman_starters": 0.1023,
     "calibration": {
       "note": "bias is mean prediction minus mean actual over every player in the archive; expected points target the mean, so zero is the aim. RMSE is the error a mean-targeting forecast minimises; MAE rewards shrinking towards the median of a target where half the players score zero.",
       "ep_next": {
-        "gameweeks": 6,
-        "mean_bias_all": -0.0076,
-        "mean_rmse_all": 2.3869
+        "gameweeks": 7,
+        "mean_bias_all": -0.0031,
+        "mean_rmse_all": 2.3986
       },
       "model_version": "xpoints-minutes-blend-v4",
       "models": {
@@ -68,31 +72,32 @@
         },
         "xpoints-minutes-blend-v4": {
           "gameweeks": [
-            6
+            6,
+            7
           ],
-          "mean_bias_all": -0.0687,
-          "mean_rmse_all": 2.007,
-          "mean_mae_all": 1.0444,
-          "ep_next_mean_bias_same_gameweeks": 0.0067,
-          "ep_next_mean_rmse_same_gameweeks": 2.361,
-          "ep_next_mean_mae_same_gameweeks": 1.1675
+          "mean_bias_all": -0.0493,
+          "mean_rmse_all": 2.0071,
+          "mean_mae_all": 1.0579,
+          "ep_next_mean_bias_same_gameweeks": 0.0152,
+          "ep_next_mean_rmse_same_gameweeks": 2.415,
+          "ep_next_mean_mae_same_gameweeks": 1.2251
         }
       }
     },
     "model_vs_ep_next_starter_spearman": {
       "model_version": "xpoints-minutes-blend-v4",
-      "gameweeks": 1,
-      "mean_diff": -0.1259,
-      "sd_diff": null
+      "gameweeks": 2,
+      "mean_diff": -0.0224,
+      "sd_diff": 0.1464
     },
-    "mean_ep_next_mae_all": 1.3201,
-    "mean_zero_mae_all": 1.4526,
+    "mean_ep_next_mae_all": 1.3148,
+    "mean_zero_mae_all": 1.4397,
     "power": {
       "effect_to_detect": 0.05,
-      "per_gameweek_sd_used": 0.0845,
+      "per_gameweek_sd_used": 0.0894,
       "sd_source": "observed across scored gameweeks",
-      "gameweeks_needed_power_80": 23,
-      "gameweeks_needed_power_90": 31,
+      "gameweeks_needed_power_80": 26,
+      "gameweeks_needed_power_90": 34,
       "formula": "n = ((z_{1-alpha/2} + z_power) * sd / effect)^2, one-sample normal approximation, alpha 0.05"
     }
   },
@@ -345,6 +350,51 @@
       "model_captain_regret": 12.0,
       "model_p60_brier_all": 0.0825,
       "model_p60_base_rate_brier_all": 0.2135,
+      "price_spearman_starters": null,
+      "blend_spearman_starters": null,
+      "blend_precision_at_20_starters": null
+    },
+    {
+      "gameweek": 7,
+      "deadline": "2026-10-17T10:00:00Z",
+      "generated_at": "2026-10-17T06:47:19Z",
+      "source": "fpl_ep_next",
+      "model_version": "xpoints-minutes-blend-v4",
+      "model_coverage": {
+        "predicted": 667,
+        "missing": 0
+      },
+      "model_coverage_share": 1.0,
+      "ep_next_mae_all_on_model_rows": 1.2828,
+      "ep_next_spearman_starters_on_model_rows": 0.0002,
+      "ep_next_precision_at_20_starters_on_model_rows": 0.1,
+      "n_all": 667,
+      "n_played": 304,
+      "n_starters": 200,
+      "ep_next_mae_all": 1.2828,
+      "zero_mae_all": 1.3628,
+      "ep_next_spearman_all": 0.6461,
+      "ep_next_spearman_starters": 0.0002,
+      "ep_next_spearman_starters_ci95": [
+        -0.1456,
+        0.1451
+      ],
+      "ep_next_precision_at_20_starters": 0.1,
+      "ep_next_captain_regret": 9.0,
+      "ep_next_rmse_all": 2.469,
+      "ep_next_bias_all": 0.0237,
+      "model_mae_all": 1.0715,
+      "model_rmse_all": 2.0071,
+      "model_bias_all": -0.03,
+      "model_spearman_starters": 0.0814,
+      "model_spearman_starters_ci95": [
+        -0.0524,
+        0.2177
+      ],
+      "model_precision_at_20_starters": 0.1317,
+      "model_captain_regret": 2.0,
+      "model_p60_brier_all": 0.0764,
+      "model_p60_base_rate_brier_all": 0.2099,
       "price_spearman_starters": null,
       "blend_spearman_starters": null,
       "blend_precision_at_20_starters": null

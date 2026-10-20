@@ -1,0 +1,184 @@
+{
+  "gameweek": 7,
+  "scored_at": "2026-10-20T19:07:09Z",
+  "deadline": "2026-10-17T10:00:00Z",
+  "data_checked": true,
+  "prediction": {
+    "generated_at": "2026-10-17T06:47:19Z",
+    "source": "fpl_ep_next",
+    "model_version": "ep-next-baseline-1",
+    "ordering": null,
+    "rows": 667
+  },
+  "challenger": {
+    "model_version": "xpoints-minutes-blend-v4",
+    "source": "xpoints_model",
+    "generated_at": "2026-10-17T06:47:27Z",
+    "rows": 667
+  },
+  "populations": {
+    "all": "every player in the archive",
+    "played": "minutes > 0",
+    "starters": "minutes >= 60"
+  },
+  "n": {
+    "all": 667,
+    "played": 304,
+    "starters": 200
+  },
+  "missing_from_live": 0,
+  "predictors_available": [
+    "ep_next",
+    "model",
+    "zero"
+  ],
+  "coverage": {
+    "model": {
+      "predicted": 667,
+      "missing": 0
+    }
+  },
+  "metrics": {
+    "all": {
+      "ep_next": {
+        "mae": 1.2828,
+        "rmse": 2.469,
+        "bias": 0.0237,
+        "spearman": 0.6461,
+        "spearman_ci95": [
+          0.5901,
+          0.7061
+        ],
+        "precision_at_10": 0.1,
+        "precision_at_20": 0.1,
+        "captain_regret": 9.0
+      },
+      "zero": {
+        "mae": 1.3628,
+        "rmse": 2.7827,
+        "bias": -1.3268
+      },
+      "model": {
+        "n": 667,
+        "coverage": 1.0,
+        "mae": 1.0715,
+        "rmse": 2.0071,
+        "bias": -0.03,
+        "spearman": 0.7155,
+        "spearman_ci95": [
+          0.6748,
+          0.7571
+        ],
+        "precision_at_10": 0.1,
+        "precision_at_20": 0.13,
+        "captain_regret": 2.0,
+        "ep_next_same_rows": {
+          "n": 667,
+          "mae": 1.2828,
+          "spearman": 0.6461,
+          "precision_at_10": 0.1,
+          "precision_at_20": 0.1,
+          "captain_regret": 9.0
+        }
+      },
+      "model_p60": {
+        "n": 667,
+        "brier": 0.0764,
+        "base_rate": 0.2999,
+        "base_rate_brier": 0.2099
+      }
+    },
+    "played": {
+      "ep_next": {
+        "mae": 2.4855,
+        "rmse": 3.5004,
+        "bias": -0.277,
+        "spearman": 0.2323,
+        "spearman_ci95": [
+          0.1117,
+          0.342
+        ],
+        "precision_at_10": 0.1455,
+        "precision_at_20": 0.1
+      },
+      "zero": {
+        "mae": 2.9901,
+        "rmse": 4.1219,
+        "bias": -2.9112
+      },
+      "model": {
+        "n": 304,
+        "coverage": 1.0,
+        "mae": 1.9729,
+        "rmse": 2.858,
+        "bias": -0.4439,
+        "spearman": 0.3654,
+        "spearman_ci95": [
+          0.2547,
+          0.4607
+        ],
+        "precision_at_10": 0.1,
+        "precision_at_20": 0.1317,
+        "ep_next_same_rows": {
+          "n": 304,
+          "mae": 2.4855,
+          "spearman": 0.2323,
+          "precision_at_10": 0.1455,
+          "precision_at_20": 0.1
+        }
+      },
+      "model_p60": {
+        "n": 304,
+        "brier": 0.1373,
+        "base_rate": 0.6579,
+        "base_rate_brier": 0.2251
+      }
+    },
+    "starters": {
+      "ep_next": {
+        "mae": 2.92,
+        "rmse": 3.8716,
+        "bias": -0.632,
+        "spearman": 0.0002,
+        "spearman_ci95": [
+          -0.1456,
+          0.1451
+        ],
+        "precision_at_10": 0.2,
+        "precision_at_20": 0.1
+      },
+      "zero": {
+        "mae": 3.9,
+        "rmse": 4.9376,
+        "bias": -3.87
+      },
+      "model": {
+        "n": 200,
+        "coverage": 1.0,
+        "mae": 2.3481,
+        "rmse": 3.2577,
+        "bias": -0.8955,
+        "spearman": 0.0814,
+        "spearman_ci95": [
+          -0.0524,
+          0.2177
+        ],
+        "precision_at_10": 0.1,
+        "precision_at_20": 0.1317,
+        "ep_next_same_rows": {
+          "n": 200,
+          "mae": 2.92,
+          "spearman": 0.0002,
+          "precision_at_10": 0.2,
+          "precision_at_20": 0.1
+        }
+      },
+      "model_p60": {
+        "n": 200,
+        "brier": 0.1243,
+        "base_rate": 1.0,
+        "base_rate_brier": 0.0
+      }
+    }
+  }
+}
