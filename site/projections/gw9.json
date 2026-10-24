@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 9,
   "label": "FPL's official expected points",
-  "generated_at": "2026-10-24T00:25:09Z"
+  "generated_at": "2026-10-24T05:35:40Z"
  },
- "site_generated_at": "2026-10-24T05:35:50.180Z",
+ "site_generated_at": "2026-10-24T10:40:09.062Z",
  "rows": [
   {
    "player_id": 1,
@@ -855,10 +855,10 @@
    "web_name": "Manzambi",
    "team": 2,
    "element_type": 3,
-   "rate": 8.2,
+   "rate": 8.21,
    "rate_source": "feed",
    "xp": {
-    "9": 4.0,
+    "9": 5.3,
     "10": 4.2,
     "11": 4.2,
     "12": 3.4,
@@ -6202,7 +6202,7 @@
    "rate": 4.43,
    "rate_source": "feed",
    "xp": {
-    "9": 1.7,
+    "9": 2.3,
     "10": 2.1,
     "11": 2.4,
     "12": 2.2,
@@ -6503,10 +6503,10 @@
    "web_name": "Kova\u010di\u0107",
    "team": 15,
    "element_type": 3,
-   "rate": 6.75,
+   "rate": 6.78,
    "rate_source": "feed",
    "xp": {
-    "9": 1.3,
+    "9": 1.7,
     "10": 1.4,
     "11": 1.4,
     "12": 1.1,
@@ -9143,14 +9143,14 @@
    "web_name": "Florentino",
    "team": 12,
    "element_type": 3,
-   "rate": 4.5,
+   "rate": 6.08,
    "rate_source": "feed",
    "xp": {
-    "9": 2.0,
-    "10": 2.1,
-    "11": 1.8,
-    "12": 1.9,
-    "13": 1.6
+    "9": 2.7,
+    "10": 2.6,
+    "11": 2.2,
+    "12": 2.2,
+    "13": 1.9
    }
   },
   {
@@ -10706,6 +10706,6 @@
    }
   }
  ],
- "archived_at": "2026-10-24T05:35:50Z",
+ "archived_at": "2026-10-24T10:40:09Z",
  "deadline": "2026-10-31T11:00:00Z"
 }
