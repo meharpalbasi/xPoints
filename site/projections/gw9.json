@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 9,
   "label": "FPL's official expected points",
-  "generated_at": "2026-10-24T20:31:48Z"
+  "generated_at": "2026-10-24T23:02:16Z"
  },
- "site_generated_at": "2026-10-24T23:02:26.766Z",
+ "site_generated_at": "2026-10-25T00:57:02.106Z",
  "rows": [
   {
    "player_id": 1,
@@ -71,14 +71,14 @@
    "web_name": "Gabriel",
    "team": 1,
    "element_type": 2,
-   "rate": 9.88,
+   "rate": 10.22,
    "rate_source": "feed",
    "xp": {
-    "9": 8.7,
-    "10": 8.7,
-    "11": 7.2,
-    "12": 7.4,
-    "13": 6.4
+    "9": 9.0,
+    "10": 8.9,
+    "11": 7.4,
+    "12": 7.6,
+    "13": 6.5
    }
   },
   {
@@ -503,14 +503,14 @@
    "web_name": "Konsa",
    "team": 1,
    "element_type": 2,
-   "rate": 11.08,
+   "rate": 10.72,
    "rate_source": "feed",
    "xp": {
-    "9": 9.3,
-    "10": 8.5,
-    "11": 6.5,
-    "12": 6.3,
-    "13": 5.0
+    "9": 9.0,
+    "10": 8.3,
+    "11": 6.4,
+    "12": 6.1,
+    "13": 4.9
    }
   },
   {
@@ -10722,6 +10722,6 @@
    }
   }
  ],
- "archived_at": "2026-10-24T23:02:26Z",
+ "archived_at": "2026-10-25T00:57:02Z",
  "deadline": "2026-10-31T11:00:00Z"
 }
