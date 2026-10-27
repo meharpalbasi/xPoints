@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 9,
   "label": "FPL's official expected points",
-  "generated_at": "2026-10-26T22:31:02Z"
+  "generated_at": "2026-10-27T07:35:52Z"
  },
- "site_generated_at": "2026-10-27T01:56:32.053Z",
+ "site_generated_at": "2026-10-27T14:16:10.470Z",
  "rows": [
   {
    "player_id": 1,
@@ -3335,10 +3335,10 @@
    "web_name": "Sarr",
    "team": 8,
    "element_type": 3,
-   "rate": 2.9,
+   "rate": 2.92,
    "rate_source": "feed",
    "xp": {
-    "9": 0.3,
+    "9": 0.2,
     "10": 0.4,
     "11": 0.4,
     "12": 0.4,
@@ -10722,6 +10722,6 @@
    }
   }
  ],
- "archived_at": "2026-10-27T01:56:32Z",
+ "archived_at": "2026-10-27T14:16:10Z",
  "deadline": "2026-10-31T11:00:00Z"
 }
