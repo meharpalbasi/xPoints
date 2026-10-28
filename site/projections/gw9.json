@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 9,
   "label": "FPL's official expected points",
-  "generated_at": "2026-10-27T23:39:32Z"
+  "generated_at": "2026-10-28T05:02:51Z"
  },
- "site_generated_at": "2026-10-28T05:03:01.527Z",
+ "site_generated_at": "2026-10-28T11:11:14.859Z",
  "rows": [
   {
    "player_id": 1,
@@ -215,7 +215,7 @@
    "web_name": "Rice",
    "team": 1,
    "element_type": 3,
-   "rate": 7.52,
+   "rate": 7.48,
    "rate_source": "feed",
    "xp": {
     "9": 4.7,
@@ -263,7 +263,7 @@
    "web_name": "Madueke",
    "team": 1,
    "element_type": 3,
-   "rate": 6.22,
+   "rate": 6.28,
    "rate_source": "feed",
    "xp": {
     "9": 2.5,
@@ -10722,6 +10722,6 @@
    }
   }
  ],
- "archived_at": "2026-10-28T05:03:01Z",
+ "archived_at": "2026-10-28T11:11:14Z",
  "deadline": "2026-10-31T11:00:00Z"
 }
