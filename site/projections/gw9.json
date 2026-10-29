@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 9,
   "label": "FPL's official expected points",
-  "generated_at": "2026-10-28T23:03:15Z"
+  "generated_at": "2026-10-29T02:17:32Z"
  },
- "site_generated_at": "2026-10-29T02:17:44.494Z",
+ "site_generated_at": "2026-10-29T09:42:03.027Z",
  "rows": [
   {
    "player_id": 1,
@@ -3207,14 +3207,14 @@
    "web_name": "Lacroix",
    "team": 6,
    "element_type": 2,
-   "rate": 5.47,
+   "rate": 4.14,
    "rate_source": "feed",
    "xp": {
-    "9": 3.7,
-    "10": 4.3,
-    "11": 4.6,
-    "12": 4.0,
-    "13": 4.4
+    "9": 2.8,
+    "10": 3.5,
+    "11": 3.9,
+    "12": 3.6,
+    "13": 4.0
    }
   },
   {
@@ -10410,7 +10410,7 @@
    "rate": 6.0,
    "rate_source": "feed",
    "xp": {
-    "9": 5.0,
+    "9": 3.8,
     "10": 5.0,
     "11": 4.1,
     "12": 4.2,
@@ -10722,6 +10722,6 @@
    }
   }
  ],
- "archived_at": "2026-10-29T02:17:44Z",
+ "archived_at": "2026-10-29T09:42:03Z",
  "deadline": "2026-10-31T11:00:00Z"
 }
