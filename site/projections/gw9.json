@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 9,
   "label": "FPL's official expected points",
-  "generated_at": "2026-10-29T21:41:30Z"
+  "generated_at": "2026-10-30T01:46:06Z"
  },
- "site_generated_at": "2026-10-30T01:46:16.349Z",
+ "site_generated_at": "2026-10-30T08:24:03.905Z",
  "rows": [
   {
    "player_id": 1,
@@ -2311,14 +2311,14 @@
    "web_name": "Gusto",
    "team": 6,
    "element_type": 2,
-   "rate": 1.61,
+   "rate": 1.43,
    "rate_source": "feed",
    "xp": {
     "9": 0.2,
-    "10": 0.4,
-    "11": 0.5,
+    "10": 0.3,
+    "11": 0.4,
     "12": 0.5,
-    "13": 0.6
+    "13": 0.5
    }
   },
   {
@@ -2375,11 +2375,11 @@
    "web_name": "Hato",
    "team": 6,
    "element_type": 2,
-   "rate": 9.88,
+   "rate": 9.93,
    "rate_source": "feed",
    "xp": {
     "9": 4.3,
-    "10": 4.3,
+    "10": 4.4,
     "11": 4.1,
     "12": 3.3,
     "13": 3.2
@@ -2551,14 +2551,14 @@
    "web_name": "Caicedo",
    "team": 6,
    "element_type": 3,
-   "rate": 3.36,
+   "rate": 3.31,
    "rate_source": "feed",
    "xp": {
     "9": 1.7,
     "10": 2.1,
     "11": 2.3,
     "12": 2.1,
-    "13": 2.4
+    "13": 2.3
    }
   },
   {
@@ -3207,7 +3207,7 @@
    "web_name": "Lacroix",
    "team": 6,
    "element_type": 2,
-   "rate": 4.13,
+   "rate": 4.21,
    "rate_source": "feed",
    "xp": {
     "9": 1.9,
@@ -7447,7 +7447,7 @@
    "web_name": "Osula",
    "team": 17,
    "element_type": 4,
-   "rate": 8.35,
+   "rate": 8.44,
    "rate_source": "feed",
    "xp": {
     "9": 2.5,
@@ -10722,6 +10722,6 @@
    }
   }
  ],
- "archived_at": "2026-10-30T01:46:16Z",
+ "archived_at": "2026-10-30T08:24:04Z",
  "deadline": "2026-10-31T11:00:00Z"
 }
