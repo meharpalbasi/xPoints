@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-03T07:46:07Z",
+  "generated_at": "2026-11-03T16:01:57Z",
   "method": "The site's projections table and expected-minutes table are frozen at each deadline (site/). Once FPL marks a gameweek data_checked, every frozen projection for it is joined to official results (event/{gw}/live) and scored per named population like the feed; the horizon week is how many deadlines before the gameweek the projection was made. P(60+) is scored with the Brier score against playing sixty minutes, beside the base-rate Brier it must beat; from Gameweek 6 the served number is a blend of the site's estimate and the xPoints model's, and each half is graded too. Entries under scores/site/ never change once written.",
   "populations": {
     "all": "every player in the archive",
@@ -7,91 +7,91 @@
     "starters": "minutes >= 60"
   },
   "summary": {
-    "gameweeks_graded": 5,
+    "gameweeks_graded": 6,
     "by_horizon_week": {
       "0": {
-        "gameweeks": 5,
-        "mean_mae_all": 1.2285,
-        "mean_zero_mae_all": 1.4057,
-        "mean_spearman_starters": 0.0911,
-        "mean_precision_at_20_starters": 0.1329
+        "gameweeks": 6,
+        "mean_mae_all": 1.1927,
+        "mean_zero_mae_all": 1.3942,
+        "mean_spearman_starters": 0.0975,
+        "mean_precision_at_20_starters": 0.1568
       },
       "1": {
-        "gameweeks": 4,
-        "mean_mae_all": 1.2971,
-        "mean_zero_mae_all": 1.4053,
-        "mean_spearman_starters": -0.0072,
-        "mean_precision_at_20_starters": 0.146
+        "gameweeks": 5,
+        "mean_mae_all": 1.2586,
+        "mean_zero_mae_all": 1.3919,
+        "mean_spearman_starters": 0.0232,
+        "mean_precision_at_20_starters": 0.1788
       },
       "2": {
-        "gameweeks": 3,
-        "mean_mae_all": 1.2785,
-        "mean_zero_mae_all": 1.388,
-        "mean_spearman_starters": 0.0401,
-        "mean_precision_at_20_starters": 0.158
+        "gameweeks": 4,
+        "mean_mae_all": 1.2591,
+        "mean_zero_mae_all": 1.376,
+        "mean_spearman_starters": 0.0454,
+        "mean_precision_at_20_starters": 0.1649
       },
       "3": {
-        "gameweeks": 2,
-        "mean_mae_all": 1.3087,
-        "mean_zero_mae_all": 1.3992,
-        "mean_spearman_starters": 0.0445,
-        "mean_precision_at_20_starters": 0.1289
+        "gameweeks": 3,
+        "mean_mae_all": 1.268,
+        "mean_zero_mae_all": 1.3796,
+        "mean_spearman_starters": 0.0639,
+        "mean_precision_at_20_starters": 0.1526
       },
       "4": {
-        "gameweeks": 1,
-        "mean_mae_all": 1.3357,
-        "mean_zero_mae_all": 1.4192,
-        "mean_spearman_starters": 0.0182,
-        "mean_precision_at_20_starters": 0.151
+        "gameweeks": 2,
+        "mean_mae_all": 1.2641,
+        "mean_zero_mae_all": 1.3879,
+        "mean_spearman_starters": 0.0324,
+        "mean_precision_at_20_starters": 0.1105
       }
     },
     "minutes": {
-      "gameweeks": 5,
-      "mean_brier_60": 0.0834,
-      "mean_brier_60_site": 0.0915,
-      "mean_brier_60_model": 0.0852,
-      "mean_brier_base_rate": 0.2133,
-      "mean_brier_skill": 0.6093,
-      "mean_minutes_mae": 13.6748,
-      "mean_minutes_mae_played": 19.7712,
+      "gameweeks": 6,
+      "mean_brier_60": 0.0823,
+      "mean_brier_60_site": 0.0899,
+      "mean_brier_60_model": 0.0832,
+      "mean_brier_base_rate": 0.2134,
+      "mean_brier_skill": 0.6144,
+      "mean_minutes_mae": 13.6799,
+      "mean_minutes_mae_played": 19.7976,
       "latest_calibration": [
         {
           "from": 0.0,
           "to": 0.2,
-          "n": 396,
-          "predicted": 0.0428,
-          "actual": 0.053
+          "n": 387,
+          "predicted": 0.0421,
+          "actual": 0.031
         },
         {
           "from": 0.2,
           "to": 0.4,
-          "n": 58,
-          "predicted": 0.2762,
-          "actual": 0.3966
+          "n": 55,
+          "predicted": 0.2927,
+          "actual": 0.2909
         },
         {
           "from": 0.4,
           "to": 0.6,
-          "n": 40,
-          "predicted": 0.4868,
-          "actual": 0.575
+          "n": 56,
+          "predicted": 0.4998,
+          "actual": 0.4643
         },
         {
           "from": 0.6,
           "to": 0.8,
           "n": 51,
-          "predicted": 0.72,
-          "actual": 0.7451
+          "predicted": 0.6875,
+          "actual": 0.8431
         },
         {
           "from": 0.8,
           "to": 1.0,
-          "n": 123,
-          "predicted": 0.8904,
-          "actual": 0.8537
+          "n": 120,
+          "predicted": 0.8869,
+          "actual": 0.9167
         }
       ],
-      "latest_gameweek": 8
+      "latest_gameweek": 9
     }
   },
   "gameweeks": [
@@ -319,6 +319,81 @@
         0.1089
       ],
       "precision_at_20_starters": 0.05
+    },
+    {
+      "gameweek": 9,
+      "snapshot": 5,
+      "horizon_week": 4,
+      "n_all": 659,
+      "n_starters": 207,
+      "mae_all": 1.1924,
+      "zero_mae_all": 1.3566,
+      "spearman_starters": 0.0466,
+      "spearman_starters_ci95": [
+        -0.0876,
+        0.1855
+      ],
+      "precision_at_20_starters": 0.07
+    },
+    {
+      "gameweek": 9,
+      "snapshot": 6,
+      "horizon_week": 3,
+      "n_all": 667,
+      "n_starters": 207,
+      "mae_all": 1.1867,
+      "zero_mae_all": 1.3403,
+      "spearman_starters": 0.1026,
+      "spearman_starters_ci95": [
+        -0.0358,
+        0.2364
+      ],
+      "precision_at_20_starters": 0.2
+    },
+    {
+      "gameweek": 9,
+      "snapshot": 7,
+      "horizon_week": 2,
+      "n_all": 667,
+      "n_starters": 207,
+      "mae_all": 1.2007,
+      "zero_mae_all": 1.3403,
+      "spearman_starters": 0.0615,
+      "spearman_starters_ci95": [
+        -0.0819,
+        0.1934
+      ],
+      "precision_at_20_starters": 0.1855
+    },
+    {
+      "gameweek": 9,
+      "snapshot": 8,
+      "horizon_week": 1,
+      "n_all": 668,
+      "n_starters": 207,
+      "mae_all": 1.1045,
+      "zero_mae_all": 1.3383,
+      "spearman_starters": 0.1449,
+      "spearman_starters_ci95": [
+        -0.0053,
+        0.2808
+      ],
+      "precision_at_20_starters": 0.31
+    },
+    {
+      "gameweek": 9,
+      "snapshot": 9,
+      "horizon_week": 0,
+      "n_all": 669,
+      "n_starters": 207,
+      "mae_all": 1.0135,
+      "zero_mae_all": 1.3363,
+      "spearman_starters": 0.1296,
+      "spearman_starters_ci95": [
+        -0.0159,
+        0.2716
+      ],
+      "precision_at_20_starters": 0.2765
     }
   ],
   "minutes": [
@@ -569,6 +644,56 @@
           "n": 123,
           "predicted": 0.8904,
           "actual": 0.8537
+        }
+      ]
+    },
+    {
+      "gameweek": 9,
+      "n": 669,
+      "brier_60": 0.0769,
+      "brier_60_site": 0.0851,
+      "brier_60_model": 0.0769,
+      "n_model": 669,
+      "brier_base_rate": 0.2137,
+      "brier_skill": 0.6403,
+      "minutes_mae": 13.7057,
+      "minutes_mae_played": 19.9297,
+      "base_rate_60": 0.3094,
+      "calibration": [
+        {
+          "from": 0.0,
+          "to": 0.2,
+          "n": 387,
+          "predicted": 0.0421,
+          "actual": 0.031
+        },
+        {
+          "from": 0.2,
+          "to": 0.4,
+          "n": 55,
+          "predicted": 0.2927,
+          "actual": 0.2909
+        },
+        {
+          "from": 0.4,
+          "to": 0.6,
+          "n": 56,
+          "predicted": 0.4998,
+          "actual": 0.4643
+        },
+        {
+          "from": 0.6,
+          "to": 0.8,
+          "n": 51,
+          "predicted": 0.6875,
+          "actual": 0.8431
+        },
+        {
+          "from": 0.8,
+          "to": 1.0,
+          "n": 120,
+          "predicted": 0.8869,
+          "actual": 0.9167
         }
       ]
     }
