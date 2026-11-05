@@ -13,9 +13,9 @@
   "available": true,
   "gameweek": 10,
   "label": "FPL's official expected points",
-  "generated_at": "2026-11-04T22:29:56Z"
+  "generated_at": "2026-11-05T03:20:43Z"
  },
- "site_generated_at": "2026-11-05T03:20:53.575Z",
+ "site_generated_at": "2026-11-05T12:02:16.881Z",
  "rows": [
   {
    "player_id": 1,
@@ -1671,10 +1671,10 @@
    "web_name": "Onyeka",
    "team": 7,
    "element_type": 3,
-   "rate": 2.8,
+   "rate": 2.79,
    "rate_source": "feed",
    "xp": {
-    "10": 0.8,
+    "10": 0.4,
     "11": 0.9,
     "12": 0.9,
     "13": 1.0,
@@ -10738,6 +10738,6 @@
    }
   }
  ],
- "archived_at": "2026-11-05T03:20:53Z",
+ "archived_at": "2026-11-05T12:02:16Z",
  "deadline": "2026-11-06T18:30:00Z"
 }
