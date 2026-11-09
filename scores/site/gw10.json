@@ -1,0 +1,347 @@
+{
+ "projections": {
+  "6": {
+   "horizon_week": 4,
+   "scored_at": "2026-11-09T22:10:53Z",
+   "snapshot_deadline": "2026-10-10T10:00:00Z",
+   "snapshot_archived_at": "2026-10-10T06:53:03Z",
+   "model": "proj-2",
+   "feed": {
+    "available": true,
+    "gameweek": 6,
+    "label": "FPL's official expected points",
+    "generated_at": "2026-10-10T00:39:11Z"
+   },
+   "n": {
+    "all": 667,
+    "played": 313,
+    "starters": 204
+   },
+   "missing_from_live": 0,
+   "metrics": {
+    "all": {
+     "mae": 1.2331,
+     "rmse": 2.2002,
+     "zero_mae": 1.3853,
+     "spearman": 0.6007,
+     "spearman_ci95": [
+      0.5407,
+      0.6478
+     ],
+     "precision_at_10": 0.019,
+     "precision_at_20": 0.082
+    },
+    "played": {
+     "mae": 2.0773,
+     "rmse": 3.0149,
+     "zero_mae": 2.9521,
+     "spearman": 0.339,
+     "spearman_ci95": [
+      0.2326,
+      0.4431
+     ],
+     "precision_at_10": 0.0195,
+     "precision_at_20": 0.1275
+    },
+    "starters": {
+     "mae": 2.4799,
+     "rmse": 3.4289,
+     "zero_mae": 3.8627,
+     "spearman": 0.1774,
+     "spearman_ci95": [
+      0.0381,
+      0.3075
+     ],
+     "precision_at_10": 0.0375,
+     "precision_at_20": 0.1502
+    }
+   }
+  },
+  "7": {
+   "horizon_week": 3,
+   "scored_at": "2026-11-09T22:10:53Z",
+   "snapshot_deadline": "2026-10-17T10:00:00Z",
+   "snapshot_archived_at": "2026-10-17T01:11:51Z",
+   "model": "proj-2",
+   "feed": {
+    "available": true,
+    "gameweek": 7,
+    "label": "FPL's official expected points",
+    "generated_at": "2026-10-16T22:42:37Z"
+   },
+   "n": {
+    "all": 667,
+    "played": 313,
+    "starters": 204
+   },
+   "missing_from_live": 0,
+   "metrics": {
+    "all": {
+     "mae": 1.206,
+     "rmse": 2.1804,
+     "zero_mae": 1.3853,
+     "spearman": 0.6365,
+     "spearman_ci95": [
+      0.5829,
+      0.6826
+     ],
+     "precision_at_10": 0.019,
+     "precision_at_20": 0.2338
+    },
+    "played": {
+     "mae": 2.0204,
+     "rmse": 2.9659,
+     "zero_mae": 2.9521,
+     "spearman": 0.3395,
+     "spearman_ci95": [
+      0.2321,
+      0.4387
+     ],
+     "precision_at_10": 0.0195,
+     "precision_at_20": 0.2852
+    },
+    "starters": {
+     "mae": 2.3912,
+     "rmse": 3.3555,
+     "zero_mae": 3.8627,
+     "spearman": 0.1841,
+     "spearman_ci95": [
+      0.0398,
+      0.3128
+     ],
+     "precision_at_10": 0.0375,
+     "precision_at_20": 0.3017
+    }
+   }
+  },
+  "8": {
+   "horizon_week": 2,
+   "scored_at": "2026-11-09T22:10:53Z",
+   "snapshot_deadline": "2026-10-23T17:30:00Z",
+   "snapshot_archived_at": "2026-10-23T13:15:44Z",
+   "model": "proj-2",
+   "feed": {
+    "available": true,
+    "gameweek": 8,
+    "label": "FPL's official expected points",
+    "generated_at": "2026-10-23T07:15:50Z"
+   },
+   "n": {
+    "all": 668,
+    "played": 313,
+    "starters": 204
+   },
+   "missing_from_live": 0,
+   "metrics": {
+    "all": {
+     "mae": 1.2046,
+     "rmse": 2.2143,
+     "zero_mae": 1.3832,
+     "spearman": 0.6505,
+     "spearman_ci95": [
+      0.5982,
+      0.695
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.1412
+    },
+    "played": {
+     "mae": 2.1096,
+     "rmse": 3.0637,
+     "zero_mae": 2.9521,
+     "spearman": 0.312,
+     "spearman_ci95": [
+      0.2107,
+      0.4099
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.159
+    },
+    "starters": {
+     "mae": 2.5162,
+     "rmse": 3.4754,
+     "zero_mae": 3.8627,
+     "spearman": 0.1242,
+     "spearman_ci95": [
+      -0.0259,
+      0.2555
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.173
+    }
+   }
+  },
+  "9": {
+   "horizon_week": 1,
+   "scored_at": "2026-11-09T22:10:53Z",
+   "snapshot_deadline": "2026-10-31T11:00:00Z",
+   "snapshot_archived_at": "2026-10-31T00:36:09Z",
+   "model": "proj-2",
+   "feed": {
+    "available": true,
+    "gameweek": 9,
+    "label": "FPL's official expected points",
+    "generated_at": "2026-10-30T20:37:23Z"
+   },
+   "n": {
+    "all": 669,
+    "played": 313,
+    "starters": 204
+   },
+   "missing_from_live": 0,
+   "metrics": {
+    "all": {
+     "mae": 1.1336,
+     "rmse": 2.1234,
+     "zero_mae": 1.3812,
+     "spearman": 0.6992,
+     "spearman_ci95": [
+      0.65,
+      0.7384
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.1527
+    },
+    "played": {
+     "mae": 2.0626,
+     "rmse": 2.9846,
+     "zero_mae": 2.9521,
+     "spearman": 0.3499,
+     "spearman_ci95": [
+      0.2542,
+      0.4476
+     ],
+     "precision_at_10": 0.2,
+     "precision_at_20": 0.1535
+    },
+    "starters": {
+     "mae": 2.4525,
+     "rmse": 3.3769,
+     "zero_mae": 3.8627,
+     "spearman": 0.1629,
+     "spearman_ci95": [
+      0.0227,
+      0.2975
+     ],
+     "precision_at_10": 0.2,
+     "precision_at_20": 0.1665
+    }
+   }
+  },
+  "10": {
+   "horizon_week": 0,
+   "scored_at": "2026-11-09T22:10:53Z",
+   "snapshot_deadline": "2026-11-06T18:30:00Z",
+   "snapshot_archived_at": "2026-11-05T12:02:16Z",
+   "model": "proj-2",
+   "feed": {
+    "available": true,
+    "gameweek": 10,
+    "label": "FPL's official expected points",
+    "generated_at": "2026-11-05T03:20:43Z"
+   },
+   "n": {
+    "all": 670,
+    "played": 313,
+    "starters": 204
+   },
+   "missing_from_live": 0,
+   "metrics": {
+    "all": {
+     "mae": 1.1113,
+     "rmse": 2.1552,
+     "zero_mae": 1.3791,
+     "spearman": 0.7453,
+     "spearman_ci95": [
+      0.6953,
+      0.784
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.128
+    },
+    "played": {
+     "mae": 2.1249,
+     "rmse": 3.0675,
+     "zero_mae": 2.9521,
+     "spearman": 0.323,
+     "spearman_ci95": [
+      0.2241,
+      0.4155
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.1273
+    },
+    "starters": {
+     "mae": 2.5466,
+     "rmse": 3.4619,
+     "zero_mae": 3.8627,
+     "spearman": 0.0726,
+     "spearman_ci95": [
+      -0.0741,
+      0.2059
+     ],
+     "precision_at_10": 0.1,
+     "precision_at_20": 0.1342
+    }
+   }
+  }
+ },
+ "gameweek": 10,
+ "deadline": "2026-11-06T18:30:00Z",
+ "xmins": {
+  "scored_at": "2026-11-09T22:10:53Z",
+  "snapshot_archived_at": "2026-11-05T12:02:18Z",
+  "model": "xmins-1",
+  "n": 670,
+  "missing_from_live": 0,
+  "base_rate_60": 0.3045,
+  "brier_60": 0.0736,
+  "brier_base_rate": 0.2118,
+  "brier_skill": 0.6523,
+  "minutes_mae": 13.3133,
+  "minutes_mae_played": 19.7422,
+  "brier_appear": 0.0835,
+  "n_site": 670,
+  "brier_60_site": 0.0827,
+  "n_model": 670,
+  "brier_60_model": 0.0721,
+  "brier_60_on_model_rows": 0.0736,
+  "calibration": [
+   {
+    "from": 0.0,
+    "to": 0.2,
+    "n": 397,
+    "predicted": 0.0428,
+    "actual": 0.0353
+   },
+   {
+    "from": 0.2,
+    "to": 0.4,
+    "n": 60,
+    "predicted": 0.2857,
+    "actual": 0.2333
+   },
+   {
+    "from": 0.4,
+    "to": 0.6,
+    "n": 39,
+    "predicted": 0.5195,
+    "actual": 0.5897
+   },
+   {
+    "from": 0.6,
+    "to": 0.8,
+    "n": 65,
+    "predicted": 0.6938,
+    "actual": 0.7846
+   },
+   {
+    "from": 0.8,
+    "to": 1.0,
+    "n": 109,
+    "predicted": 0.8865,
+    "actual": 0.9358
+   }
+  ]
+ }
+}

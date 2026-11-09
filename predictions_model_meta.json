@@ -1,12 +1,12 @@
 {
   "model_version": "xpoints-minutes-blend-v4",
-  "trained_at": "2026-11-09T11:11:48Z",
+  "trained_at": "2026-11-09T22:10:05Z",
   "target_gameweek": 11,
   "seasons": [
     "2025-26",
     "2026-27"
   ],
-  "training_rows": 35228,
+  "training_rows": 35900,
   "n_features": 80,
   "features": [
     "total_points_r1",
