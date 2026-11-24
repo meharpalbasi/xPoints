@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-24T04:16:48Z",
+  "generated_at": "2026-11-24T15:40:22Z",
   "method": "The site's projections table and expected-minutes table are frozen at each deadline (site/). Once FPL marks a gameweek data_checked, every frozen projection for it is joined to official results (event/{gw}/live) and scored per named population like the feed; the horizon week is how many deadlines before the gameweek the projection was made. P(60+) is scored with the Brier score against playing sixty minutes, beside the base-rate Brier it must beat; from Gameweek 6 the served number is a blend of the site's estimate and the xPoints model's, and each half is graded too. Entries under scores/site/ never change once written.",
   "populations": {
     "all": "every player in the archive",
@@ -7,7 +7,7 @@
     "starters": "minutes >= 60"
   },
   "summary": {
-    "gameweeks_graded": 7,
+    "gameweeks_graded": 8,
     "by_horizon_week": {
       "0": {
         "gameweeks": 7,
@@ -17,32 +17,32 @@
         "mean_precision_at_20_starters": 0.1536
       },
       "1": {
-        "gameweeks": 6,
-        "mean_mae_all": 1.2377,
-        "mean_zero_mae_all": 1.3901,
-        "mean_spearman_starters": 0.0465,
-        "mean_precision_at_20_starters": 0.1767
+        "gameweeks": 7,
+        "mean_mae_all": 1.2398,
+        "mean_zero_mae_all": 1.3971,
+        "mean_spearman_starters": 0.0508,
+        "mean_precision_at_20_starters": 0.1729
       },
       "2": {
-        "gameweeks": 5,
-        "mean_mae_all": 1.2482,
-        "mean_zero_mae_all": 1.3775,
-        "mean_spearman_starters": 0.0612,
-        "mean_precision_at_20_starters": 0.1665
+        "gameweeks": 6,
+        "mean_mae_all": 1.2537,
+        "mean_zero_mae_all": 1.3881,
+        "mean_spearman_starters": 0.061,
+        "mean_precision_at_20_starters": 0.1471
       },
       "3": {
-        "gameweeks": 4,
-        "mean_mae_all": 1.2525,
-        "mean_zero_mae_all": 1.381,
-        "mean_spearman_starters": 0.0939,
-        "mean_precision_at_20_starters": 0.1899
+        "gameweeks": 5,
+        "mean_mae_all": 1.2699,
+        "mean_zero_mae_all": 1.3934,
+        "mean_spearman_starters": 0.0849,
+        "mean_precision_at_20_starters": 0.1574
       },
       "4": {
-        "gameweeks": 3,
-        "mean_mae_all": 1.2537,
-        "mean_zero_mae_all": 1.387,
-        "mean_spearman_starters": 0.0807,
-        "mean_precision_at_20_starters": 0.1237
+        "gameweeks": 4,
+        "mean_mae_all": 1.2811,
+        "mean_zero_mae_all": 1.4016,
+        "mean_spearman_starters": 0.0561,
+        "mean_precision_at_20_starters": 0.1053
       }
     },
     "minutes": {
@@ -469,6 +469,66 @@
         0.2059
       ],
       "precision_at_20_starters": 0.1342
+    },
+    {
+      "gameweek": 11,
+      "snapshot": 7,
+      "horizon_week": 4,
+      "n_all": 667,
+      "n_starters": 203,
+      "mae_all": 1.3631,
+      "zero_mae_all": 1.4453,
+      "spearman_starters": -0.018,
+      "spearman_starters_ci95": [
+        -0.1591,
+        0.1235
+      ],
+      "precision_at_20_starters": 0.05
+    },
+    {
+      "gameweek": 11,
+      "snapshot": 8,
+      "horizon_week": 3,
+      "n_all": 668,
+      "n_starters": 203,
+      "mae_all": 1.3395,
+      "zero_mae_all": 1.4431,
+      "spearman_starters": 0.0487,
+      "spearman_starters_ci95": [
+        -0.1002,
+        0.1965
+      ],
+      "precision_at_20_starters": 0.0275
+    },
+    {
+      "gameweek": 11,
+      "snapshot": 9,
+      "horizon_week": 2,
+      "n_all": 669,
+      "n_starters": 203,
+      "mae_all": 1.2816,
+      "zero_mae_all": 1.441,
+      "spearman_starters": 0.06,
+      "spearman_starters_ci95": [
+        -0.0847,
+        0.2058
+      ],
+      "precision_at_20_starters": 0.05
+    },
+    {
+      "gameweek": 11,
+      "snapshot": 10,
+      "horizon_week": 1,
+      "n_all": 670,
+      "n_starters": 203,
+      "mae_all": 1.2519,
+      "zero_mae_all": 1.4388,
+      "spearman_starters": 0.0768,
+      "spearman_starters_ci95": [
+        -0.0759,
+        0.2186
+      ],
+      "precision_at_20_starters": 0.15
     }
   ],
   "minutes": [
